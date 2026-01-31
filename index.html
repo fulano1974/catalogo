@@ -2,127 +2,175 @@
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Catálogo Haris</title>
+    
+    <!-- Configurações de Aplicativo (PWA) -->
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="theme-color" content="#2563eb">
+    <link rel="icon" type="image/png" href="https://cdn-icons-png.flaticon.com">
+
     <style>
-        :root { --primary: #1e293b; --accent: #2563eb; --success: #10b981; --danger: #e11d48; --bg: #f8fafc; }
-        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); margin: 0; padding: 20px; }
-        .container { max-width: 1100px; margin: auto; }
+        :root { 
+            --primary: #1e293b; --accent: #2563eb; --success: #10b981; --danger: #e11d48; --bg: #f1f5f9; 
+            --cat-tinta: #3b82f6; --cat-jotamastic: #8b5cf6; --cat-solvente: #f59e0b; --cat-componente: #06b6d4; --cat-outros: #64748b;
+        }
+        body { font-family: 'Inter', sans-serif; background: var(--bg); margin: 0; padding: 15px; color: var(--primary); }
+        .container { max-width: 1400px; margin: auto; }
         
-        .header { display: flex; justify-content: space-between; align-items: center; background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); margin-bottom: 20px; gap: 15px; }
-        .nav-btns { display: flex; gap: 10px; flex-shrink: 0; }
+        .header { display: flex; justify-content: space-between; align-items: center; background: white; padding: 15px 20px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.03); margin-bottom: 15px; gap: 10px; }
+        .search-container { flex: 1; display: flex; gap: 8px; align-items: center; }
+        .search-input { flex: 1; padding: 10px; border-radius: 8px; border: 1px solid #e2e8f0; outline: none; font-size: 0.85rem; }
+        .sort-select { width: 110px; padding: 9px; border-radius: 8px; border: 1px solid #e2e8f0; background: #fff; font-size: 0.75rem; }
+        .nav-btns { display: flex; gap: 5px; }
 
-        .search-container { flex: 1; max-width: 600px; margin: 0 15px; display: flex; gap: 10px; }
-        .search-input { flex: 2; padding: 12px 15px; border-radius: 8px; border: 1px solid #e2e8f0; outline: none; }
-        .sort-select { flex: 1; padding: 10px; border-radius: 8px; border: 1px solid #e2e8f0; font-size: 0.8rem; background: #fff; cursor: pointer; }
+        .cat-filter { display: flex; gap: 5px; margin-bottom: 15px; flex-wrap: wrap; }
+        .btn-cat { padding: 10px 18px; border-radius: 30px; border: none; background: white; cursor: pointer; font-size: 0.8rem; transition: 0.3s; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+        .btn-cat.active { background: var(--accent); color: white; }
 
-        .cat-filter { display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; }
-        .btn-cat { padding: 8px 16px; border-radius: 20px; border: 1px solid #e2e8f0; background: white; cursor: pointer; font-size: 0.8rem; transition: 0.3s; }
-        .btn-cat.active { background: var(--accent); color: white; border-color: var(--accent); }
+        #adminPanel { display: none; background: white; padding: 15px; border-radius: 12px; grid-template-columns: 2fr 1fr 1fr 1fr auto; gap: 10px; margin-bottom: 15px; align-items: end; border-left: 5px solid var(--accent); }
+        .input-group label { font-size: 0.65rem; font-weight: 700; color: #64748b; margin-bottom: 3px; }
+        input, select, textarea { padding: 8px; border: 1px solid #e2e8f0; border-radius: 8px; width: 100%; box-sizing: border-box; font-size: 0.8rem; }
 
-        #adminPanel { display: none; background: white; padding: 25px; border-radius: 12px; grid-template-columns: 2fr 1fr 1fr 1.5fr auto; gap: 15px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); margin-bottom: 30px; align-items: end; border: 2px solid var(--accent); }
-        .input-group { display: flex; flex-direction: column; gap: 5px; }
-        label { font-size: 0.75rem; font-weight: 700; color: #64748b; }
-        input, select { padding: 12px; border: 1px solid #e2e8f0; border-radius: 8px; width: 100%; box-sizing: border-box; background: white; }
+        .stats-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; background: white; padding: 10px 15px; border-radius: 10px; border: 1px solid #e2e8f0; font-size: 0.8rem; }
+        .backup-group { display: none; gap: 5px; }
+
+        #historyPanel { display: none; background: white; padding: 25px; border-radius: 16px; margin-bottom: 30px; border-left: 5px solid var(--primary); box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
+        .hist-table { width: 100%; border-collapse: collapse; margin-top: 15px; font-size: 0.85rem; }
+        .hist-table th, .hist-table td { padding: 12px; text-align: left; border-bottom: 1px solid #eee; }
+        .tag-add { color: var(--success); font-weight: bold; }
+        .tag-sub { color: var(--danger); font-weight: bold; }
+
+        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 15px; }
+        .card { background: white; border-radius: 12px; overflow: hidden; border: 1px solid #e2e8f0; text-align: center; transition: 0.3s; padding: 10px; break-inside: avoid; }
+        .card img { width: 100%; height: 130px; object-fit: contain; background: #f9f9f9; border-radius: 8px; }
+        .card-info { padding: 8px 0; display: flex; flex-direction: column; align-items: center; }
+        .badge-cat { font-size: 0.55rem; padding: 3px 8px; border-radius: 50px; color: white; font-weight: bold; text-transform: uppercase; margin-bottom: 4px; }
         
-        .stats-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; background: #ebf2ff; padding: 10px 20px; border-radius: 8px; border: 1px solid #d0e1fd; color: var(--primary); }
-        .stats-group { display: flex; gap: 20px; font-size: 0.9rem; }
-        .stats-item b { color: var(--accent); font-size: 1.1rem; }
-        .backup-group { display: none; gap: 10px; }
+        .cat-tinta-hardtop { background: var(--cat-tinta); }
+        .cat-jotamastic-a, .cat-jotamastic-b { background: var(--cat-jotamastic); }
+        .cat-solvente { background: var(--cat-solvente); }
+        .cat-componente-b { background: var(--cat-componente); }
+        .cat-outros { background: var(--cat-outros); }
 
-        .btn { padding: 12px 24px; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; transition: 0.3s; text-transform: uppercase; font-size: 0.75rem; }
-        .btn-add { background: var(--accent); color: white; }
-        .btn-report { background: var(--primary); color: white; }
-        .btn-lock { background: #64748b; color: white; }
-        .btn-backup { background: white; color: var(--accent); border: 1px solid var(--accent); padding: 8px 15px; font-size: 0.65rem; }
+        .admin-actions { display: none; flex-direction: column; gap: 4px; margin-top: 5px; }
+        .btn-edit-card { font-size: 0.65rem; padding: 5px; background: #f8fafc; border: 1px solid #ddd; border-radius: 5px; cursor: pointer; }
 
-        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 25px; }
-        .card { background: white; border-radius: 15px; overflow: hidden; border: 1px solid #e2e8f0; text-align: center; padding-bottom: 15px; position: relative; }
-        .card img { width: 100%; height: 200px; object-fit: cover; }
-        .badge-cat { font-size: 0.6rem; background: #f1f5f9; padding: 2px 8px; border-radius: 10px; color: #64748b; text-transform: uppercase; }
-        
-        .card-zerado { border: 2px solid var(--danger); }
-        .txt-zerado { color: var(--danger); font-weight: bold; }
+        #modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.8); z-index: 1000; align-items: center; justify-content: center; backdrop-filter: blur(3px); }
+        .modal-content { background: white; padding: 25px; border-radius: 20px; width: 320px; text-align: center; }
 
-        .admin-actions { display: none; padding: 0 10px; flex-direction: column; gap: 5px; }
-        .btn-edit { background: #f1f5f9; color: var(--primary); border: 1px solid #e2e8f0; padding: 8px; border-radius: 6px; }
-        .btn-del { background: #fee2e2; color: var(--danger); border: 1px solid #fecdd3; padding: 8px; border-radius: 6px; }
-
-        #modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 1000; align-items: center; justify-content: center; }
-        .modal-content { background: white; padding: 30px; border-radius: 15px; width: 350px; text-align: center; }
+        @media print {
+            @page { size: A4 landscape; margin: 1cm; counter-increment: page; }
+            .no-print { display: none !important; }
+            .print-only { display: block; }
+            body { background: white; padding: 0; counter-reset: page; }
+            .print-header { text-align: center; font-size: 22px; font-weight: bold; border-bottom: 3px solid #000; padding-bottom: 10px; margin-bottom: 20px; }
+            .grid { display: grid !important; grid-template-columns: repeat(6, 1fr) !important; gap: 10px !important; }
+            .card { border: 1px solid #ddd !important; box-shadow: none !important; }
+            .footer-container { position: fixed; bottom: 0; left: 0; width: 100%; display: flex !important; justify-content: space-between; align-items: center; font-size: 10px; color: #555; border-top: 1px solid #ccc; padding: 10px 0; background: white; }
+            .page-number::after { content: "Página " counter(page); }
+        }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <div class="header">
-        <h1>📦 Haris</h1>
-        <div class="search-container">
-            <input type="text" id="inputBusca" class="search-input" placeholder="Pesquisar..." oninput="render()">
-            <select id="ordem" class="sort-select" onchange="render()">
-                <option value="nome">Ordem: A-Z</option>
-                <option value="qtd-desc">Estoque: Maior</option>
-                <option value="qtd-asc">Estoque: Menor</option>
-            </select>
+    <div class="no-print">
+        <div class="header">
+            <h1>📦 Haris</h1>
+            <div class="search-container">
+                <input type="text" id="inputBusca" class="search-input" placeholder="Pesquisar..." oninput="render()">
+                <select id="ordem" class="sort-select" onchange="render()">
+                    <option value="nome">A-Z</option>
+                    <option value="qtd-desc">Estoque ↑</option>
+                    <option value="qtd-asc">Estoque ↓</option>
+                </select>
+            </div>
+            <div class="nav-btns">
+                <button class="btn-cat" id="btnAdmin" onclick="toggleAdmin()">🔑 Admin</button>
+                <button class="btn-cat" onclick="prepararImpressao()" style="background:var(--primary); color:white;">📄 PDF</button>
+            </div>
         </div>
-        <div class="nav-btns">
-            <button class="btn btn-lock" id="btnAdmin" onclick="toggleAdmin()">🔑 Admin</button>
-            <button class="btn btn-report" onclick="prepararImpressao()">📄 PDF</button>
+
+        <div class="stats-bar">
+            <div style="display:flex; gap:15px;">
+                <div>Produtos: <b id="totalProdutos">0</b></div>
+                <div>Total Unid: <b id="totalEstoque">0</b></div>
+            </div>
+            <div class="backup-group" id="backupGroup" style="display:none; gap:5px;">
+                <button class="btn-cat" onclick="toggleHistory()">📋 Histórico</button>
+                <button class="btn-cat" onclick="exportarBackup()">📥 Exportar</button>
+                <button class="btn-cat" onclick="document.getElementById('importInput').click()">📤 Importar</button>
+                <input type="file" id="importInput" style="display:none" onchange="importarBackup(this)">
+            </div>
+        </div>
+
+        <div id="historyPanel">
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+                <h2 style="margin:0; font-size:1.1rem;">📋 Histórico</h2>
+                <button onclick="limparHistorico()" style="color:red; background:none; border:none; cursor:pointer; font-size:0.7rem;">Limpar Tudo</button>
+            </div>
+            <table class="hist-table">
+                <thead><tr><th>Data</th><th>Produto</th><th>Tipo</th><th>Qtd</th><th>Motivo</th><th>Ação</th></tr></thead>
+                <tbody id="listaHist"></tbody>
+            </table>
+        </div>
+
+        <div class="cat-filter" id="catFiltros"></div>
+
+        <div id="adminPanel">
+            <div class="input-group"><label>Nome</label><input type="text" id="nome"></div>
+            <div class="input-group"><label>Categoria</label>
+                <select id="categoria">
+                    <option value="Tinta Hardtop">Tinta Hardtop</option>
+                    <option value="Tinta Pilot">Tinta Pilot</option>
+                    <option value="Componente B">Componente B</option>
+                    <option value="Jotamastic A">Jotamastic A</option>
+                    <option value="Jotamastic B">Jotamastic B</option>
+                    <option value="Solvente">Solvente</option>
+                    <option value="Outros">Outros</option>
+                </select>
+            </div>
+            <div class="input-group"><label>Qtd</label><input type="number" id="qtd"></div>
+            <div class="input-group"><label>Foto</label><input type="file" id="foto" accept="image/*"></div>
+            <button class="btn-cat" style="background:var(--accent); color:white; height:35px;" onclick="cadastrar()">CADASTRAR</button>
         </div>
     </div>
 
-    <div class="stats-bar">
-        <div class="stats-group">
-            <div class="stats-item">Produtos: <b id="totalProdutos">0</b></div>
-            <div class="stats-item">Estoque Total: <b id="totalEstoque">0</b></div>
-        </div>
-        <div class="backup-group" id="backupGroup">
-            <button class="btn btn-backup" onclick="exportarBackup()">📥 Exportar</button>
-            <button class="btn btn-backup" onclick="document.getElementById('importInput').click()">📤 Importar</button>
-            <input type="file" id="importInput" style="display:none" accept=".json" onchange="importarBackup(this)">
-        </div>
-    </div>
-
-    <div class="cat-filter" id="catFiltros"></div>
-
-    <div id="adminPanel">
-        <div class="input-group"><label>Produto</label><input type="text" id="nome"></div>
-        <div class="input-group"><label>Categoria</label>
-            <select id="categoria">
-                <option value="Componente B">Componente B</option>
-                <option value="Jotamastic A">Jotamastic A</option>
-                <option value="Jotamastic B">Jotamastic B</option>
-                <option value="Solvente">Solvente</option>
-                <option value="Tinta Hardtop">Tinta Hardtop</option>
-                <option value="Tinta Pilot">Tinta Pilot</option>
-                <option value="Outros">Outros</option>
-            </select>
-        </div>
-        <div class="input-group"><label>Quantidade</label><input type="number" id="qtd"></div>
-        <div class="input-group"><label>Foto</label><input type="file" id="foto" accept="image/*"></div>
-        <button class="btn btn-add" onclick="cadastrar()">CADASTRAR</button>
-    </div>
-
+    <div class="print-only print-header">CONTROLE DE ESTOQUE HARIS</div>
     <div class="grid" id="vitrine"></div>
+
+    <div class="print-only footer-container">
+        <div style="flex:1"></div>
+        <div style="flex:1; text-align:center;" id="print-date"></div>
+        <div style="flex:1; text-align:right;" class="page-number"></div>
+    </div>
 </div>
 
-<div id="modal">
+<div id="modal" class="no-print">
     <div class="modal-content">
-        <label>Editar Nome</label>
-        <input type="text" id="mNomeEdit" style="margin-bottom:15px; font-weight:bold; font-size:1.1rem; text-align:center; border:2px solid var(--accent); padding:8px; border-radius:8px; width:100%; box-sizing:border-box;">
-        <p>Estoque: <b id="mQtd">0</b></p>
-        <input type="number" id="valMov" value="1" style="width:80px; text-align:center; padding:8px; border-radius:4px; border:1px solid #ddd; margin:10px auto; display:block;">
-        <div style="display:flex; gap:10px; margin-top:20px;">
-            <button class="btn" style="background:#10b981; color:white; flex:1;" onclick="movimentar('add')">ENTRADA</button>
-            <button class="btn" style="background:#e11d48; color:white; flex:1;" onclick="movimentar('sub')">SAÍDA</button>
+        <p style="font-size:0.7rem; font-weight:bold; margin-bottom:5px;">EDITAR PRODUTO</p>
+        <input type="text" id="mNomeEdit" style="margin-bottom:10px; font-weight:bold; text-align:center;">
+        <div style="background:#f8fafc; padding:8px; border-radius:8px; margin-bottom:10px;">
+            <p style="margin:0; font-size:0.6rem;">Estoque Atual</p>
+            <b id="mQtd" style="font-size:1.5rem;">0</b>
         </div>
-        <br><button onclick="fecharModal()" style="cursor:pointer; color:var(--danger); border:1px solid var(--danger); background:none; font-size:0.8rem; padding:5px 15px; border-radius:5px; margin-top:10px; font-weight:bold;">FECHAR E SALVAR</button>
+        <input type="number" id="valMov" value="1" style="text-align:center; width:60px; margin:auto;">
+        <textarea id="mNota" placeholder="Motivo..." style="margin-top:8px; height:40px; font-size:0.7rem;"></textarea>
+        <div style="display:flex; gap:8px; margin-top:12px;">
+            <button class="btn-cat" style="background:var(--success); color:white; flex:1;" onclick="movimentar('add')">ENTRADA</button>
+            <button class="btn-cat" style="background:var(--danger); color:white; flex:1;" onclick="movimentar('sub')">SAÍDA</button>
+        </div>
+        <button onclick="fecharModal()" style="margin-top:15px; cursor:pointer; background:none; border:none; text-decoration:underline; font-size:0.7rem;">SALVAR E FECHAR</button>
     </div>
 </div>
 
 <script>
     let isAdmin = false, editIdx = null, catAtiva = 'Todos';
-    let db = JSON.parse(localStorage.getItem('db_haris_final_v30')) || [];
-    const listaCategorias = ["Componente B", "Jotamastic A", "Jotamastic B", "Solvente", "Tinta Hardtop", "Tinta Pilot", "Outros"];
+    let db = JSON.parse(localStorage.getItem('db_haris_v30')) || [];
+    let historico = JSON.parse(localStorage.getItem('db_haris_hist')) || [];
+    const listaCategorias = ["Tinta Hardtop", "Tinta Pilot", "Componente B", "Jotamastic A", "Jotamastic B", "Solvente", "Outros"];
 
     function toggleAdmin() {
         if (!isAdmin) {
@@ -130,16 +178,21 @@
                 isAdmin = true;
                 document.getElementById('adminPanel').style.display = 'grid';
                 document.getElementById('backupGroup').style.display = 'flex';
-                document.getElementById('btnAdmin').innerText = "🔓 Sair";
                 render();
-            } else { alert("Incorreta!"); }
+            }
         } else {
             isAdmin = false;
             document.getElementById('adminPanel').style.display = 'none';
             document.getElementById('backupGroup').style.display = 'none';
-            document.getElementById('btnAdmin').innerText = "🔑 Admin";
+            document.getElementById('historyPanel').style.display = 'none';
             render();
         }
+    }
+
+    function toggleHistory() {
+        const p = document.getElementById('historyPanel');
+        p.style.display = p.style.display === 'block' ? 'none' : 'block';
+        if(p.style.display === 'block') renderHistory();
     }
 
     function render() {
@@ -148,35 +201,29 @@
         v.innerHTML = '';
         let cProd = 0, cEst = 0;
 
-        fBox.innerHTML = ['Todos', ...listaCategorias].map(c => 
-            `<button class="btn-cat ${catAtiva === c ? 'active' : ''}" onclick="setCat('${c}')">${c}</button>`
-        ).join('');
+        fBox.innerHTML = ['Todos', ...listaCategorias].map(c => `<button class="btn-cat ${catAtiva === c ? 'active' : ''}" onclick="setCat('${c}')">${c}</button>`).join('');
 
-        // Lógica de Ordenação
         let copiaDb = [...db];
         if(ordem === 'nome') copiaDb.sort((a, b) => a.nome.localeCompare(b.nome));
         else if(ordem === 'qtd-desc') copiaDb.sort((a, b) => b.qtd - a.qtd);
         else if(ordem === 'qtd-asc') copiaDb.sort((a, b) => a.qtd - b.qtd);
 
         copiaDb.forEach((p) => {
-            const i = db.indexOf(p); // Mantém o índice original para edição
-            const matchesSearch = p.nome.toLowerCase().includes(termo);
-            const matchesCat = catAtiva === 'Todos' || (p.cat || 'Outros') === catAtiva;
-
-            if (matchesSearch && matchesCat) {
+            const i = db.indexOf(p);
+            if (p.nome.toLowerCase().includes(termo) && (catAtiva === 'Todos' || (p.cat || 'Outros') === catAtiva)) {
                 cProd++; cEst += parseInt(p.qtd);
-                const isZerado = parseInt(p.qtd) <= 0;
+                const catClass = "cat-" + (p.cat || 'Outros').toLowerCase().replace(/\s+/g, '-');
                 v.innerHTML += `
-                    <div class="card ${isZerado ? 'card-zerado' : ''}">
+                    <div class="card">
                         <img src="${p.foto}">
                         <div class="card-info">
-                            <span class="badge-cat">${p.cat || 'Outros'}</span>
-                            <h3>${p.nome}</h3>
-                            <p>Estoque: <b class="${isZerado ? 'txt-zerado' : ''}">${p.qtd}</b></p>
+                            <span class="badge-cat ${catClass}">${p.cat || 'Outros'}</span>
+                            <h3 style="margin:2px 0; font-size:0.75rem; line-height:1.1;">${p.nome}</h3>
+                            <p style="margin:0; font-size:0.7rem; color:gray;">Estoque: <b style="font-size:0.9rem;">${p.qtd}</b></p>
                         </div>
-                        <div class="admin-actions" style="display: ${isAdmin ? 'flex' : 'none'}">
-                            <button class="btn btn-edit" onclick="abrirPop(${i})">⚙️ EDITAR</button>
-                            <button class="btn btn-del" onclick="remover(${i})">🗑️ EXCLUIR</button>
+                        <div class="admin-actions no-print" style="display: ${isAdmin ? 'flex' : 'none'}">
+                            <button class="btn-edit-card" onclick="abrirPop(${i})">⚙️ EDITAR</button>
+                            <button onclick="remover(${i})" style="color:red; border:none; background:none; cursor:pointer; font-size:9px; margin-top:2px;">🗑️ EXCLUIR</button>
                         </div>
                     </div>`;
             }
@@ -185,39 +232,59 @@
         document.getElementById('totalEstoque').innerText = cEst;
     }
 
-    function setCat(c) { catAtiva = c; render(); }
-    function salvar() { localStorage.setItem('db_haris_final_v30', JSON.stringify(db)); render(); }
-    function fecharModal() { db[editIdx].nome = document.getElementById('mNomeEdit').value; salvar(); document.getElementById('modal').style.display = 'none'; }
-    function remover(i) { if(confirm("Remover?")) { db.splice(i, 1); salvar(); } }
-    function prepararImpressao() { window.print(); }
-    function exportarBackup() { const a = document.createElement('a'); a.setAttribute("href", "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(db))); a.setAttribute("download", "backup_haris.json"); a.click(); }
-    function importarBackup(input) { const r = new FileReader(); r.onload = () => { db = JSON.parse(r.result); salvar(); }; r.readAsText(input.files[0]); }
-    
-    function cadastrar() {
-        const n = document.getElementById('nome').value, q = document.getElementById('qtd').value, c = document.getElementById('categoria').value, f = document.getElementById('foto').files;
-        if(!n || !q || !f[0]) return alert("Preencha tudo!");
-        const r = new FileReader();
-        r.onload = (e) => { db.push({ nome: n, qtd: parseInt(q), cat: c, foto: e.target.result }); salvar(); document.getElementById('nome').value = ""; document.getElementById('qtd').value = ""; };
-        r.readAsDataURL(f[0]);
-    }
-
-    function abrirPop(i) {
-        editIdx = i;
-        document.getElementById('mNomeEdit').value = db[i].nome;
-        document.getElementById('mQtd').innerText = db[i].qtd;
-        document.getElementById('valMov').value = 1;
-        document.getElementById('modal').style.display = 'flex';
+    function renderHistory() {
+        const hTable = document.getElementById('listaHist');
+        hTable.innerHTML = historico.map((h, index) => `
+            <tr>
+                <td>${h.data}</td>
+                <td>${h.prod}</td>
+                <td class="${h.tipo === 'ENTRADA' ? 'tag-add' : 'tag-sub'}">${h.tipo}</td>
+                <td>${h.qtd}</td>
+                <td>${h.nota}</td>
+                <td><button onclick="apagarItemHistorico(${index})" style="cursor:pointer; border:none; background:none;">🗑️</button></td>
+            </tr>
+        `).reverse().join('');
     }
 
     function movimentar(tipo) {
-        const val = parseInt(document.getElementById('valMov').value);
+        const valInput = document.getElementById('valMov');
+        const notaInput = document.getElementById('mNota');
+        const val = parseInt(valInput.value);
+        if (isNaN(val) || val <= 0) return;
         db[editIdx].nome = document.getElementById('mNomeEdit').value;
-        if (tipo === 'add') db[editIdx].qtd += val;
-        else { if (db[editIdx].qtd < val) return alert("Estoque insuficiente!"); db[editIdx].qtd -= val; }
+        const operacao = (tipo === 'add' ? val : -val);
+        if (tipo === 'sub' && db[editIdx].qtd < val) return alert("Estoque insuficiente!");
+        db[editIdx].qtd += operacao;
+        historico.push({ data: new Date().toLocaleString(), prod: db[editIdx].nome, tipo: tipo === 'add' ? 'ENTRADA' : 'SAÍDA', qtd: val, nota: notaInput.value });
+        localStorage.setItem('db_haris_hist', JSON.stringify(historico));
         document.getElementById('mQtd').innerText = db[editIdx].qtd;
+        valInput.value = 1;
+        notaInput.value = "";
         salvar();
     }
 
+    function abrirPop(i) { editIdx = i; document.getElementById('mNomeEdit').value = db[i].nome; document.getElementById('mQtd').innerText = db[i].qtd; document.getElementById('valMov').value = 1; document.getElementById('mNota').value = ""; document.getElementById('modal').style.display = 'flex'; }
+    function fecharModal() { document.getElementById('modal').style.display = 'none'; render(); }
+    function setCat(c) { catAtiva = c; render(); }
+    function salvar() { localStorage.setItem('db_haris_v30', JSON.stringify(db)); render(); }
+    function remover(i) { if(confirm("Excluir?")) { db.splice(i, 1); salvar(); } }
+    function limparHistorico() { if(confirm("Limpar Tudo?")) { historico = []; localStorage.setItem('db_haris_hist', '[]'); renderHistory(); } }
+    function apagarItemHistorico(idx) { historico.splice(idx, 1); localStorage.setItem('db_haris_hist', JSON.stringify(historico)); renderHistory(); }
+    function exportarBackup() { const a = document.createElement('a'); a.setAttribute("href", "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify({db, hist:historico}))); a.setAttribute("download", "backup_haris.json"); a.click(); }
+    function importarBackup(input) { const r = new FileReader(); r.onload = () => { const data = JSON.parse(r.result); db = data.db; historico = data.hist; salvar(); }; r.readAsText(input.files); }
+    function prepararImpressao() { document.getElementById('print-date').innerText = "Gerado em: " + new Date().toLocaleString(); window.print(); }
+
+    function cadastrar() {
+        const n = document.getElementById('nome').value, q = document.getElementById('qtd').value, f = document.getElementById('foto').files;
+        if(!n || !q || !f[0]) return alert("Faltam dados!");
+        const r = new FileReader();
+        r.onload = (e) => { 
+            db.push({ nome: n, qtd: parseInt(q), cat: document.getElementById('categoria').value, foto: e.target.result }); 
+            salvar();
+            document.getElementById('nome').value = ""; document.getElementById('qtd').value = ""; document.getElementById('foto').value = "";
+        };
+        r.readAsDataURL(f[0]);
+    }
     render();
 </script>
 </body>
