@@ -18,16 +18,21 @@
         label { font-size: 0.75rem; font-weight: 700; color: #64748b; }
         input { padding: 12px; border: 1px solid #e2e8f0; border-radius: 8px; width: 100%; box-sizing: border-box; }
         
-        .btn { padding: 12px 24px; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; transition: 0.3s; }
+        .btn { padding: 12px 24px; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; transition: 0.3s; text-transform: uppercase; font-size: 0.75rem; }
         .btn-add { background: var(--accent); color: white; }
         .btn-report { background: var(--primary); color: white; }
         .btn-lock { background: #64748b; color: white; }
 
         /* GRID */
         .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 25px; }
-        .card { background: white; border-radius: 15px; overflow: hidden; border: 1px solid #e2e8f0; text-align: center; padding-bottom: 15px; }
+        .card { background: white; border-radius: 15px; overflow: hidden; border: 1px solid #e2e8f0; text-align: center; padding-bottom: 15px; position: relative; }
         .card img { width: 100%; height: 200px; object-fit: cover; }
-        .btn-edit { background: #f1f5f9; color: var(--primary); width: 90%; margin-top: 10px; border: 1px solid #e2e8f0; }
+        .card-info { padding: 10px; }
+        
+        /* BOTÕES INTERNOS DO CARD */
+        .admin-actions { display: none; padding: 0 10px; flex-direction: column; gap: 5px; }
+        .btn-edit { background: #f1f5f9; color: var(--primary); border: 1px solid #e2e8f0; padding: 8px; border-radius: 6px; }
+        .btn-del { background: #fee2e2; color: var(--danger); border: 1px solid #fecdd3; padding: 8px; border-radius: 6px; }
 
         /* MODAL */
         #modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 1000; align-items: center; justify-content: center; }
@@ -36,60 +41,27 @@
 
         /* --- REGRAS DE IMPRESSÃO (PDF) --- */
         @media print {
-            /* 1. Remove títulos e links automáticos escondendo as margens padrões */
-            @page { 
-                margin: 0.5cm; 
-                size: auto;
-            }
-            
-            /* 2. Esconde tudo que não deve sair no papel */
-            .header, #adminPanel, .btn-edit, .nav-btns, #modal, #btnAdmin, title { display: none !important; }
-            
+            @page { margin: 0.5cm; size: auto; }
+            .header, #adminPanel, .admin-actions, .nav-btns, #modal, #btnAdmin, title { display: none !important; }
             body { background: white; padding: 0; margin: 0; }
-
-            /* 3. Título do Relatório */
             body::before {
                 content: "RELATÓRIO DE ESTOQUE - HARIS";
-                display: block;
-                text-align: center;
-                font-size: 24px;
-                font-weight: bold;
-                padding: 20px 0;
-                color: #1e293b;
-                border-bottom: 3px solid #1e293b;
-                margin-bottom: 20px;
+                display: block; text-align: center; font-size: 24px; font-weight: bold;
+                padding: 20px 0; color: #1e293b; border-bottom: 3px solid #1e293b; margin-bottom: 20px;
             }
-
-            /* 4. Rodapé ÚNICO (Data e Hora) */
             #footer-pdf {
-                display: block !important;
-                position: fixed;
-                bottom: 0;
-                left: 0;
-                width: 100%;
-                text-align: center;
-                font-size: 10px;
-                color: #64748b;
-                padding: 10px 0;
-                border-top: 1px solid #eee;
-                background: white;
+                display: block !important; position: fixed; bottom: 0; left: 0; width: 100%;
+                text-align: center; font-size: 10px; color: #64748b; padding: 10px 0;
+                border-top: 1px solid #eee; background: white;
             }
-
-            /* 5. Estilo da Lista no PDF */
             .grid { display: block !important; }
             .card { 
-                break-inside: avoid; 
-                display: flex !important; 
-                text-align: left; 
-                align-items: center; 
-                border: none; 
-                border-bottom: 1px solid #eee; 
-                margin-bottom: 5px; 
-                padding: 8px;
+                break-inside: avoid; display: flex !important; text-align: left; 
+                align-items: center; border: none; border-bottom: 1px solid #eee; 
+                margin-bottom: 5px; padding: 8px;
             }
             .card img { width: 60px; height: 60px; margin-right: 20px; border-radius: 5px; }
         }
-
         #footer-pdf { display: none; }
     </style>
 </head>
@@ -99,7 +71,7 @@
     <div class="header">
         <h1>📦 Catálogo Haris</h1>
         <div class="nav-btns">
-            <button class="btn btn-lock" id="btnAdmin" onclick="toggleAdmin()">🔑 Admin</button>
+            <button class="btn btn-lock" id="btnAdmin" onclick="toggleAdmin()">🔑 Área do Admin</button>
             <button class="btn btn-report" onclick="prepararImpressao()">📄 Gerar PDF</button>
         </div>
     </div>
@@ -120,24 +92,32 @@
     <div class="modal-content">
         <h2 id="mNome">Editar</h2>
         <p>Estoque Atual: <b id="mQtd">0</b></p>
-        <input type="number" id="valMov" value="1" style="width:60px; text-align:center;">
+        <input type="number" id="valMov" value="1" style="width:60px; text-align:center; padding: 5px; border-radius: 4px; border: 1px solid #ddd;">
         <div class="mov-box">
             <button class="btn" style="background:#10b981; color:white; flex:1;" onclick="movimentar('add')">ENTRADA</button>
             <button class="btn" style="background:#e11d48; color:white; flex:1;" onclick="movimentar('sub')">SAÍDA</button>
         </div>
-        <br><button onclick="document.getElementById('modal').style.display='none'" style="cursor:pointer; color:gray; border:none; background:none;">Fechar</button>
+        <br><button onclick="document.getElementById('modal').style.display='none'" style="cursor:pointer; color:gray; border:none; background:none; font-size: 0.8rem;">FECHAR</button>
     </div>
 </div>
 
 <script>
     let isAdmin = false;
     let editIdx = null;
-    let db = JSON.parse(localStorage.getItem('db_haris_final_clean')) || [];
+    let db = JSON.parse(localStorage.getItem('db_haris_final_v30')) || [];
 
     function toggleAdmin() {
-        if (prompt("Senha:") === "RebocadorHaris") {
-            isAdmin = true;
-            document.getElementById('adminPanel').style.display = 'grid';
+        if (!isAdmin) {
+            if (prompt("Digite a senha de acesso:") === "RebocadorHaris") {
+                isAdmin = true;
+                document.getElementById('adminPanel').style.display = 'grid';
+                document.getElementById('btnAdmin').innerText = "🔓 Sair";
+                render();
+            } else { alert("Senha incorreta!"); }
+        } else {
+            isAdmin = false;
+            document.getElementById('adminPanel').style.display = 'none';
+            document.getElementById('btnAdmin').innerText = "🔑 Área do Admin";
             render();
         }
     }
@@ -150,9 +130,12 @@
                 <div class="card">
                     <img src="${p.foto}">
                     <div class="card-info">
-                        <h3>${p.nome}</h3>
-                        <p>Qtd: <b>${p.qtd}</b></p>
-                        ${isAdmin ? `<button class="btn btn-edit" onclick="abrirPop(${i})">⚙️ MOVIMENTAR</button>` : ''}
+                        <h3 style="margin: 5px 0;">${p.nome}</h3>
+                        <p style="margin: 5px 0;">Estoque: <b>${p.qtd}</b></p>
+                    </div>
+                    <div class="admin-actions" style="display: ${isAdmin ? 'flex' : 'none'}">
+                        <button class="btn btn-edit" onclick="abrirPop(${i})">⚙️ MOVIMENTAR</button>
+                        <button class="btn btn-del" onclick="remover(${i})">🗑️ EXCLUIR PRODUTO</button>
                     </div>
                 </div>`;
         });
@@ -160,12 +143,15 @@
 
     function cadastrar() {
         const n = document.getElementById('nome').value, q = document.getElementById('qtd').value, f = document.getElementById('foto').files;
-        if(!n || !q || !f[0]) return alert("Preencha tudo!");
+        if(!n || !q || !f[0]) return alert("Preencha todos os campos!");
         const r = new FileReader();
         r.onload = (e) => {
             db.push({ nome: n, qtd: parseInt(q), foto: e.target.result });
-            localStorage.setItem('db_haris_final_clean', JSON.stringify(db));
+            localStorage.setItem('db_haris_final_v30', JSON.stringify(db));
             render();
+            document.getElementById('nome').value = "";
+            document.getElementById('qtd').value = "";
+            document.getElementById('foto').value = "";
         };
         r.readAsDataURL(f[0]);
     }
@@ -187,14 +173,20 @@
         let v = parseInt(document.getElementById('valMov').value);
         if(tipo === 'add') db[editIdx].qtd += v;
         else db[editIdx].qtd = Math.max(0, db[editIdx].qtd - v);
-        localStorage.setItem('db_haris_final_clean', JSON.stringify(db));
+        localStorage.setItem('db_haris_final_v30', JSON.stringify(db));
         document.getElementById('mQtd').innerText = db[editIdx].qtd;
         render();
+    }
+
+    function remover(i) {
+        if(confirm(`Tem certeza que deseja excluir "${db[i].nome}"?`)) {
+            db.splice(i, 1);
+            localStorage.setItem('db_haris_final_v30', JSON.stringify(db));
+            render();
+        }
     }
 
     render();
 </script>
 </body>
 </html>
-
-
