@@ -1,0 +1,32 @@
+body { font-family: Arial, sans-serif; background-color: #f4f4f4; margin: 0; padding: 0; }
+header { background: #25d366; color: white; text-align: center; padding: 1rem; }
+
+.container { 
+    display: grid; 
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); 
+    gap: 20px; 
+    padding: 20px; 
+    max-width: 1200px; 
+    margin: auto; 
+}
+
+.produto-card { 
+    background: white; 
+    padding: 15px; 
+    border-radius: 8px; 
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1); 
+    text-align: center; 
+}
+
+.produto-card img { max-width: 100%; border-radius: 5px; }
+.preco { display: block; font-weight: bold; font-size: 1.2rem; color: #333; margin: 10px 0; }
+
+.btn-whatsapp { 
+    display: inline-block; 
+    background: #25d366; 
+    color: white; 
+    padding: 10px 20px; 
+    text-decoration: none; 
+    border-radius: 5px; 
+    font-weight: bold; 
+}
