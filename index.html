@@ -173,210 +173,55 @@ input,select,textarea{padding:8px;border:1px solid #e2e8f0;border-radius:8px;wid
 
 <script>
 let isAdmin=false,editIdx=null;
-let db=[],historico=[];
+let db=[];
+let historico=[];
+const listaCategorias=["Tinta Hardtop","Tinta Pilot","Componente B","Jotamastic A","Jotamastic B","Solvente","Outros"];
 let catAtiva='Todos';
-let dbOpen=null;
 
-// Inicializa IndexedDB
-function initDB(){
-    return new Promise((resolve,reject)=>{
-        const request = indexedDB.open('harisDB',1);
-        request.onerror = e => reject(e);
-        request.onsuccess = e => { dbOpen = e.target.result; resolve(); };
-        request.onupgradeneeded = e=>{
-            dbOpen = e.target.result;
-            if(!dbOpen.objectStoreNames.contains('produtos')){
-                dbOpen.createObjectStore('produtos',{keyPath:'id',autoIncrement:true});
-            }
-            if(!dbOpen.objectStoreNames.contains('historico')){
-                dbOpen.createObjectStore('historico',{keyPath:'id',autoIncrement:true});
-            }
-        };
-    });
-}
+// === INDEXEDDB ===
+let dbRequest = indexedDB.open('harisDB',1);
+dbRequest.onupgradeneeded = e=>{
+    let idb = e.target.result;
+    if(!idb.objectStoreNames.contains('produtos')) idb.createObjectStore('produtos',{keyPath:'id',autoIncrement:true});
+    if(!idb.objectStoreNames.contains('historico')) idb.createObjectStore('historico',{keyPath:'id',autoIncrement:true});
+};
+dbRequest.onsuccess = e=>{
+    let idb = e.target.result;
+    let tx = idb.transaction('produtos','readonly').objectStore('produtos').getAll();
+    tx.onsuccess = ()=>{ db = tx.result; render(); };
+    let txHist = idb.transaction('historico','readonly').objectStore('historico').getAll();
+    txHist.onsuccess = ()=>{ historico = txHist.result; renderHistory(); };
+};
 
-// Funções DB
-function getAll(storeName){
-    return new Promise(resolve=>{
-        const tx = dbOpen.transaction(storeName,'readonly');
-        const store = tx.objectStore(storeName);
-        const req = store.getAll();
-        req.onsuccess=e=>resolve(e.target.result);
-    });
+function salvar(){
+    let idb = dbRequest.result;
+    let tx = idb.transaction('produtos','readwrite');
+    let store = tx.objectStore('produtos');
+    store.clear().onsuccess = ()=>{ db.forEach(p=>store.put(p)); };
+    let txHist = idb.transaction('historico','readwrite');
+    let storeHist = txHist.objectStore('historico');
+    storeHist.clear().onsuccess = ()=>{ historico.forEach(h=>storeHist.put(h)); };
+    render(); renderHistory();
 }
 
-function addItem(storeName,item){
-    return new Promise(resolve=>{
-        const tx = dbOpen.transaction(storeName,'readwrite');
-        const store = tx.objectStore(storeName);
-        store.add(item).onsuccess=e=>resolve();
-    });
-}
-
-function updateItem(storeName,item){
-    return new Promise(resolve=>{
-        const tx = dbOpen.transaction(storeName,'readwrite');
-        const store = tx.objectStore(storeName);
-        store.put(item).onsuccess=e=>resolve();
-    });
-}
-
-function deleteItem(storeName,id){
-    return new Promise(resolve=>{
-        const tx = dbOpen.transaction(storeName,'readwrite');
-        const store = tx.objectStore(storeName);
-        store.delete(id).onsuccess=e=>resolve();
-    });
-}
-
-// Carrega dados do DB
-async function loadData(){
-    db = await getAll('produtos');
-    historico = await getAll('historico');
-    render();
-}
-
-// Toggle Admin
-function toggleAdmin(){
-if(!isAdmin){
-if(prompt("Senha:")==="RebocadorHaris"){
-isAdmin=true;
-document.getElementById('adminPanel').style.display='grid';
-document.getElementById('backupGroup').style.display='flex';
-render();
-}
-}else{
-isAdmin=false;
-document.getElementById('adminPanel').style.display='none';
-document.getElementById('backupGroup').style.display='none';
-document.getElementById('historyPanel').style.display='none';
-render();
-}
-}
-
-// Render vitrine
-function getCorCat(cat){
-switch(cat){
-case 'Tinta Hardtop': return '#2563eb';
-case 'Tinta Pilot': return '#1d4ed8';
-case 'Componente B': return '#f59e0b';
-case 'Jotamastic A': return '#10b981';
-case 'Jotamastic B': return '#14b8a6';
-case 'Solvente': return '#f97316';
-default: return '#64748b';
-}
-}
-
+// === FUNÇÕES EXISTENTES (mantidas) ===
+function toggleAdmin(){if(!isAdmin){if(prompt("Senha:")==="RebocadorHaris"){isAdmin=true;document.getElementById('adminPanel').style.display='grid';document.getElementById('backupGroup').style.display='flex';render();}}else{isAdmin=false;document.getElementById('adminPanel').style.display='none';document.getElementById('backupGroup').style.display='none';document.getElementById('historyPanel').style.display='none';render();}}
+function toggleHistory(){const p=document.getElementById('historyPanel');p.style.display=p.style.display==='block'?'none':'block';if(p.style.display==='block') renderHistory();}
+function render(){const v=document.getElementById('vitrine');const termo=document.getElementById('inputBusca').value.toLowerCase();const fBox=document.getElementById('catFiltros');const ordem=document.getElementById('ordem').value;v.innerHTML='';fBox.innerHTML=['Todos',...listaCategorias].map(c=>`<button class="btn-cat ${catAtiva===c?'active':''}" onclick="setCat('${c}')">${c}</button>`).join('');let cProd=0,cEst=0;let copiaDb=[...db];if(ordem==='nome') copiaDb.sort((a,b)=>a.nome.localeCompare(b.nome));else if(ordem==='qtd-desc') copiaDb.sort((a,b)=>b.qtd-a.qtd);else if(ordem==='qtd-asc') copiaDb.sort((a,b)=>a.qtd-b.qtd);copiaDb.forEach((p,i)=>{if(p.nome.toLowerCase().includes(termo)&&(catAtiva==='Todos'||p.cat===catAtiva)){cProd++; cEst+=parseInt(p.qtd);v.innerHTML+=`<div class="card"><img src="${p.foto}"><div class="card-info"><h3 style="margin:2px 0; font-size:0.75rem; line-height:1.1;">${p.nome}</h3><span class="badge-cat" style="background:${getCorCat(p.cat)}">${p.cat||'Outros'}</span><p style="margin:0; font-size:0.7rem; color:gray;">Estoque: <b style="font-size:0.9rem;">${p.qtd}</b></p>${isAdmin?`<div class="admin-actions"><button class="btn-edit-card" onclick="abrirModal(${i})">Editar</button><button class="btn-delete-card" onclick="deletar(${i})">Deletar</button></div>`:''}</div></div>`;}});
+document.getElementById('totalProdutos').innerText=cProd;document.getElementById('totalEstoque').innerText=cEst;}
+function getCorCat(cat){switch(cat){case 'Tinta Hardtop': return '#2563eb';case 'Tinta Pilot': return '#1d4ed8';case 'Componente B': return '#f59e0b';case 'Jotamastic A': return '#10b981';case 'Jotamastic B': return '#14b8a6';case 'Solvente': return '#f97316';default: return '#64748b';}}
 function setCat(c){catAtiva=c;render();}
-
-async function render(){
-const v=document.getElementById('vitrine');
-const termo=document.getElementById('inputBusca').value.toLowerCase();
-const fBox=document.getElementById('catFiltros');
-const ordem=document.getElementById('ordem').value;
-v.innerHTML='';
-fBox.innerHTML=['Todos','Tinta Hardtop','Tinta Pilot','Componente B','Jotamastic A','Jotamastic B','Solvente','Outros'].map(c=>`<button class="btn-cat ${catAtiva===c?'active':''}" onclick="setCat('${c}')">${c}</button>`).join('');
-let cProd=0,cEst=0;
-let copiaDb=[...db];
-if(ordem==='nome') copiaDb.sort((a,b)=>a.nome.localeCompare(b.nome));
-else if(ordem==='qtd-desc') copiaDb.sort((a,b)=>b.qtd-a.qtd);
-else if(ordem==='qtd-asc') copiaDb.sort((a,b)=>a.qtd-b.qtd);
-
-copiaDb.forEach((p,i)=>{
-if(p.nome.toLowerCase().includes(termo)&&(catAtiva==='Todos'||p.cat===catAtiva)){
-cProd++; cEst+=parseInt(p.qtd);
-v.innerHTML+=`
-<div class="card">
-<img src="${p.foto}">
-<div class="card-info">
-<h3 style="margin:2px 0; font-size:0.75rem; line-height:1.1;">${p.nome}</h3>
-<span class="badge-cat" style="background:${getCorCat(p.cat)}">${p.cat||'Outros'}</span>
-<p style="margin:0; font-size:0.7rem; color:gray;">Estoque: <b style="font-size:0.9rem;">${p.qtd}</b></p>
-${isAdmin?`<div class="admin-actions">
-<button class="btn-edit-card" onclick="abrirModal(${p.id})">Editar</button>
-<button class="btn-delete-card" onclick="deletar(${p.id})">Deletar</button>
-</div>`:''}
-</div>
-</div>`;
-}
-});
-document.getElementById('totalProdutos').innerText=cProd;
-document.getElementById('totalEstoque').innerText=cEst;
-}
-
-// Cadastrar
-async function cadastrar(){
-const n=document.getElementById('nome').value.trim();
-const c=document.getElementById('categoria').value;
-const q=parseInt(document.getElementById('qtd').value)||0;
-const f=document.getElementById('foto').files[0];
-if(!n){alert('Nome obrigatório');return;}
-let foto='';
-if(f){foto=await toBase64(f);}
-await addItem('produtos',{nome:n,cat:c,qtd:q,foto});
-document.getElementById('nome').value='';document.getElementById('qtd').value='';document.getElementById('foto').value='';
-loadData();
-}
-
-// converter arquivo em base64
-function toBase64(file){return new Promise(resolve=>{const reader=new FileReader();reader.onload=e=>resolve(e.target.result);reader.readAsDataURL(file);});}
-
-// Modal
-async function abrirModal(id){
-editIdx=id;
-const p=db.find(x=>x.id===id);
-document.getElementById('mNomeEdit').value=p.nome;
-document.getElementById('mQtd').innerText=p.qtd;
-document.getElementById('valMov').value=0;
-document.getElementById('mNota').value='';
-document.getElementById('mFoto').value='';
-document.getElementById('modal').style.display='flex';
-}
-
-function fecharModal(){document.getElementById('modal').style.display='none';}
-
-// Movimentar
-async function movimentar(tipo){
-const val=parseInt(document.getElementById('valMov').value)||0;
-const nota=document.getElementById('mNota').value.trim();
-if(val<=0){alert('Informe valor positivo');return;}
-const p=db.find(x=>x.id===editIdx);
-if(tipo==='sub' && val>p.qtd){alert('Estoque insuficiente');return;}
-p.qtd = tipo==='add'?p.qtd+val:p.qtd-val;
-const f=document.getElementById('mFoto').files[0];
-if(f){p.foto=await toBase64(f);}
-await updateItem('produtos',p);
-await addItem('historico',{data:new Date().toLocaleString(),produto:p.nome,tipo:tipo,qtd:val,motivo:nota});
-fecharModal();loadData();renderHistory();
-}
-
-// Deletar produto
-async function deletar(id){if(confirm('Deletar produto?')){await deleteItem('produtos',id);loadData();}}
-
-// Histórico
-function toggleHistory(){document.getElementById('historyPanel').style.display=document.getElementById('historyPanel').style.display==='none'?'block':'none'; renderHistory();}
-function renderHistory(){
-const lista=document.getElementById('listaHist');
-const termo=document.getElementById('inputBuscaHist').value.toLowerCase();
-const filtro=document.getElementById('filtroCatHist').value;
-lista.innerHTML='';
-historico.forEach(h=>{
-if(h.produto.toLowerCase().includes(termo) && (filtro==='Todos'||h.categoria===filtro)){
-lista.innerHTML+=`<tr><td>${h.data}</td><td>${h.produto}</td><td>${h.tipo}</td><td>${h.qtd}</td><td>${h.motivo||''}</td><td><button onclick="deletarHist(${h.id})">❌</button></td></tr>`;
-}
-});}
-async function deletarHist(id){await deleteItem('historico',id);historico=await getAll('historico');renderHistory();}
-
-// Backup
-async function exportarBackup(){const data=await getAll('produtos');const blob=new Blob([JSON.stringify(data)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='backup_produtos.json';a.click();}
-async function importarBackup(input){const file=input.files[0];if(!file)return;const text=await file.text();const items=JSON.parse(text);for(const i of items){delete i.id;await addItem('produtos',i);}loadData();}
-
-// PDF / Impressão
+function cadastrar(){const n=document.getElementById('nome').value;const c=document.getElementById('categoria').value;const q=parseInt(document.getElementById('qtd').value)||0;const f=document.getElementById('foto').files[0];if(!n||!f){alert('Preencha nome e foto');return;}const reader=new FileReader();reader.onload=function(e){db.push({nome:n,cat:c,qtd:q,foto:e.target.result});salvar();document.getElementById('nome').value='';document.getElementById('qtd').value='';document.getElementById('foto').value='';};reader.readAsDataURL(f);}
+function abrirModal(i){editIdx=i;document.getElementById('modal').style.display='flex';document.getElementById('mNomeEdit').value=db[i].nome;document.getElementById('mQtd').innerText=db[i].qtd;document.getElementById('valMov').value=0;document.getElementById('mNota').value='';document.getElementById('mFoto').value='';}
+function fecharModal(){if(editIdx!==null){const nome=document.getElementById('mNomeEdit').value;const fotoInput=document.getElementById('mFoto');if(nome) db[editIdx].nome=nome;if(fotoInput.files && fotoInput.files[0]){const reader=new FileReader();reader.onload=function(e){db[editIdx].foto=e.target.result;salvar();document.getElementById('modal').style.display='none';editIdx=null;};reader.readAsDataURL(fotoInput.files[0]);} else {salvar();document.getElementById('modal').style.display='none';editIdx=null;}}}
+function movimentar(tipo){if(editIdx===null)return;let val=parseInt(document.getElementById('valMov').value)||0;if(val===0)return;let nota=document.getElementById('mNota').value;db[editIdx].qtd+=tipo==='add'?val:-val;historico.push({data:new Date().toLocaleString(),produto:db[editIdx].nome,tipo:tipo,qtd:val,nota:nota});salvar();renderHistory();render();}
+function deletar(i){if(confirm('Confirma deletar?')){db.splice(i,1);salvar();}}
+function renderHistory(){const termo=document.getElementById('inputBuscaHist').value.toLowerCase();const filtro=document.getElementById('filtroCatHist').value;const tbody=document.getElementById('listaHist');tbody.innerHTML='';historico.forEach((h,i)=>{if((h.produto.toLowerCase().includes(termo)||h.nota.toLowerCase().includes(termo))&&(filtro==='Todos'||h.tipo===filtro||h.produto===filtro)){tbody.innerHTML+=`<tr><td>${h.data}</td><td>${h.produto}</td><td class="${h.tipo==='add'?'tag-add':'tag-sub'}">${h.tipo==='add'?'Entrada':'Saída'}</td><td>${h.qtd}</td><td>${h.nota||''}</td><td><button class="btn-delete-card" onclick="historico.splice(${i},1);salvar()">Deletar</button></td></tr>`;}});}
+function limparHistorico(){if(confirm('Apagar histórico?')){historico=[];salvar();}}
+function imprimirHistorico(){const histHtml=document.getElementById('historyPanel').cloneNode(true);histHtml.querySelectorAll('.btn-cat,input,select').forEach(el=>el.remove());const win=window.open('','PRINT','height=600,width=800');win.document.write('<html><head><title>Histórico</title><style>body{font-family:sans-serif;padding:20px;}h2{text-align:center;font-size:28px;border-bottom:2px solid #000;padding-bottom:10px;}table{width:100%;border-collapse:collapse;margin-top:20px;}th,td{border:1px solid #ddd;padding:10px;text-align:left;}th{background:#f4f4f4;} .tag-add{color:green;} .tag-sub{color:red;}</style></head><body>');win.document.write('<h2>Histórico de Movimentações</h2>');win.document.write(histHtml.innerHTML);win.document.write('</body></html>');win.document.close();win.focus();setTimeout(()=>{win.print();win.close();},500);}
 function imprimirPDF(){window.print();}
-function imprimirHistorico(){window.print();}
-
-// Inicializa
-initDB().then(()=>loadData());
+function exportarBackup(){const data=JSON.stringify({db,historico});const a=document.createElement('a');a.href='data:text/json;charset=utf-8,'+encodeURIComponent(data);a.download='backup.json';a.click();}
+function importarBackup(input){const file=input.files[0];if(!file)return;const reader=new FileReader();reader.onload=e=>{const data=JSON.parse(e.target.result);db=data.db||[];historico=data.historico||[];salvar();};reader.readAsText(file);}
 </script>
 </body>
 </html>
