@@ -172,70 +172,211 @@ input,select,textarea{padding:8px;border:1px solid #e2e8f0;border-radius:8px;wid
 </div>
 
 <script>
-let isAdmin=false, editIdx=null;
-let db=[], historico=[];
-const listaCategorias=["Tinta Hardtop","Tinta Pilot","Componente B","Jotamastic A","Jotamastic B","Solvente","Outros"];
+let isAdmin=false,editIdx=null;
+let db=[],historico=[];
 let catAtiva='Todos';
+let dbOpen=null;
 
-// --- IndexedDB Setup ---
-let request = indexedDB.open('harisDB', 1);
-request.onupgradeneeded = function(e){
-    let dbLocal = e.target.result;
-    if(!dbLocal.objectStoreNames.contains('produtos')){
-        dbLocal.createObjectStore('produtos', { keyPath: 'id', autoIncrement: true });
-    }
-    if(!dbLocal.objectStoreNames.contains('historico')){
-        dbLocal.createObjectStore('historico', { keyPath: 'id', autoIncrement: true });
-    }
-};
-request.onsuccess = function(e){
-    let dbLocal = e.target.result;
-    loadDB(dbLocal);
-};
-request.onerror = function(e){ alert("Erro IndexedDB: "+e.target.error); };
-
-// --- Load DB ---
-function loadDB(dbLocal){
-    let tx = dbLocal.transaction('produtos', 'readonly');
-    let store = tx.objectStore('produtos');
-    let getAll = store.getAll();
-    getAll.onsuccess = function(){ db = getAll.result; render(); };
-    
-    let tx2 = dbLocal.transaction('historico', 'readonly');
-    let store2 = tx2.objectStore('historico');
-    let getAll2 = store2.getAll();
-    getAll2.onsuccess = function(){ historico = getAll2.result; renderHistory(); };
+// Inicializa IndexedDB
+function initDB(){
+    return new Promise((resolve,reject)=>{
+        const request = indexedDB.open('harisDB',1);
+        request.onerror = e => reject(e);
+        request.onsuccess = e => { dbOpen = e.target.result; resolve(); };
+        request.onupgradeneeded = e=>{
+            dbOpen = e.target.result;
+            if(!dbOpen.objectStoreNames.contains('produtos')){
+                dbOpen.createObjectStore('produtos',{keyPath:'id',autoIncrement:true});
+            }
+            if(!dbOpen.objectStoreNames.contains('historico')){
+                dbOpen.createObjectStore('historico',{keyPath:'id',autoIncrement:true});
+            }
+        };
+    });
 }
 
-// --- Save Functions ---
-function salvar(){
-    let req = indexedDB.open('harisDB', 1);
-    req.onsuccess = function(e){
-        let dbLocal = e.target.result;
-        // salvar produtos
-        let tx = dbLocal.transaction('produtos','readwrite');
-        let store = tx.objectStore('produtos');
-        store.clear().onsuccess = function(){
-            db.forEach(p=>store.add(p));
-        };
-        // salvar historico
-        let tx2 = dbLocal.transaction('historico','readwrite');
-        let store2 = tx2.objectStore('historico');
-        store2.clear().onsuccess = function(){
-            historico.forEach(h=>store2.add(h));
-        };
-        render(); renderHistory();
-    };
+// Funções DB
+function getAll(storeName){
+    return new Promise(resolve=>{
+        const tx = dbOpen.transaction(storeName,'readonly');
+        const store = tx.objectStore(storeName);
+        const req = store.getAll();
+        req.onsuccess=e=>resolve(e.target.result);
+    });
 }
 
-// --- Funções existentes (render, cadastrar, modal, etc.) ---
-// A lógica de renderização, cadastro, modal e movimentar produtos continua igual
-// Só substituímos localStorage por IndexedDB nas funções salvar() e loadDB()
+function addItem(storeName,item){
+    return new Promise(resolve=>{
+        const tx = dbOpen.transaction(storeName,'readwrite');
+        const store = tx.objectStore(storeName);
+        store.add(item).onsuccess=e=>resolve();
+    });
+}
 
-// Aqui você mantém seu código original para:
-// toggleAdmin, toggleHistory, render, renderHistory, removerHist, limparHistorico, exportarBackup, importarBackup, imprimirPDF, imprimirHistorico, getCorCat, setCat, abrirModal, fecharModal, movimentar, deletar, etc.
-// Recomendo apenas chamar salvar() quando alterar db ou historico
+function updateItem(storeName,item){
+    return new Promise(resolve=>{
+        const tx = dbOpen.transaction(storeName,'readwrite');
+        const store = tx.objectStore(storeName);
+        store.put(item).onsuccess=e=>resolve();
+    });
+}
 
+function deleteItem(storeName,id){
+    return new Promise(resolve=>{
+        const tx = dbOpen.transaction(storeName,'readwrite');
+        const store = tx.objectStore(storeName);
+        store.delete(id).onsuccess=e=>resolve();
+    });
+}
+
+// Carrega dados do DB
+async function loadData(){
+    db = await getAll('produtos');
+    historico = await getAll('historico');
+    render();
+}
+
+// Toggle Admin
+function toggleAdmin(){
+if(!isAdmin){
+if(prompt("Senha:")==="RebocadorHaris"){
+isAdmin=true;
+document.getElementById('adminPanel').style.display='grid';
+document.getElementById('backupGroup').style.display='flex';
+render();
+}
+}else{
+isAdmin=false;
+document.getElementById('adminPanel').style.display='none';
+document.getElementById('backupGroup').style.display='none';
+document.getElementById('historyPanel').style.display='none';
+render();
+}
+}
+
+// Render vitrine
+function getCorCat(cat){
+switch(cat){
+case 'Tinta Hardtop': return '#2563eb';
+case 'Tinta Pilot': return '#1d4ed8';
+case 'Componente B': return '#f59e0b';
+case 'Jotamastic A': return '#10b981';
+case 'Jotamastic B': return '#14b8a6';
+case 'Solvente': return '#f97316';
+default: return '#64748b';
+}
+}
+
+function setCat(c){catAtiva=c;render();}
+
+async function render(){
+const v=document.getElementById('vitrine');
+const termo=document.getElementById('inputBusca').value.toLowerCase();
+const fBox=document.getElementById('catFiltros');
+const ordem=document.getElementById('ordem').value;
+v.innerHTML='';
+fBox.innerHTML=['Todos','Tinta Hardtop','Tinta Pilot','Componente B','Jotamastic A','Jotamastic B','Solvente','Outros'].map(c=>`<button class="btn-cat ${catAtiva===c?'active':''}" onclick="setCat('${c}')">${c}</button>`).join('');
+let cProd=0,cEst=0;
+let copiaDb=[...db];
+if(ordem==='nome') copiaDb.sort((a,b)=>a.nome.localeCompare(b.nome));
+else if(ordem==='qtd-desc') copiaDb.sort((a,b)=>b.qtd-a.qtd);
+else if(ordem==='qtd-asc') copiaDb.sort((a,b)=>a.qtd-b.qtd);
+
+copiaDb.forEach((p,i)=>{
+if(p.nome.toLowerCase().includes(termo)&&(catAtiva==='Todos'||p.cat===catAtiva)){
+cProd++; cEst+=parseInt(p.qtd);
+v.innerHTML+=`
+<div class="card">
+<img src="${p.foto}">
+<div class="card-info">
+<h3 style="margin:2px 0; font-size:0.75rem; line-height:1.1;">${p.nome}</h3>
+<span class="badge-cat" style="background:${getCorCat(p.cat)}">${p.cat||'Outros'}</span>
+<p style="margin:0; font-size:0.7rem; color:gray;">Estoque: <b style="font-size:0.9rem;">${p.qtd}</b></p>
+${isAdmin?`<div class="admin-actions">
+<button class="btn-edit-card" onclick="abrirModal(${p.id})">Editar</button>
+<button class="btn-delete-card" onclick="deletar(${p.id})">Deletar</button>
+</div>`:''}
+</div>
+</div>`;
+}
+});
+document.getElementById('totalProdutos').innerText=cProd;
+document.getElementById('totalEstoque').innerText=cEst;
+}
+
+// Cadastrar
+async function cadastrar(){
+const n=document.getElementById('nome').value.trim();
+const c=document.getElementById('categoria').value;
+const q=parseInt(document.getElementById('qtd').value)||0;
+const f=document.getElementById('foto').files[0];
+if(!n){alert('Nome obrigatório');return;}
+let foto='';
+if(f){foto=await toBase64(f);}
+await addItem('produtos',{nome:n,cat:c,qtd:q,foto});
+document.getElementById('nome').value='';document.getElementById('qtd').value='';document.getElementById('foto').value='';
+loadData();
+}
+
+// converter arquivo em base64
+function toBase64(file){return new Promise(resolve=>{const reader=new FileReader();reader.onload=e=>resolve(e.target.result);reader.readAsDataURL(file);});}
+
+// Modal
+async function abrirModal(id){
+editIdx=id;
+const p=db.find(x=>x.id===id);
+document.getElementById('mNomeEdit').value=p.nome;
+document.getElementById('mQtd').innerText=p.qtd;
+document.getElementById('valMov').value=0;
+document.getElementById('mNota').value='';
+document.getElementById('mFoto').value='';
+document.getElementById('modal').style.display='flex';
+}
+
+function fecharModal(){document.getElementById('modal').style.display='none';}
+
+// Movimentar
+async function movimentar(tipo){
+const val=parseInt(document.getElementById('valMov').value)||0;
+const nota=document.getElementById('mNota').value.trim();
+if(val<=0){alert('Informe valor positivo');return;}
+const p=db.find(x=>x.id===editIdx);
+if(tipo==='sub' && val>p.qtd){alert('Estoque insuficiente');return;}
+p.qtd = tipo==='add'?p.qtd+val:p.qtd-val;
+const f=document.getElementById('mFoto').files[0];
+if(f){p.foto=await toBase64(f);}
+await updateItem('produtos',p);
+await addItem('historico',{data:new Date().toLocaleString(),produto:p.nome,tipo:tipo,qtd:val,motivo:nota});
+fecharModal();loadData();renderHistory();
+}
+
+// Deletar produto
+async function deletar(id){if(confirm('Deletar produto?')){await deleteItem('produtos',id);loadData();}}
+
+// Histórico
+function toggleHistory(){document.getElementById('historyPanel').style.display=document.getElementById('historyPanel').style.display==='none'?'block':'none'; renderHistory();}
+function renderHistory(){
+const lista=document.getElementById('listaHist');
+const termo=document.getElementById('inputBuscaHist').value.toLowerCase();
+const filtro=document.getElementById('filtroCatHist').value;
+lista.innerHTML='';
+historico.forEach(h=>{
+if(h.produto.toLowerCase().includes(termo) && (filtro==='Todos'||h.categoria===filtro)){
+lista.innerHTML+=`<tr><td>${h.data}</td><td>${h.produto}</td><td>${h.tipo}</td><td>${h.qtd}</td><td>${h.motivo||''}</td><td><button onclick="deletarHist(${h.id})">❌</button></td></tr>`;
+}
+});}
+async function deletarHist(id){await deleteItem('historico',id);historico=await getAll('historico');renderHistory();}
+
+// Backup
+async function exportarBackup(){const data=await getAll('produtos');const blob=new Blob([JSON.stringify(data)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='backup_produtos.json';a.click();}
+async function importarBackup(input){const file=input.files[0];if(!file)return;const text=await file.text();const items=JSON.parse(text);for(const i of items){delete i.id;await addItem('produtos',i);}loadData();}
+
+// PDF / Impressão
+function imprimirPDF(){window.print();}
+function imprimirHistorico(){window.print();}
+
+// Inicializa
+initDB().then(()=>loadData());
 </script>
 </body>
 </html>
