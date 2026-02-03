@@ -172,56 +172,220 @@ input,select,textarea{padding:8px;border:1px solid #e2e8f0;border-radius:8px;wid
 </div>
 
 <script>
-let isAdmin=false,editIdx=null;
-let db=[];
-let historico=[];
+let isAdmin=false;
+let editId=null;
+let db=JSON.parse(localStorage.getItem('db_haris_v30'))||[];
+let historico=JSON.parse(localStorage.getItem('db_haris_hist'))||[];
 const listaCategorias=["Tinta Hardtop","Tinta Pilot","Componente B","Jotamastic A","Jotamastic B","Solvente","Outros"];
 let catAtiva='Todos';
 
-// === INDEXEDDB ===
-let dbRequest = indexedDB.open('harisDB',1);
-dbRequest.onupgradeneeded = e=>{
-    let idb = e.target.result;
-    if(!idb.objectStoreNames.contains('produtos')) idb.createObjectStore('produtos',{keyPath:'id',autoIncrement:true});
-    if(!idb.objectStoreNames.contains('historico')) idb.createObjectStore('historico',{keyPath:'id',autoIncrement:true});
-};
-dbRequest.onsuccess = e=>{
-    let idb = e.target.result;
-    let tx = idb.transaction('produtos','readonly').objectStore('produtos').getAll();
-    tx.onsuccess = ()=>{ db = tx.result; render(); };
-    let txHist = idb.transaction('historico','readonly').objectStore('historico').getAll();
-    txHist.onsuccess = ()=>{ historico = txHist.result; renderHistory(); };
-};
-
-function salvar(){
-    let idb = dbRequest.result;
-    let tx = idb.transaction('produtos','readwrite');
-    let store = tx.objectStore('produtos');
-    store.clear().onsuccess = ()=>{ db.forEach(p=>store.put(p)); };
-    let txHist = idb.transaction('historico','readwrite');
-    let storeHist = txHist.objectStore('historico');
-    storeHist.clear().onsuccess = ()=>{ historico.forEach(h=>storeHist.put(h)); };
-    render(); renderHistory();
+function toggleAdmin(){
+if(!isAdmin){
+if(prompt("Senha:")==="RebocadorHaris"){
+isAdmin=true;
+document.getElementById('adminPanel').style.display='grid';
+document.getElementById('backupGroup').style.display='flex';
+render();
+}
+}else{
+isAdmin=false;
+document.getElementById('adminPanel').style.display='none';
+document.getElementById('backupGroup').style.display='none';
+document.getElementById('historyPanel').style.display='none';
+render();
+}
 }
 
-// === FUNÇÕES EXISTENTES (mantidas) ===
-function toggleAdmin(){if(!isAdmin){if(prompt("Senha:")==="RebocadorHaris"){isAdmin=true;document.getElementById('adminPanel').style.display='grid';document.getElementById('backupGroup').style.display='flex';render();}}else{isAdmin=false;document.getElementById('adminPanel').style.display='none';document.getElementById('backupGroup').style.display='none';document.getElementById('historyPanel').style.display='none';render();}}
-function toggleHistory(){const p=document.getElementById('historyPanel');p.style.display=p.style.display==='block'?'none':'block';if(p.style.display==='block') renderHistory();}
-function render(){const v=document.getElementById('vitrine');const termo=document.getElementById('inputBusca').value.toLowerCase();const fBox=document.getElementById('catFiltros');const ordem=document.getElementById('ordem').value;v.innerHTML='';fBox.innerHTML=['Todos',...listaCategorias].map(c=>`<button class="btn-cat ${catAtiva===c?'active':''}" onclick="setCat('${c}')">${c}</button>`).join('');let cProd=0,cEst=0;let copiaDb=[...db];if(ordem==='nome') copiaDb.sort((a,b)=>a.nome.localeCompare(b.nome));else if(ordem==='qtd-desc') copiaDb.sort((a,b)=>b.qtd-a.qtd);else if(ordem==='qtd-asc') copiaDb.sort((a,b)=>a.qtd-b.qtd);copiaDb.forEach((p,i)=>{if(p.nome.toLowerCase().includes(termo)&&(catAtiva==='Todos'||p.cat===catAtiva)){cProd++; cEst+=parseInt(p.qtd);v.innerHTML+=`<div class="card"><img src="${p.foto}"><div class="card-info"><h3 style="margin:2px 0; font-size:0.75rem; line-height:1.1;">${p.nome}</h3><span class="badge-cat" style="background:${getCorCat(p.cat)}">${p.cat||'Outros'}</span><p style="margin:0; font-size:0.7rem; color:gray;">Estoque: <b style="font-size:0.9rem;">${p.qtd}</b></p>${isAdmin?`<div class="admin-actions"><button class="btn-edit-card" onclick="abrirModal(${i})">Editar</button><button class="btn-delete-card" onclick="deletar(${i})">Deletar</button></div>`:''}</div></div>`;}});
-document.getElementById('totalProdutos').innerText=cProd;document.getElementById('totalEstoque').innerText=cEst;}
-function getCorCat(cat){switch(cat){case 'Tinta Hardtop': return '#2563eb';case 'Tinta Pilot': return '#1d4ed8';case 'Componente B': return '#f59e0b';case 'Jotamastic A': return '#10b981';case 'Jotamastic B': return '#14b8a6';case 'Solvente': return '#f97316';default: return '#64748b';}}
+function toggleHistory(){
+const p=document.getElementById('historyPanel');
+p.style.display=p.style.display==='block'?'none':'block';
+if(p.style.display==='block') renderHistory();
+}
+
+function salvar(){
+localStorage.setItem('db_haris_v30',JSON.stringify(db));
+localStorage.setItem('db_haris_hist',JSON.stringify(historico));
+render();
+renderHistory();
+}
+
+function render(){
+const v=document.getElementById('vitrine');
+const termo=document.getElementById('inputBusca').value.toLowerCase();
+const fBox=document.getElementById('catFiltros');
+const ordem=document.getElementById('ordem').value;
+v.innerHTML='';
+fBox.innerHTML=['Todos',...listaCategorias].map(c=>`<button class="btn-cat ${catAtiva===c?'active':''}" onclick="setCat('${c}')">${c}</button>`).join('');
+let cProd=0,cEst=0;
+let copiaDb=[...db];
+if(ordem==='nome') copiaDb.sort((a,b)=>a.nome.localeCompare(b.nome));
+else if(ordem==='qtd-desc') copiaDb.sort((a,b)=>b.qtd-a.qtd);
+else if(ordem==='qtd-asc') copiaDb.sort((a,b)=>a.qtd-b.qtd);
+
+copiaDb.forEach((p,i)=>{
+if(p.nome.toLowerCase().includes(termo)&&(catAtiva==='Todos'||p.cat===catAtiva)){
+cProd++; cEst+=parseInt(p.qtd);
+v.innerHTML+=`
+<div class="card">
+<img src="${p.foto}">
+<div class="card-info">
+<h3 style="margin:2px 0; font-size:0.75rem; line-height:1.1;">${p.nome}</h3>
+<span class="badge-cat" style="background:${getCorCat(p.cat)}">${p.cat||'Outros'}</span>
+<p style="margin:0; font-size:0.7rem; color:gray;">Estoque: <b style="font-size:0.9rem;">${p.qtd}</b></p>
+${isAdmin?`<div class="admin-actions">
+<button class="btn-edit-card" onclick="abrirModal('${p.nome}')">Editar</button>
+<button class="btn-delete-card" onclick="deletar('${p.nome}')">Deletar</button>
+</div>`:''}
+</div>
+</div>`;}});
+
+document.getElementById('totalProdutos').innerText=cProd;
+document.getElementById('totalEstoque').innerText=cEst;
+}
+
+function getCorCat(cat){
+switch(cat){
+case 'Tinta Hardtop': return '#2563eb';
+case 'Tinta Pilot': return '#1d4ed8';
+case 'Componente B': return '#f59e0b';
+case 'Jotamastic A': return '#10b981';
+case 'Jotamastic B': return '#14b8a6';
+case 'Solvente': return '#f97316';
+default: return '#64748b';
+}
+}
+
 function setCat(c){catAtiva=c;render();}
-function cadastrar(){const n=document.getElementById('nome').value;const c=document.getElementById('categoria').value;const q=parseInt(document.getElementById('qtd').value)||0;const f=document.getElementById('foto').files[0];if(!n||!f){alert('Preencha nome e foto');return;}const reader=new FileReader();reader.onload=function(e){db.push({nome:n,cat:c,qtd:q,foto:e.target.result});salvar();document.getElementById('nome').value='';document.getElementById('qtd').value='';document.getElementById('foto').value='';};reader.readAsDataURL(f);}
-function abrirModal(i){editIdx=i;document.getElementById('modal').style.display='flex';document.getElementById('mNomeEdit').value=db[i].nome;document.getElementById('mQtd').innerText=db[i].qtd;document.getElementById('valMov').value=0;document.getElementById('mNota').value='';document.getElementById('mFoto').value='';}
-function fecharModal(){if(editIdx!==null){const nome=document.getElementById('mNomeEdit').value;const fotoInput=document.getElementById('mFoto');if(nome) db[editIdx].nome=nome;if(fotoInput.files && fotoInput.files[0]){const reader=new FileReader();reader.onload=function(e){db[editIdx].foto=e.target.result;salvar();document.getElementById('modal').style.display='none';editIdx=null;};reader.readAsDataURL(fotoInput.files[0]);} else {salvar();document.getElementById('modal').style.display='none';editIdx=null;}}}
-function movimentar(tipo){if(editIdx===null)return;let val=parseInt(document.getElementById('valMov').value)||0;if(val===0)return;let nota=document.getElementById('mNota').value;db[editIdx].qtd+=tipo==='add'?val:-val;historico.push({data:new Date().toLocaleString(),produto:db[editIdx].nome,tipo:tipo,qtd:val,nota:nota});salvar();renderHistory();render();}
-function deletar(i){if(confirm('Confirma deletar?')){db.splice(i,1);salvar();}}
-function renderHistory(){const termo=document.getElementById('inputBuscaHist').value.toLowerCase();const filtro=document.getElementById('filtroCatHist').value;const tbody=document.getElementById('listaHist');tbody.innerHTML='';historico.forEach((h,i)=>{if((h.produto.toLowerCase().includes(termo)||h.nota.toLowerCase().includes(termo))&&(filtro==='Todos'||h.tipo===filtro||h.produto===filtro)){tbody.innerHTML+=`<tr><td>${h.data}</td><td>${h.produto}</td><td class="${h.tipo==='add'?'tag-add':'tag-sub'}">${h.tipo==='add'?'Entrada':'Saída'}</td><td>${h.qtd}</td><td>${h.nota||''}</td><td><button class="btn-delete-card" onclick="historico.splice(${i},1);salvar()">Deletar</button></td></tr>`;}});}
-function limparHistorico(){if(confirm('Apagar histórico?')){historico=[];salvar();}}
-function imprimirHistorico(){const histHtml=document.getElementById('historyPanel').cloneNode(true);histHtml.querySelectorAll('.btn-cat,input,select').forEach(el=>el.remove());const win=window.open('','PRINT','height=600,width=800');win.document.write('<html><head><title>Histórico</title><style>body{font-family:sans-serif;padding:20px;}h2{text-align:center;font-size:28px;border-bottom:2px solid #000;padding-bottom:10px;}table{width:100%;border-collapse:collapse;margin-top:20px;}th,td{border:1px solid #ddd;padding:10px;text-align:left;}th{background:#f4f4f4;} .tag-add{color:green;} .tag-sub{color:red;}</style></head><body>');win.document.write('<h2>Histórico de Movimentações</h2>');win.document.write(histHtml.innerHTML);win.document.write('</body></html>');win.document.close();win.focus();setTimeout(()=>{win.print();win.close();},500);}
-function imprimirPDF(){window.print();}
-function exportarBackup(){const data=JSON.stringify({db,historico});const a=document.createElement('a');a.href='data:text/json;charset=utf-8,'+encodeURIComponent(data);a.download='backup.json';a.click();}
-function importarBackup(input){const file=input.files[0];if(!file)return;const reader=new FileReader();reader.onload=e=>{const data=JSON.parse(e.target.result);db=data.db||[];historico=data.historico||[];salvar();};reader.readAsText(file);}
+
+function cadastrar(){
+const n=document.getElementById('nome').value;
+const c=document.getElementById('categoria').value;
+const q=parseInt(document.getElementById('qtd').value)||0;
+const f=document.getElementById('foto').files;
+if(!n||!f){alert("Nome e foto obrigatórios");return;}
+const reader=new FileReader();
+reader.onload=e=>{
+db.push({nome:n,cat:c,qtd:q,foto:e.target.result});
+salvar();
+document.getElementById('nome').value='';
+document.getElementById('qtd').value='';
+document.getElementById('foto').value='';
+};
+reader.readAsDataURL(f[0]);
+}
+
+function abrirModal(nomeProd){
+editId=db.findIndex(p=>p.nome===nomeProd);
+if(editId<0) return;
+document.getElementById('modal').style.display='flex';
+document.getElementById('mNomeEdit').value=db[editId].nome;
+document.getElementById('mQtd').innerText=db[editId].qtd;
+document.getElementById('valMov').value=0;
+document.getElementById('mNota').value='';
+document.getElementById('mFoto').value='';
+}
+
+function fecharModal(){
+if(editId===null) return;
+const nome=document.getElementById('mNomeEdit').value;
+const fotoInput=document.getElementById('mFoto').files;
+if(fotoInput.length>0){
+const reader=new FileReader();
+reader.onload=e=>{
+db[editId].foto=e.target.result;
+db[editId].nome=nome;
+salvar();
+editId=null;
+document.getElementById('modal').style.display='none';
+};
+reader.readAsDataURL(fotoInput[0]);
+}else{
+db[editId].nome=nome;
+salvar();
+editId=null;
+document.getElementById('modal').style.display='none';
+}
+}
+
+function movimentar(tipo){
+if(editId===null) return;
+const val=parseInt(document.getElementById('valMov').value)||0;
+if(val<=0){alert("Digite valor >0");return;}
+const motivo=document.getElementById('mNota').value;
+if(tipo==='add') db[editId].qtd+=val;
+else db[editId].qtd-=val;
+historico.push({data:new Date().toLocaleString(),produto:db[editId].nome,tipo:tipo==='add'?'Entrada':'Saída',qtd:val,motivo});
+salvar();
+document.getElementById('mQtd').innerText=db[editId].qtd;
+document.getElementById('valMov').value=0;
+document.getElementById('mNota').value='';
+}
+
+function deletar(nomeProd){
+if(!confirm("Deletar produto?")) return;
+db=db.filter(p=>p.nome!==nomeProd);
+salvar();
+}
+
+function renderHistory(){
+const lista=document.getElementById('listaHist');
+const termo=document.getElementById('inputBuscaHist').value.toLowerCase();
+const filtroCat=document.getElementById('filtroCatHist').value;
+lista.innerHTML='';
+historico.forEach(h=>{
+if((h.produto.toLowerCase().includes(termo)||h.motivo.toLowerCase().includes(termo)) &&
+(filtroCat==='Todos'||db.find(p=>p.nome===h.produto)?.cat===filtroCat)){
+lista.innerHTML+=`<tr>
+<td>${h.data}</td>
+<td>${h.produto}</td>
+<td>${h.tipo}</td>
+<td>${h.qtd}</td>
+<td>${h.motivo}</td>
+<td><button onclick="removerHistorico('${h.data}','${h.produto}','${h.tipo}','${h.qtd}','${h.motivo}')">❌</button></td>
+</tr>`;
+}});
+}
+
+function removerHistorico(d,p,t,q,m){
+historico=historico.filter(h=>!(h.data===d&&h.produto===p&&h.tipo===t&&h.qtd==q&&h.motivo===m));
+salvar();
+}
+
+function limparHistorico(){
+if(confirm("Limpar todo histórico?")){historico=[];salvar();}
+}
+
+function imprimirPDF(){
+window.print();
+}
+
+function imprimirHistorico(){
+const w=window.open('','_blank');
+w.document.write('<h2 style="text-align:center;">📋 Histórico de Movimentações</h2><table border="1" cellspacing="0" cellpadding="5" style="width:100%;border-collapse:collapse;"><tr><th>Data</th><th>Produto</th><th>Tipo</th><th>Qtd</th><th>Motivo</th></tr>');
+historico.forEach(h=>{w.document.write(`<tr><td>${h.data}</td><td>${h.produto}</td><td>${h.tipo}</td><td>${h.qtd}</td><td>${h.motivo}</td></tr>`);});
+w.document.write('</table>');
+w.print();
+w.close();
+}
+
+function exportarBackup(){
+const dataStr="data:text/json;charset=utf-8,"+encodeURIComponent(JSON.stringify({db,historico}));
+const a=document.createElement('a');
+a.setAttribute('href',dataStr);
+a.setAttribute('download','backup_haris.json');
+a.click();
+}
+
+function importarBackup(input){
+if(input.files.length==0) return;
+const reader=new FileReader();
+reader.onload=e=>{
+try{const d=JSON.parse(e.target.result); if(d.db && d.historico){db=d.db;historico=d.historico; salvar(); alert('Importação concluída');}}catch(err){alert('Arquivo inválido');}
+};
+reader.readAsText(input.files[0]);
+}
+
+render();
 </script>
 </body>
 </html>
