@@ -5,7 +5,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Haris Estoque</title>
 <meta name="theme-color" content="#2563eb">
-<link rel="icon" href="https://cdn-icons-png.flaticon.com">
 <style>
 :root{
   --primary:#1e293b;
@@ -47,7 +46,6 @@ input,select,textarea{padding:8px;border:1px solid #e2e8f0;border-radius:8px;wid
 #modal{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background: rgba(15,23,42,0.8);z-index:1000;align-items:center;justify-content:center;backdrop-filter:blur(3px);}
 .modal-content{background:white;padding:25px;border-radius:20px;width:320px;text-align:center;}
 .print-only{display:none;}
-
 @media print{
   body{background:white;padding:0; counter-reset: page;}
   .no-print{display:none !important;}
@@ -58,109 +56,238 @@ input,select,textarea{padding:8px;border:1px solid #e2e8f0;border-radius:8px;wid
   .card img{height:80px !important;}
   .card h3{font-size:0.6rem !important;}
   .admin-actions{display:none !important;}
-  .footer-print{position:fixed;bottom:0;width:100%;display:flex;justify-content:center;font-size:10px;padding-top:5px;background:white;}
+  .footer-print{position:fixed;bottom:0;width:100%;text-align:center;font-size:10px;border-top:1px solid #ddd;padding-top:5px;background:white;}
   .page-counter{display:none;}
 }
 </style>
 </head>
 <body>
 <div class="container">
-  <!-- Título do relatório para impressão -->
-  <div class="print-only print-header">📋 Histórico de Movimentações</div>
 
-  <div class="no-print">
-    <div class="header">
-      <h1>📦 Haris</h1>
-      <div class="search-container">
-        <input type="text" id="inputBusca" class="search-input" placeholder="Pesquisar..." oninput="render()">
-        <select id="ordem" class="sort-select" onchange="render()">
-          <option value="nome">A-Z</option>
-          <option value="qtd-desc">Estoque ↑</option>
-          <option value="qtd-asc">Estoque ↓</option>
-        </select>
-      </div>
-      <div class="nav-btns">
-        <button class="btn-cat" id="btnAdmin" onclick="toggleAdmin()">🔑 Admin</button>
-        <button class="btn-cat" onclick="imprimirPDF()" style="background:var(--primary);color:white;">📄 PDF</button>
-      </div>
-    </div>
+<!-- Print Header -->
+<div class="print-only print-header">📋 Histórico de Movimentações</div>
 
-    <div class="stats-bar">
-      <div style="display:flex; gap:15px;">
-        <div>Produtos: <b id="totalProdutos">0</b></div>
-        <div>Total Unid: <b id="totalEstoque">0</b></div>
-      </div>
-      <div class="backup-group" id="backupGroup" style="display:none; gap:5px;">
-        <button class="btn-cat" onclick="toggleHistory()">📋 Histórico</button>
-        <button class="btn-cat" onclick="exportarBackup()">📥 Exportar</button>
-        <button class="btn-cat" onclick="document.getElementById('importInput').click()">📤 Importar</button>
-        <input type="file" id="importInput" style="display:none" onchange="importarBackup(this)">
-      </div>
-    </div>
-
-    <div id="historyPanel">
-      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
-        <h2 style="margin:0; font-size:1.1rem;">📋 Histórico</h2>
-        <div style="display:flex; gap:5px;">
-          <button class="btn-cat" style="background:#2563eb;color:white;" onclick="imprimirHistorico()">📄 PDF Histórico</button>
-          <button class="btn-cat" onclick="limparHistorico()">Limpar Tudo</button>
-        </div>
-      </div>
-      <div style="display:flex; gap:8px; margin-bottom:15px;">
-        <input type="text" id="inputBuscaHist" class="search-input" placeholder="Pesquisar produto ou motivo..." oninput="renderHistory()">
-        <select id="filtroCatHist" class="sort-select" onchange="renderHistory()">
-          <option value="Todos">Todas as Categorias</option>
-          <option value="Tinta Hardtop">Tinta Hardtop</option>
-          <option value="Tinta Pilot">Tinta Pilot</option>
-          <option value="Componente B">Componente B</option>
-          <option value="Jotamastic A">Jotamastic A</option>
-          <option value="Jotamastic B">Jotamastic B</option>
-          <option value="Solvente">Solvente</option>
-          <option value="Outros">Outros</option>
-        </select>
-      </div>
-      <table class="hist-table">
-        <thead><tr><th>Data</th><th>Produto</th><th>Tipo</th><th>Qtd</th><th>Motivo</th><th>Ação</th></tr></thead>
-        <tbody id="listaHist"></tbody>
-      </table>
-    </div>
-
-    <div class="cat-filter" id="catFiltros"></div>
-    <div id="adminPanel">
-      <!-- admin inputs aqui -->
-    </div>
-  </div>
-
-  <div class="grid" id="vitrine"></div>
-
-  <!-- DATA E HORA CENTRALIZADA NO FINAL -->
-  <div class="print-only footer-print" id="printDateTime"></div>
+<!-- Header -->
+<div class="no-print header">
+<h1>📦 Haris</h1>
+<div class="search-container">
+<input type="text" id="inputBusca" class="search-input" placeholder="Pesquisar..." oninput="render()">
+<select id="ordem" class="sort-select" onchange="render()">
+<option value="nome">A-Z</option>
+<option value="qtd-desc">Estoque ↑</option>
+<option value="qtd-asc">Estoque ↓</option>
+</select>
+</div>
+<div class="nav-btns">
+<button class="btn-cat" id="btnAdmin" onclick="toggleAdmin()" disabled>🔑 Admin</button>
+<button class="btn-cat" onclick="imprimirPDF()" style="background:var(--primary);color:white;">📄 PDF</button>
+</div>
 </div>
 
-<div id="modal" class="no-print">
-  <!-- modal content aqui -->
+<div class="stats-bar">
+<div style="display:flex; gap:15px;">
+<div>Produtos: <b id="totalProdutos">0</b></div>
+<div>Total Unid: <b id="totalEstoque">0</b></div>
+</div>
+<div class="backup-group" id="backupGroup">
+<button class="btn-cat" onclick="toggleHistory()">📋 Histórico</button>
+<button class="btn-cat" onclick="exportarBackup()">📥 Exportar</button>
+<button class="btn-cat" onclick="document.getElementById('importInput').click()">📤 Importar</button>
+<input type="file" id="importInput" style="display:none" onchange="importarBackup(this)">
+</div>
+</div>
+
+<!-- Histórico -->
+<div id="historyPanel">
+<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+<h2 style="margin:0; font-size:1.1rem;">📋 Histórico</h2>
+<div style="display:flex; gap:5px;">
+<button class="btn-cat" style="background:#2563eb;color:white;" onclick="imprimirHistorico()">📄 PDF Histórico</button>
+<button class="btn-cat" onclick="limparHistorico()">Limpar Tudo</button>
+</div>
+</div>
+<div style="display:flex; gap:8px; margin-bottom:15px;">
+    <input type="text" id="inputBuscaHist" class="search-input" placeholder="Pesquisar produto ou motivo..." oninput="renderHistory()">
+    <select id="filtroCatHist" class="sort-select" onchange="renderHistory()">
+        <option value="Todos">Todas as Categorias</option>
+        <option value="Tinta Hardtop">Tinta Hardtop</option>
+        <option value="Tinta Pilot">Tinta Pilot</option>
+        <option value="Componente B">Componente B</option>
+        <option value="Jotamastic A">Jotamastic A</option>
+        <option value="Jotamastic B">Jotamastic B</option>
+        <option value="Solvente">Solvente</option>
+        <option value="Outros">Outros</option>
+    </select>
+</div>
+<table class="hist-table">
+<thead><tr><th>Data</th><th>Produto</th><th>Tipo</th><th>Qtd</th><th>Motivo</th><th>Ação</th></tr></thead>
+<tbody id="listaHist"></tbody>
+</table>
+</div>
+
+<!-- Admin Panel -->
+<div id="adminPanel">
+<div class="input-group"><label>Nome</label><input type="text" id="nome"></div>
+<div class="input-group"><label>Categoria</label>
+<select id="categoria">
+<option value="Tinta Hardtop">Tinta Hardtop</option>
+<option value="Tinta Pilot">Tinta Pilot</option>
+<option value="Componente B">Componente B</option>
+<option value="Jotamastic A">Jotamastic A</option>
+<option value="Jotamastic B">Jotamastic B</option>
+<option value="Solvente">Solvente</option>
+<option value="Outros">Outros</option>
+</select>
+</div>
+<div class="input-group"><label>Qtd</label><input type="number" id="qtd"></div>
+<div class="input-group"><label>Foto</label><input type="file" id="foto" accept="image/*"></div>
+<button class="btn-cat" style="background:var(--accent);color:white;height:35px;" onclick="cadastrar()">CADASTRAR</button>
+</div>
+
+<!-- Produtos -->
+<div class="grid" id="vitrine"></div>
+
+<!-- Rodapé impressão -->
+<div class="print-only footer-print" id="printDateTime"></div>
+
 </div>
 
 <script>
-let tituloOriginal=document.title;
+let isAdmin=false,editIdx=null;
+let db=[], historico=[];
+let catAtiva='Todos';
+let listaCategorias=["Tinta Hardtop","Tinta Pilot","Componente B","Jotamastic A","Jotamastic B","Solvente","Outros"];
+let dbHaris;
+
+// === INICIALIZAÇÃO DO INDEXEDDB ===
+function initDB(){
+    const request = indexedDB.open('db_haris_v30', 1);
+    request.onerror = e=>console.log('Erro DB', e);
+    request.onsuccess = e=>{
+        dbHaris = e.target.result;
+        carregarDados();
+        document.getElementById('btnAdmin').disabled=false; // habilita botão Admin
+    };
+    request.onupgradeneeded = e=>{
+        const dbObj = e.target.result;
+        if(!dbObj.objectStoreNames.contains('produtos'))
+            dbObj.createObjectStore('produtos', {keyPath:'id', autoIncrement:true});
+        if(!dbObj.objectStoreNames.contains('historico'))
+            dbObj.createObjectStore('historico', {keyPath:'id', autoIncrement:true});
+    };
+}
+
+function carregarDados(){
+    const t = dbHaris.transaction(['produtos','historico'],'readonly');
+    t.objectStore('produtos').getAll().onsuccess = e=>{ db = e.target.result; render(); }
+    t.objectStore('historico').getAll().onsuccess = e=>{ historico = e.target.result; renderHistory(); }
+}
+
+// === ADMIN ===
+function toggleAdmin(){
+    if(!isAdmin){
+        const senha = prompt("Digite a senha de administrador:");
+        if(senha==="RebocadorHaris"){
+            isAdmin=true;
+            document.getElementById('adminPanel').style.display='grid';
+            document.getElementById('backupGroup').style.display='flex';
+            render();
+        } else { alert("Senha incorreta!"); }
+    } else {
+        isAdmin=false;
+        document.getElementById('adminPanel').style.display='none';
+        document.getElementById('backupGroup').style.display='none';
+        document.getElementById('historyPanel').style.display='none';
+        render();
+    }
+}
+
+// === FUNÇÕES DE RENDERIZAÇÃO ===
+function render(){
+    const v=document.getElementById('vitrine');
+    const termo=document.getElementById('inputBusca').value.toLowerCase();
+    const fBox=document.getElementById('catFiltros');
+    const ordem=document.getElementById('ordem').value;
+    v.innerHTML='';
+    fBox.innerHTML=['Todos',...listaCategorias].map(c=>`<button class="btn-cat ${catAtiva===c?'active':''}" onclick="setCat('${c}')">${c}</button>`).join('');
+    let cProd=0,cEst=0;
+    let copiaDb=[...db];
+    if(ordem==='nome') copiaDb.sort((a,b)=>a.nome.localeCompare(b.nome));
+    else if(ordem==='qtd-desc') copiaDb.sort((a,b)=>b.qtd-a.qtd);
+    else if(ordem==='qtd-asc') copiaDb.sort((a,b)=>a.qtd-b.qtd);
+
+    copiaDb.forEach((p)=>{
+        if(p.nome.toLowerCase().includes(termo)&&(catAtiva==='Todos'||p.cat===catAtiva)){
+            cProd++; cEst+=parseInt(p.qtd);
+            v.innerHTML+=`
+            <div class="card">
+                <img src="${p.foto}">
+                <div class="card-info">
+                    <h3>${p.nome}</h3>
+                    <span class="badge-cat" style="background:${getCorCat(p.cat)}">${p.cat||'Outros'}</span>
+                    <p>Estoque: <b>${p.qtd}</b></p>
+                    ${isAdmin?`<div class="admin-actions">
+                        <button class="btn-edit-card" onclick="abrirModal(${p.id})">Editar</button>
+                        <button class="btn-delete-card" onclick="deletar(${p.id})">Deletar</button>
+                    </div>`:''}
+                </div>
+            </div>`;
+        }
+    });
+    document.getElementById('totalProdutos').innerText=cProd;
+    document.getElementById('totalEstoque').innerText=cEst;
+}
+
+function getCorCat(cat){
+    switch(cat){
+        case 'Tinta Hardtop': return '#2563eb';
+        case 'Tinta Pilot': return '#1d4ed8';
+        case 'Componente B': return '#f59e0b';
+        case 'Jotamastic A': return '#10b981';
+        case 'Jotamastic B': return '#14b8a6';
+        case 'Solvente': return '#f97316';
+        default: return '#64748b';
+    }
+}
+
+function setCat(c){catAtiva=c; render();}
+
+// === Histórico ===
+function renderHistory(){
+    const lista=document.getElementById('listaHist');
+    const termo=document.getElementById('inputBuscaHist').value.toLowerCase();
+    const catFilter=document.getElementById('filtroCatHist').value;
+    lista.innerHTML='';
+    historico.filter(h=> (catFilter==='Todos'||h.cat===catFilter)&&
+    (h.produto.toLowerCase().includes(termo)||h.motivo.toLowerCase().includes(termo))
+    ).forEach(h=>{
+        lista.innerHTML+=`<tr>
+            <td>${h.data}</td>
+            <td>${h.produto}</td>
+            <td>${h.tipo}</td>
+            <td>${h.qtd}</td>
+            <td>${h.motivo}</td>
+            <td><button onclick="historico=historico.filter(x=>x.id!==${h.id}); salvar(); renderHistory()">Deletar</button></td>
+        </tr>`;
+    });
+}
 
 function imprimirPDF(){
-  // imprime a página inteira
-  window.print();
+    const agora=new Date();
+    document.getElementById('printDateTime').innerText=agora.toLocaleString();
+    window.print();
 }
 
 function imprimirHistorico(){
-  // mostra apenas o histórico e imprime
-  document.body.classList.add('print-historico-only');
-  document.getElementById('historyPanel').style.display='block';
-  const agora=new Date();
-  document.getElementById('printDateTime').innerText=agora.toLocaleDateString()+" "+agora.toLocaleTimeString();
-  window.print();
-  document.getElementById('historyPanel').style.display='none';
-  document.body.classList.remove('print-historico-only');
+    const agora=new Date();
+    document.getElementById('printDateTime').innerText=agora.toLocaleString();
+    document.getElementById('historyPanel').style.display='block';
+    window.print();
+    document.getElementById('historyPanel').style.display='none';
 }
 
-// inicialização do IndexedDB e funções principais permanecem iguais
+// === Inicialização ===
+window.onload=initDB;
 </script>
 </body>
 </html>
