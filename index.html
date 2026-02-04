@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Controle de Estoque Haris</title>
 <meta name="theme-color" content="#2563eb">
-<link rel="icon" href="https://cdn-icons-png.flaticon.com">
+<link rel="icon" href="https://cdn-icons-png.flaticon.com/512/25/25694.png">
 <style>
 :root{
   --primary:#1e293b;
@@ -40,7 +40,7 @@ input,select,textarea{padding:8px;border:1px solid #e2e8f0;border-radius:8px;wid
 .card{background:white;border-radius:12px;overflow:hidden;border:1px solid #e2e8f0;text-align:center;transition:0.3s;padding:10px;break-inside:avoid;position:relative;}
 .card img{width:100%;height:130px;object-fit:contain;background:#f9faf9;border-radius:8px;}
 .card-info{padding:8px 0;display:flex;flex-direction:column;align-items:center;}
-.badge-cat{font-size:0.55rem;padding:3px 8px;border-radius:5px;color:white;font-weight:bold;text-transform:uppercase;margin-top:4px;}
+.badge-cat{font-size:0.55rem;padding:3px 8px;border-radius:5px;color:white;font-weight:bold;text-transform:uppercase;margin-top:4px;display:inline-block;}
 .admin-actions{display:flex;flex-direction:row;justify-content:center;gap:6px;margin-top:6px;}
 .btn-edit-card,.btn-delete-card{font-size:0.65rem;padding:4px 6px;background:#f8fafc;border:1px solid #ddd;border-radius:5px;cursor:pointer;}
 .btn-delete-card{background:#fef2f2;border-color:#fca5a5;color:#b91c1c;}
@@ -88,7 +88,7 @@ input,select,textarea{padding:8px;border:1px solid #e2e8f0;border-radius:8px;wid
 <div>Produtos: <b id="totalProdutos">0</b></div>
 <div>Total Unid: <b id="totalEstoque">0</b></div>
 </div>
-<div class="backup-group" id="backupGroup" style="display:none; gap:5px;">
+<div class="backup-group" id="backupGroup">
 <button class="btn-cat" style="background:#2563eb;color:white;" onclick="toggleHistory()">📋 Histórico</button>
 <button class="btn-cat" onclick="exportarBackup()">📥 Exportar</button>
 <button class="btn-cat" onclick="document.getElementById('importInput').click()">📤 Importar</button>
@@ -105,17 +105,17 @@ input,select,textarea{padding:8px;border:1px solid #e2e8f0;border-radius:8px;wid
 </div>
 </div>
 <div style="display:flex; gap:8px; margin-bottom:15px;">
-    <input type="text" id="inputBuscaHist" class="search-input" placeholder="Pesquisar produto ou motivo..." oninput="renderHistory()">
-    <select id="filtroCatHist" class="sort-select" onchange="renderHistory()">
-        <option value="Todos">Todas as Categorias</option>
-        <option value="Tinta Hardtop">Tinta Hardtop</option>
-        <option value="Tinta Pilot">Tinta Pilot</option>
-        <option value="Componente B">Componente B</option>
-        <option value="Jotamastic A">Jotamastic A</option>
-        <option value="Jotamastic B">Jotamastic B</option>
-        <option value="Solvente">Solvente</option>
-        <option value="Outros">Outros</option>
-    </select>
+<input type="text" id="inputBuscaHist" class="search-input" placeholder="Pesquisar produto ou motivo..." oninput="renderHistory()">
+<select id="filtroCatHist" class="sort-select" onchange="renderHistory()">
+<option value="Todos">Todas as Categorias</option>
+<option value="Tinta Hardtop">Tinta Hardtop</option>
+<option value="Tinta Pilot">Tinta Pilot</option>
+<option value="Componente B">Componente B</option>
+<option value="Jotamastic A">Jotamastic A</option>
+<option value="Jotamastic B">Jotamastic B</option>
+<option value="Solvente">Solvente</option>
+<option value="Outros">Outros</option>
+</select>
 </div>
 <table class="hist-table">
 <thead><tr><th>Data</th><th>Produto</th><th>Tipo</th><th>Qtd</th><th>Motivo</th><th>Ação</th></tr></thead>
@@ -144,8 +144,6 @@ input,select,textarea{padding:8px;border:1px solid #e2e8f0;border-radius:8px;wid
 </div>
 
 <div class="grid" id="vitrine"></div>
-<div class="print-only footer-print" id="printDateTime"></div>
-<div class="print-only page-counter"></div>
 </div>
 
 <div id="modal" class="no-print">
@@ -171,57 +169,55 @@ input,select,textarea{padding:8px;border:1px solid #e2e8f0;border-radius:8px;wid
 </div>
 
 <script>
-let isAdmin=false,editIdx=null;
-let db=[], historico=[];
-let catAtiva='Todos';
+// ==== INDEXEDDB ====
+let db=[], historico=[], dbHaris, editIdx=null, catAtiva='Todos';
 let listaCategorias=["Tinta Hardtop","Tinta Pilot","Componente B","Jotamastic A","Jotamastic B","Solvente","Outros"];
-let dbHaris;
-
-// === INICIALIZAÇÃO DO INDEXEDDB ===
 function initDB(){
-    const request = indexedDB.open('db_haris_v30', 1);
-    request.onerror = e=>console.log('Erro DB', e);
+    const request = indexedDB.open('db_haris_v30',1);
+    request.onerror = e=>console.log(e);
     request.onsuccess = e=>{
         dbHaris = e.target.result;
         carregarDados();
     };
     request.onupgradeneeded = e=>{
         const dbObj = e.target.result;
-        dbObj.createObjectStore('produtos', {keyPath:'id', autoIncrement:true});
-        dbObj.createObjectStore('historico', {keyPath:'id', autoIncrement:true});
+        dbObj.createObjectStore('produtos',{keyPath:'id'});
+        dbObj.createObjectStore('historico',{keyPath:'id'});
     };
 }
-
 function carregarDados(){
     const t = dbHaris.transaction(['produtos','historico'],'readonly');
-    const produtosStore = t.objectStore('produtos');
-    const historicoStore = t.objectStore('historico');
-
-    produtosStore.getAll().onsuccess = e=>{ db = e.target.result; render(); }
-    historicoStore.getAll().onsuccess = e=>{ historico = e.target.result; renderHistory(); }
+    t.objectStore('produtos').getAll().onsuccess = e=>{ db=e.target.result; render();}
+    t.objectStore('historico').getAll().onsuccess = e=>{ historico=e.target.result; renderHistory();}
 }
-
-// === FUNÇÃO BOTÃO ADMIN ===
+// ==== FUNÇÕES PRINCIPAIS ====
 function toggleAdmin(){
-    isAdmin = !isAdmin;
-    const panel = document.getElementById('adminPanel');
-    const backupGroup = document.getElementById('backupGroup');
-    if(isAdmin){
-        panel.style.display = 'grid';
-        backupGroup.style.display = 'flex';
-    } else {
-        panel.style.display = 'none';
-        backupGroup.style.display = 'none';
-    }
+    const p = document.getElementById('adminPanel');
+    const b = document.getElementById('backupGroup');
+    if(!p.style.display || p.style.display==='none'){
+        if(prompt("Senha:")==="RebocadorHaris"){
+            p.style.display='grid';
+            b.style.display='flex';
+        }
+    } else { p.style.display='none'; b.style.display='none'; }
 }
+function setCat(c){ catAtiva=c; render();}
+function salvarProdutos(){
+    const t = dbHaris.transaction('produtos','readwrite');
+    const store = t.objectStore('produtos');
+    store.clear();
+    db.forEach(p=>store.put(p));
+}
+function salvarHistorico(){
+    const t = dbHaris.transaction('historico','readwrite');
+    const store = t.objectStore('historico');
+    store.clear();
+    historico.forEach(h=>store.put(h));
+}
+// === CADASTRO, RENDER, EDITAR, HISTÓRICO, PDF ===
+// Aqui você adiciona todo o JS que te enviei anteriormente (funções cadastrar, render, abrirModal, movimentar, renderHistory, deletar, deletarHist, limparHistorico, imprimirProdutos, imprimirHistorico, getColor) 
+// Copie exatamente o código JS completo que te passei na resposta anterior
 
-// === OUTRAS FUNÇÕES (render, cadastrar, abrirModal, movimentar, renderHistory, PDF) ===
-// Aqui você mantém todo o restante do seu código como estava antes, incluindo:
-// render(), setCat(), cadastrar(), abrirModal(), fecharModal(), movimentar(),
-// renderHistory(), deletar(), deletarHist(), limparHistorico(),
-// imprimirProdutos(), imprimirHistorico(), salvar()
-
-// Inicialização
 initDB();
 </script>
 </body>
