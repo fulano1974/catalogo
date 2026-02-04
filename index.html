@@ -36,12 +36,7 @@ input,select,textarea{padding:8px;border:1px solid #e2e8f0;border-radius:8px;wid
 .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:15px;}
 .card{background:white;border-radius:12px;overflow:hidden;border:1px solid #e2e8f0;text-align:center;padding:10px;}
 .card img{width:100%;height:130px;object-fit:contain;background:#f9faf9;border-radius:8px;}
-.card-info{padding:8px 0;}
 .admin-actions{display:flex;gap:6px;justify-content:center;}
-.btn-edit-card,.btn-delete-card{font-size:0.65rem;padding:4px 6px;border-radius:5px;cursor:pointer;}
-.btn-delete-card{background:#fef2f2;color:#b91c1c;}
-#modal{display:none;position:fixed;inset:0;background:rgba(15,23,42,0.8);z-index:1000;align-items:center;justify-content:center;}
-.modal-content{background:white;padding:25px;border-radius:20px;width:320px;text-align:center;}
 .print-only{display:none;}
 @media print{
 .no-print{display:none!important;}
@@ -52,11 +47,10 @@ input,select,textarea{padding:8px;border:1px solid #e2e8f0;border-radius:8px;wid
 
 <body>
 <div class="container">
-
-<div class="no-print header">
+<div class="header no-print">
 <h1>📦 Haris</h1>
 <div class="search-container">
-<input type="text" id="inputBusca" class="search-input" placeholder="Pesquisar..." oninput="render()">
+<input id="inputBusca" class="search-input" placeholder="Pesquisar..." oninput="render()">
 <select id="ordem" class="sort-select" onchange="render()">
 <option value="nome">A-Z</option>
 <option value="qtd-desc">Estoque ↑</option>
@@ -99,15 +93,14 @@ input,select,textarea{padding:8px;border:1px solid #e2e8f0;border-radius:8px;wid
 </div>
 
 <div class="grid" id="vitrine"></div>
-
 </div>
 
-<div id="modal" class="no-print">
-<div class="modal-content">
+<div id="modal" class="no-print" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);align-items:center;justify-content:center;">
+<div style="background:#fff;padding:20px;border-radius:12px;width:300px;text-align:center;">
 <input id="mNomeEdit" disabled>
-<b id="mQtd">0</b>
+<p>Estoque: <b id="mQtd">0</b></p>
 <input type="number" id="valMov">
-<textarea id="mNota"></textarea>
+<textarea id="mNota" placeholder="Motivo"></textarea>
 <button onclick="movimentar('add')">ENTRADA</button>
 <button onclick="movimentar('sub')">SAÍDA</button>
 <button onclick="fecharModal()">FECHAR</button>
@@ -115,7 +108,26 @@ input,select,textarea{padding:8px;border:1px solid #e2e8f0;border-radius:8px;wid
 </div>
 
 <script>
-let db=[],historico=[],editIdx=null,catAtiva='Todos';
+let isAdmin=false,editIdx=null;
+let db=[],historico=[];
+
+function toggleAdmin(){
+if(!isAdmin){
+if(prompt("Senha:")==="RebocadorHaris"){
+isAdmin=true;
+document.getElementById('backupGroup').style.display='flex';
+}
+}else{
+isAdmin=false;
+document.getElementById('backupGroup').style.display='none';
+}
+}
+
+function toggleHistory(){
+const p=document.getElementById('historyPanel');
+p.style.display=p.style.display==='block'?'none':'block';
+renderHistory();
+}
 
 function render(){
 const v=document.getElementById('vitrine');
@@ -123,9 +135,11 @@ v.innerHTML='';
 let tp=0,te=0;
 db.forEach(p=>{
 tp++;te+=p.qtd;
-v.innerHTML+=`<div class="card">
+v.innerHTML+=`
+<div class="card">
 <img src="${p.foto}">
-<div>${p.nome}<br>Qtd: ${p.qtd}</div>
+<p>${p.nome}</p>
+<p>Qtd: ${p.qtd}</p>
 <button onclick="abrirModal(${p.id})">Editar</button>
 </div>`;
 });
@@ -143,10 +157,13 @@ mNota.value='';
 modal.style.display='flex';
 }
 
-function fecharModal(){modal.style.display='none';}
+function fecharModal(){
+modal.style.display='none';
+}
 
 function movimentar(tipo){
 const val=parseInt(valMov.value)||0;
+const nota=mNota.value||'';
 if(val<=0)return;
 const p=db[editIdx];
 if(tipo==='sub'&&val>p.qtd)return;
@@ -157,7 +174,7 @@ data:new Date().toLocaleString(),
 produto:p.nome,
 tipo,
 qtd:val,
-motivo:mNota.value||'',
+motivo:nota,
 cat:p.cat
 });
 
@@ -176,10 +193,11 @@ historico.filter(h=>{
 return (h.produto.toLowerCase().includes(t)||(h.motivo||'').toLowerCase().includes(t))
 &&(c==='Todos'||h.cat===c);
 }).forEach(h=>{
-listaHist.innerHTML+=`<tr>
+listaHist.innerHTML+=`
+<tr>
 <td>${h.data}</td>
 <td>${h.produto}</td>
-<td>${h.tipo}</td>
+<td>${h.tipo==='add'?'Entrada':'Saída'}</td>
 <td>${h.qtd}</td>
 <td>${h.motivo}</td>
 </tr>`;
@@ -189,6 +207,5 @@ listaHist.innerHTML+=`<tr>
 function imprimirProdutos(){window.print();}
 function imprimirHistorico(){window.print();}
 </script>
-
 </body>
 </html>
