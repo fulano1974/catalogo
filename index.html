@@ -13,6 +13,8 @@
   --success:#10b981;
   --danger:#e11d48;
   --bg:#f1f5f9;
+  --entrada:#10b981;
+  --saida:#e11d48;
 }
 body{margin:0;padding:15px;font-family:sans-serif;background:var(--bg);color:var(--primary);}
 .container{max-width:1400px;margin:auto;}
@@ -33,9 +35,8 @@ input,select,textarea{padding:8px;border:1px solid #e2e8f0;border-radius:8px;wid
 .hist-table{width:100%;border-collapse:collapse;margin-top:15px;font-size:0.85rem;}
 .hist-table th,.hist-table td{padding:12px;text-align:left;border-bottom:1px solid #eee;}
 .hist-table tr:nth-child(even){background:#f5f5f5;}
-.hist-table input{font-weight:bold;font-family:sans-serif;}
-.tag-add{color:var(--success);font-weight:bold;}
-.tag-sub{color:var(--danger);font-weight:bold;}
+.tag-add{color:var(--entrada);font-weight:bold;}
+.tag-sub{color:var(--saida);font-weight:bold;}
 .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:15px;}
 .card{background:white;border-radius:12px;overflow:hidden;border:1px solid #e2e8f0;text-align:center;transition:0.3s;padding:10px;break-inside:avoid;position:relative;}
 .card img{width:100%;height:130px;object-fit:contain;background:#f9faf9;border-radius:8px;}
@@ -47,6 +48,7 @@ input,select,textarea{padding:8px;border:1px solid #e2e8f0;border-radius:8px;wid
 #modal{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background: rgba(15,23,42,0.8);z-index:1000;align-items:center;justify-content:center;backdrop-filter:blur(3px);}
 .modal-content{background:white;padding:25px;border-radius:20px;width:320px;text-align:center;}
 .print-only{display:none;}
+.lixeira{background:#fca5a5;color:white;border-radius:6px;padding:4px 6px;cursor:pointer;border:none;font-size:0.75rem;}
 @media print{
   body{background:white;padding:0; counter-reset: page;}
   .no-print{display:none !important;}
@@ -59,7 +61,8 @@ input,select,textarea{padding:8px;border:1px solid #e2e8f0;border-radius:8px;wid
   .admin-actions{display:none !important;}
   .footer-print{position:fixed;bottom:0;width:100%;display:flex;justify-content:center;font-size:10px;border-top:1px solid #ddd;padding-top:5px;background:white;}
   .page-counter{position:fixed;bottom:0;right:0;font-size:10px;padding-top:5px;}
-  .page-counter::after{counter-increment: page; content: "Página " counter(page, decimal-leading-zero);}
+  .entrada-pdf{color:green;font-weight:bold;}
+  .saida-pdf{color:red;font-weight:bold;}
 }
 </style>
 </head>
@@ -82,7 +85,6 @@ input,select,textarea{padding:8px;border:1px solid #e2e8f0;border-radius:8px;wid
 <button class="btn-cat" onclick="imprimirProdutos()" style="background:var(--primary);color:white;">📄 PDF</button>
 </div>
 </div>
-
 <div class="stats-bar">
 <div style="display:flex; gap:15px;">
 <div>Produtos: <b id="totalProdutos">0</b></div>
@@ -124,7 +126,6 @@ input,select,textarea{padding:8px;border:1px solid #e2e8f0;border-radius:8px;wid
 </div>
 
 <div class="cat-filter" id="catFiltros"></div>
-
 <div id="adminPanel">
 <div class="input-group"><label>Nome</label><input type="text" id="nome"></div>
 <div class="input-group"><label>Categoria</label>
@@ -144,7 +145,6 @@ input,select,textarea{padding:8px;border:1px solid #e2e8f0;border-radius:8px;wid
 </div>
 
 <div class="grid" id="vitrine"></div>
-
 <div class="print-only footer-print" id="printDateTime"></div>
 <div class="print-only page-counter"></div>
 </div>
@@ -172,208 +172,163 @@ input,select,textarea{padding:8px;border:1px solid #e2e8f0;border-radius:8px;wid
 </div>
 
 <script>
-let dbHaris, db=[], historico=[], isAdmin=false, editIdx=null;
-let catAtiva='Todos';
-let listaCategorias=["Tinta Hardtop","Tinta Pilot","Componente B","Jotamastic A","Jotamastic B","Solvente","Outros"];
+let db=[], historico=[], editIdx=null, catAtiva='Todos', isAdmin=false;
 
-// ======= IndexedDB =======
+// ======= DB =======
 function initDB(){
-    const request = indexedDB.open('db_haris_v31',1);
-    request.onupgradeneeded = e=>{
-        const dbObj = e.target.result;
-        if(!dbObj.objectStoreNames.contains('produtos')) dbObj.createObjectStore('produtos',{keyPath:'id',autoIncrement:true});
-        if(!dbObj.objectStoreNames.contains('historico')) dbObj.createObjectStore('historico',{keyPath:'id',autoIncrement:true});
-    };
-    request.onsuccess = e=>{ dbHaris=e.target.result; carregarDados(); };
-    request.onerror = e=>console.log('Erro DB',e);
+  if(localStorage.getItem('db')) db=JSON.parse(localStorage.getItem('db'));
+  if(localStorage.getItem('historico')) historico=JSON.parse(localStorage.getItem('historico'));
+  render();
+  renderHistory();
 }
-function carregarDados(){
-    const t=dbHaris.transaction(['produtos','historico'],'readonly');
-    t.objectStore('produtos').getAll().onsuccess = e=>{ db=e.target.result; render(); }
-    t.objectStore('historico').getAll().onsuccess = e=>{ historico=e.target.result; renderHistory(); }
+function salvarProdutos(){ localStorage.setItem('db',JSON.stringify(db)); }
+function salvarHistorico(){ localStorage.setItem('historico',JSON.stringify(historico)); }
+
+// ======= Render =======
+function render(){
+const v=document.getElementById('vitrine');
+const termo=document.getElementById('inputBusca').value.toLowerCase();
+const fBox=document.getElementById('catFiltros');
+v.innerHTML='';
+fBox.innerHTML=['Todos','Tinta Hardtop','Tinta Pilot','Componente B','Jotamastic A','Jotamastic B','Solvente','Outros']
+.map(c=>`<button class="btn-cat ${catAtiva===c?'active':''}" onclick="setCat('${c}')">${c}</button>`).join('');
+let totalP=0,totalQ=0;
+db.forEach(p=>{
+if(p.nome.toLowerCase().includes(termo)&&(catAtiva==='Todos'||p.cat===catAtiva)){
+totalP++; totalQ+=p.qtd;
+v.innerHTML+=`
+<div class="card">
+<img src="${p.foto}">
+<div class="card-info">
+<h3 style="margin:2px 0; font-size:0.75rem; line-height:1.1;">${p.nome}</h3>
+<span class="badge-cat" style="background:${getCorCat(p.cat)}">${p.cat}</span>
+<p style="margin:0; font-size:0.7rem; color:gray;">Estoque: <b>${p.qtd}</b></p>
+${isAdmin?`<div class="admin-actions">
+<button class="btn-edit-card" onclick="abrirModal(${p.id})">Editar</button>
+<button class="btn-delete-card" onclick="deletar(${p.id})">Deletar</button>
+</div>`:''}
+</div>
+</div>`;}});
+document.getElementById('totalProdutos').innerText=totalP;
+document.getElementById('totalEstoque').innerText=totalQ;
 }
-function salvarProdutos(){
-    const t=dbHaris.transaction('produtos','readwrite');
-    const store=t.objectStore('produtos');
-    store.clear().onsuccess = ()=>{ db.forEach(p=> store.add(p)); }
-}
-function salvarHistorico(){
-    const t=dbHaris.transaction('historico','readwrite');
-    const store=t.objectStore('historico');
-    store.clear().onsuccess = ()=>{ historico.forEach(h=> store.add(h)); }
-}
+function getCorCat(cat){switch(cat){case'Tinta Hardtop':return'#2563eb';case'Tinta Pilot':return'#1d4ed8';case'Componente B':return'#f59e0b';case'Jotamastic A':return'#10b981';case'Jotamastic B':return'#14b8a6';case'Solvente':return'#f97316';default:return'#64748b';}}
+function setCat(c){catAtiva=c;render();}
 
 // ======= Admin =======
 function toggleAdmin(){
-    if(!isAdmin){
-        const senha = prompt("Senha:");
-        if(senha==="RebocadorHaris"){
-            isAdmin=true;
-            document.getElementById('adminPanel').style.display='grid';
-            document.getElementById('backupGroup').style.display='flex';
-            render();
-        }
-    } else{
-        isAdmin=false;
-        document.getElementById('adminPanel').style.display='none';
-        document.getElementById('backupGroup').style.display='none';
-        document.getElementById('historyPanel').style.display='none';
-        render();
-    }
+if(!isAdmin){
+if(prompt('Senha:')==='RebocadorHaris'){isAdmin=true;document.getElementById('adminPanel').style.display='grid';document.getElementById('backupGroup').style.display='flex';render();}
+}else{isAdmin=false;document.getElementById('adminPanel').style.display='none';document.getElementById('backupGroup').style.display='none';document.getElementById('historyPanel').style.display='none';render();}
 }
-
-// ======= Render Produtos =======
-function render(){
-    const v=document.getElementById('vitrine');
-    const termo=document.getElementById('inputBusca').value.toLowerCase();
-    const fBox=document.getElementById('catFiltros');
-    const ordem=document.getElementById('ordem').value;
-    v.innerHTML='';
-    fBox.innerHTML=['Todos',...listaCategorias].map(c=>`<button class="btn-cat ${catAtiva===c?'active':''}" onclick="setCat('${c}')">${c}</button>`).join('');
-    let cProd=0,cEst=0;
-    let copiaDb=[...db];
-    if(ordem==='nome') copiaDb.sort((a,b)=>a.nome.localeCompare(b.nome));
-    else if(ordem==='qtd-desc') copiaDb.sort((a,b)=>b.qtd-a.qtd);
-    else if(ordem==='qtd-asc') copiaDb.sort((a,b)=>a.qtd-b.qtd);
-    copiaDb.forEach(p=>{
-        if(p.nome.toLowerCase().includes(termo)&&(catAtiva==='Todos'||p.cat===catAtiva)){
-            cProd++; cEst+=parseInt(p.qtd);
-            v.innerHTML+=`
-            <div class="card">
-                <img src="${p.foto}">
-                <div class="card-info">
-                    <h3 style="margin:2px 0; font-size:0.75rem; line-height:1.1;">${p.nome}</h3>
-                    <span class="badge-cat" style="background:${getCorCat(p.cat)}">${p.cat||'Outros'}</span>
-                    <p style="margin:0; font-size:0.7rem; color:gray;">Estoque: <b style="font-size:0.9rem;">${p.qtd}</b></p>
-                    ${isAdmin?`<div class="admin-actions">
-                    <button class="btn-edit-card" onclick="abrirModal(${p.id})">Editar</button>
-                    <button class="btn-delete-card" onclick="deletar(${p.id})">Deletar</button>
-                    </div>`:''}
-                </div>
-            </div>`;
-        }
-    });
-    document.getElementById('totalProdutos').innerText=cProd;
-    document.getElementById('totalEstoque').innerText=cEst;
-}
-function getCorCat(cat){
-    switch(cat){
-        case 'Tinta Hardtop': return '#2563eb';
-        case 'Tinta Pilot': return '#1d4ed8';
-        case 'Componente B': return '#f59e0b';
-        case 'Jotamastic A': return '#10b981';
-        case 'Jotamastic B': return '#14b8a6';
-        case 'Solvente': return '#f97316';
-        default: return '#64748b';
-    }
-}
-function setCat(c){ catAtiva=c; render(); }
 
 // ======= Cadastrar =======
 function cadastrar(){
-    const n=document.getElementById('nome').value.trim();
-    const c=document.getElementById('categoria').value;
-    const q=document.getElementById('qtd').value;
-    const f=document.getElementById('foto').files[0];
-    if(!n||!c||!q||!f){ alert('Preencha todos os campos!'); return; }
-    const reader=new FileReader();
-    reader.onload=function(e){
-        db.push({id:Date.now(),nome:n,cat:c,qtd:parseInt(q),foto:e.target.result});
-        salvarProdutos();
-        document.getElementById('nome').value='';
-        document.getElementById('qtd').value='';
-        document.getElementById('foto').value='';
-        render();
-    }
-    reader.readAsDataURL(f);
+const n=document.getElementById('nome').value.trim();
+const c=document.getElementById('categoria').value;
+const q=document.getElementById('qtd').value;
+const f=document.getElementById('foto').files[0];
+if(!n||!c||!q||!f){alert('Preencha todos os campos!');return;}
+const reader=new FileReader();
+reader.onload=function(e){
+db.push({id:Date.now(),nome:n,cat:c,qtd:parseInt(q),foto:e.target.result});
+salvarProdutos();
+document.getElementById('nome').value='';
+document.getElementById('qtd').value='';
+document.getElementById('foto').value='';
+render();
+}
+reader.readAsDataURL(f);
 }
 
-// ======= Modal e Movimentações =======
+// ======= Modal =======
 function abrirModal(id){
-    editIdx=db.findIndex(x=>x.id===id);
-    const p=db[editIdx];
-    document.getElementById('modal').style.display='flex';
-    document.getElementById('mNomeEdit').value=p.nome;
-    document.getElementById('mQtd').innerText=p.qtd;
-    document.getElementById('mNota').value='';
+editIdx=db.findIndex(p=>p.id===id);
+const p=db[editIdx];
+document.getElementById('modal').style.display='flex';
+document.getElementById('mNomeEdit').value=p.nome;
+document.getElementById('mQtd').innerText=p.qtd;
+document.getElementById('valMov').value=0;
+document.getElementById('mNota').value='';
+document.getElementById('mFoto').value='';
 }
 function fecharModal(){
-    const p=db[editIdx];
-    p.nome=document.getElementById('mNomeEdit').value.trim();
-    const file=document.getElementById('mFoto').files[0];
-    if(file){
-        const reader=new FileReader();
-        reader.onload=e=>{ p.foto=e.target.result; salvarProdutos(); render(); };
-        reader.readAsDataURL(file);
-    }
-    salvarProdutos();
-    render();
-    document.getElementById('modal').style.display='none';
+const p=db[editIdx];
+p.nome=document.getElementById('mNomeEdit').value.trim();
+const file=document.getElementById('mFoto').files[0];
+if(file){const reader=new FileReader();reader.onload=e=>{p.foto=e.target.result;salvarProdutos();render();};reader.readAsDataURL(file);}
+salvarProdutos();
+render();
+document.getElementById('modal').style.display='none';
 }
+
+// ======= Movimentar =======
 function movimentar(tipo){
-    const val=parseInt(document.getElementById('valMov').value);
-    const motivo=document.getElementById('mNota').value.trim();
-    if(!val||val<=0){ alert('Informe uma quantidade válida'); return; }
-    const p=db[editIdx];
-    if(tipo==='sub' && val>p.qtd){ alert('Estoque insuficiente'); return; }
-    if(tipo==='add'){ p.qtd+=val; }
-    else{ p.qtd-=val; }
-    document.getElementById('mQtd').innerText=p.qtd;
-    document.getElementById('valMov').value='';
-    document.getElementById('mNota').value='';
-    historico.push({id:Date.now(),data:new Date().toLocaleString(),produto:p.nome,tipo:tipo,qtd:val,motivo:motivo});
-    salvarHistorico();
-    salvarProdutos();
-    renderHistory();
+const val=parseInt(document.getElementById('valMov').value);
+const motivo=document.getElementById('mNota').value.trim();
+if(!val||val<=0){alert('Informe uma quantidade válida');return;}
+const p=db[editIdx];
+if(tipo==='sub'&&val>p.qtd){alert('Estoque insuficiente');return;}
+if(tipo==='add'){p.qtd+=val;}else{p.qtd-=val;}
+document.getElementById('mQtd').innerText=p.qtd;
+document.getElementById('valMov').value=0;
+document.getElementById('mNota').value='';
+historico.push({id:Date.now(),data:new Date().toLocaleString(),produto:p.nome,tipo:tipo==='add'?'Entrada':'Saída',qtd:val,motivo:motivo});
+salvarProdutos();
+salvarHistorico();
+render();
+renderHistory();
 }
+
+// ======= Deletar =======
+function deletar(id){if(confirm('Excluir produto?')){db=db.filter(p=>p.id!==id);salvarProdutos();render();}}
+function deletarHist(id){historico=historico.filter(h=>h.id!==id);salvarHistorico();renderHistory();}
 
 // ======= Histórico =======
-function toggleHistory(){
-    const h=document.getElementById('historyPanel');
-    h.style.display=h.style.display==='none'?'block':'none';
-    renderHistory();
-}
+function toggleHistory(){const h=document.getElementById('historyPanel');h.style.display=h.style.display==='none'?'block':'none';renderHistory();}
 function renderHistory(){
-    const tbody=document.getElementById('listaHist');
-    const termo=document.getElementById('inputBuscaHist').value.toLowerCase();
-    const catFiltro=document.getElementById('filtroCatHist').value;
-    tbody.innerHTML='';
-    historico.filter(h=>{
-        const prod=db.find(p=>p.nome===h.produto);
-        const catMatch=catFiltro==='Todos' || (prod && prod.cat===catFiltro);
-        return (h.produto.toLowerCase().includes(termo)||h.motivo.toLowerCase().includes(termo)) && catMatch;
-    }).forEach(h=>{
-        tbody.innerHTML+=`<tr>
-        <td>${h.data}</td>
-        <td>${h.produto}</td>
-        <td>${h.tipo==='add'?'<span class="tag-add">Entrada</span>':'<span class="tag-sub">Saída</span>'}</td>
-        <td>${h.qtd}</td>
-        <td>${h.motivo}</td>
-        <td><button class="btn-delete-card" onclick="delHist(${h.id})">🗑</button></td>
-        </tr>`;
-    });
+const termo=document.getElementById('inputBuscaHist').value.toLowerCase();
+const cat=document.getElementById('filtroCatHist').value;
+const lista=document.getElementById('listaHist');
+lista.innerHTML='';
+historico.forEach(h=>{
+if((h.produto.toLowerCase().includes(termo)||h.motivo.toLowerCase().includes(termo))&&(cat==='Todos'||cat===h.produto)){
+lista.innerHTML+=`<tr>
+<td>${h.data}</td>
+<td>${h.produto}</td>
+<td class="${h.tipo==='Entrada'?'entrada-pdf':'saida-pdf'}">${h.tipo}</td>
+<td>${h.qtd}</td>
+<td>${h.motivo}</td>
+<td><button class="lixeira" onclick="deletarHist(${h.id})">🗑</button></td>
+</tr>`;
+}});
 }
-function delHist(id){ historico=historico.filter(h=>h.id!==id); salvarHistorico(); renderHistory(); }
-function limparHistorico(){ if(confirm('Limpar todo histórico?')){ historico=[]; salvarHistorico(); renderHistory(); } }
 
-// ======= Deletar Produto =======
-function deletar(id){ if(confirm('Deletar este produto?')){ db=db.filter(p=>p.id!==id); salvarProdutos(); render(); } }
-
-// ======= Backup =======
-function exportarBackup(){ const data={produtos:db,historico:historico}; const a=document.createElement('a'); a.href='data:text/json;charset=utf-8,'+encodeURIComponent(JSON.stringify(data)); a.download='backup_haris.json'; a.click(); }
-function importarBackup(input){ const file=input.files[0]; const reader=new FileReader(); reader.onload=e=>{ try{ const data=JSON.parse(e.target.result); db=data.produtos||[]; historico=data.historico||[]; salvarProdutos(); salvarHistorico(); render(); renderHistory(); alert('Backup importado'); }catch(err){alert('Arquivo inválido')}}; reader.readAsText(file); }
-
-// ======= PDF =======
-function imprimirProdutos(){
-    window.print();
-}
+// ======= PDFs =======
 function imprimirHistorico(){
-    const now=new Date();
-    document.getElementById('printDateTime').innerText='Emitido em: '+now.toLocaleString();
-    window.print();
+let html='<div class="print-header">📋 Relatório de Movimentações</div><table style="width:100%; border-collapse:collapse;"><tr style="font-weight:bold;"><th>Data</th><th>Produto</th><th>Tipo</th><th>Qtd</th><th>Motivo</th></tr>';
+historico.forEach(h=>{html+=`<tr>
+<td>${h.data}</td>
+<td>${h.produto}</td>
+<td style="color:${h.tipo==='Entrada'?'green':'red'};font-weight:bold">${h.tipo}</td>
+<td>${h.qtd}</td>
+<td>${h.motivo}</td>
+</tr>`;});
+html+='</table><div style="text-align:center;margin-top:20px;">'+new Date().toLocaleString()+'</div>';
+const w=window.open('','_blank'); w.document.write(html); w.document.close(); w.print();
+}
+function imprimirProdutos(){
+let html='<div class="print-header">📦 Relatório de Produtos</div><div class="grid">';
+db.forEach(p=>{html+=`<div class="card"><img src="${p.foto}"><div class="card-info"><h3>${p.nome}</h3><span class="badge-cat" style="background:${getCorCat(p.cat)}">${p.cat}</span><p>Estoque: <b>${p.qtd}</b></p></div></div>`;});
+html+='</div><div style="text-align:center;margin-top:20px;">'+new Date().toLocaleString()+'</div>';
+const w=window.open('','_blank'); w.document.write(html); w.document.close(); w.print();
 }
 
-// ======= Init =======
+// ======= Backup/Import =======
+function exportarBackup(){const a=document.createElement('a');a.href='data:text/json;charset=utf-8,'+encodeURIComponent(JSON.stringify({db,historico}));a.download='backup.json';a.click();}
+function importarBackup(f){const reader=new FileReader();reader.onload=e=>{const d=JSON.parse(e.target.result);db=d.db||[];historico=d.historico||[];salvarProdutos();salvarHistorico();render();renderHistory();};reader.readAsText(f.files[0]);}
+function limparHistorico(){if(confirm('Limpar todo histórico?')){historico=[];salvarHistorico();renderHistory();}}
+
 initDB();
 </script>
 </body>
