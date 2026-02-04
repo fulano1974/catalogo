@@ -169,54 +169,166 @@ input,select,textarea{padding:8px;border:1px solid #e2e8f0;border-radius:8px;wid
 </div>
 
 <script>
-// ==== INDEXEDDB ====
+// ======= VARIÁVEIS =======
 let db=[], historico=[], dbHaris, editIdx=null, catAtiva='Todos';
-let listaCategorias=["Tinta Hardtop","Tinta Pilot","Componente B","Jotamastic A","Jotamastic B","Solvente","Outros"];
+const listaCategorias=["Tinta Hardtop","Tinta Pilot","Componente B","Jotamastic A","Jotamastic B","Solvente","Outros"];
+
+// ======= INIT INDEXEDDB =======
 function initDB(){
-    const request = indexedDB.open('db_haris_v30',1);
-    request.onerror = e=>console.log(e);
-    request.onsuccess = e=>{
-        dbHaris = e.target.result;
-        carregarDados();
-    };
-    request.onupgradeneeded = e=>{
-        const dbObj = e.target.result;
-        dbObj.createObjectStore('produtos',{keyPath:'id'});
-        dbObj.createObjectStore('historico',{keyPath:'id'});
-    };
+  const request = indexedDB.open('db_haris_v31',1);
+  request.onerror = e=>console.log(e);
+  request.onsuccess = e=>{
+      dbHaris = e.target.result;
+      carregarDados();
+  };
+  request.onupgradeneeded = e=>{
+      const dbObj = e.target.result;
+      dbObj.createObjectStore('produtos',{keyPath:'id'});
+      dbObj.createObjectStore('historico',{keyPath:'id'});
+  };
 }
 function carregarDados(){
-    const t = dbHaris.transaction(['produtos','historico'],'readonly');
-    t.objectStore('produtos').getAll().onsuccess = e=>{ db=e.target.result; render();}
-    t.objectStore('historico').getAll().onsuccess = e=>{ historico=e.target.result; renderHistory();}
+  const t = dbHaris.transaction(['produtos','historico'],'readonly');
+  t.objectStore('produtos').getAll().onsuccess = e=>{ db=e.target.result; render();}
+  t.objectStore('historico').getAll().onsuccess = e=>{ historico=e.target.result; renderHistory();}
 }
-// ==== FUNÇÕES PRINCIPAIS ====
+
+// ======= ADMIN =======
 function toggleAdmin(){
-    const p = document.getElementById('adminPanel');
-    const b = document.getElementById('backupGroup');
-    if(!p.style.display || p.style.display==='none'){
-        if(prompt("Senha:")==="RebocadorHaris"){
-            p.style.display='grid';
-            b.style.display='flex';
-        }
-    } else { p.style.display='none'; b.style.display='none'; }
+  const p = document.getElementById('adminPanel');
+  const b = document.getElementById('backupGroup');
+  if(!p.style.display || p.style.display==='none'){
+    if(prompt("Senha:")==="RebocadorHaris"){
+      p.style.display='grid';
+      b.style.display='flex';
+    }
+  } else { p.style.display='none'; b.style.display='none'; }
 }
-function setCat(c){ catAtiva=c; render();}
-function salvarProdutos(){
-    const t = dbHaris.transaction('produtos','readwrite');
-    const store = t.objectStore('produtos');
-    store.clear();
-    db.forEach(p=>store.put(p));
+
+// ======= CADASTRO =======
+function cadastrar(){
+  const nome = document.getElementById('nome').value.trim();
+  const cat = document.getElementById('categoria').value;
+  const qtd = parseInt(document.getElementById('qtd').value)||0;
+  const fotoInput = document.getElementById('foto');
+  if(!nome){ alert("Preencha o nome"); return; }
+
+  const reader = new FileReader();
+  reader.onload = e=>{
+    const produto={id:Date.now(),nome,categoria:cat,qtd,foto:e.target.result};
+    db.push(produto);
+    salvarProdutos();
+    render();
+    document.getElementById('nome').value='';
+    document.getElementById('qtd').value='';
+    document.getElementById('foto').value='';
+  };
+  if(fotoInput.files[0]) reader.readAsDataURL(fotoInput.files[0]);
+  else reader.onload({target:{result:''}});
 }
-function salvarHistorico(){
-    const t = dbHaris.transaction('historico','readwrite');
-    const store = t.objectStore('historico');
-    store.clear();
-    historico.forEach(h=>store.put(h));
+
+// ======= RENDER PRODUTOS =======
+function render(){
+  const search = document.getElementById('inputBusca').value.toLowerCase();
+  const ordem = document.getElementById('ordem').value;
+  let lista = db.filter(p=>(p.nome.toLowerCase().includes(search) && (catAtiva==='Todos' || p.categoria===catAtiva)));
+  if(ordem==='nome') lista.sort((a,b)=>a.nome.localeCompare(b.nome));
+  else if(ordem==='qtd-asc') lista.sort((a,b)=>a.qtd-b.qtd);
+  else if(ordem==='qtd-desc') lista.sort((a,b)=>b.qtd-a.qtd);
+  document.getElementById('vitrine').innerHTML='';
+  lista.forEach(p=>{
+    const div=document.createElement('div'); div.className='card';
+    div.innerHTML=`
+    <img src="${p.foto}">
+    <div class="card-info">
+      <h3>${p.nome}</h3>
+      <span class="badge-cat" style="background:${getColor(p.categoria)}">${p.categoria}</span>
+      <div>Qtd: ${p.qtd}</div>
+      <div class="admin-actions">
+        <button class="btn-edit-card" onclick="abrirModal(${p.id})">Editar</button>
+        <button class="btn-delete-card" onclick="deletar(${p.id})">🗑</button>
+      </div>
+    </div>`;
+    document.getElementById('vitrine').appendChild(div);
+  });
+  document.getElementById('totalProdutos').innerText=db.length;
+  document.getElementById('totalEstoque').innerText=db.reduce((a,b)=>a+b.qtd,0);
 }
-// === CADASTRO, RENDER, EDITAR, HISTÓRICO, PDF ===
-// Aqui você adiciona todo o JS que te enviei anteriormente (funções cadastrar, render, abrirModal, movimentar, renderHistory, deletar, deletarHist, limparHistorico, imprimirProdutos, imprimirHistorico, getColor) 
-// Copie exatamente o código JS completo que te passei na resposta anterior
+
+// ======= MODAL =======
+function abrirModal(id){
+  const prod = db.find(p=>p.id===id); if(!prod) return;
+  editIdx=id;
+  document.getElementById('mNomeEdit').value=prod.nome;
+  document.getElementById('mQtd').innerText=prod.qtd;
+  document.getElementById('valMov').value=0;
+  document.getElementById('mNota').value='';
+  document.getElementById('modal').style.display='flex';
+}
+function fecharModal(){
+  const prod = db.find(p=>p.id===editIdx); if(!prod) return;
+  prod.nome = document.getElementById('mNomeEdit').value;
+  const fotoInput = document.getElementById('mFoto');
+  if(fotoInput.files[0]){
+    const reader = new FileReader();
+    reader.onload = e=>{ prod.foto=e.target.result; salvarProdutos(); render(); document.getElementById('modal').style.display='none'; }
+    reader.readAsDataURL(fotoInput.files[0]);
+  } else { salvarProdutos(); render(); document.getElementById('modal').style.display='none'; }
+}
+
+// ======= MOVIMENTAÇÃO =======
+function movimentar(tipo){
+  const prod = db.find(p=>p.id===editIdx); if(!prod) return;
+  let qtdMov = parseInt(document.getElementById('valMov').value)||0;
+  if(qtdMov<=0){ alert("Digite uma quantidade válida"); return; }
+  if(tipo==='sub' && qtdMov>prod.qtd){ alert("Não pode retirar mais que o estoque"); return; }
+  prod.qtd += tipo==='add'?qtdMov:-qtdMov;
+  historico.push({id:Date.now(),produto:prod.nome,tipo:tipo==='add'?'Entrada':'Saída',qtd:qtdMov,motivo:document.getElementById('mNota').value,data:new Date().toLocaleString()});
+  salvarProdutos(); salvarHistorico();
+  document.getElementById('mQtd').innerText=prod.qtd;
+  document.getElementById('valMov').value=0;
+  document.getElementById('mNota').value='';
+  render(); renderHistory();
+}
+
+// ======= HISTÓRICO =======
+function renderHistory(){
+  const search = document.getElementById('inputBuscaHist').value.toLowerCase();
+  const filtro = document.getElementById('filtroCatHist').value;
+  let lista = historico.filter(h=>{
+    let ok=(h.produto.toLowerCase().includes(search) || h.motivo.toLowerCase().includes(search));
+    if(filtro!=='Todos') ok = ok && db.find(p=>p.nome===h.produto)?.categoria===filtro;
+    return ok;
+  });
+  const tbody=document.getElementById('listaHist');
+  tbody.innerHTML='';
+  lista.forEach(h=>{
+    const tr=document.createElement('tr');
+    tr.innerHTML=`<td>${h.data}</td><td>${h.produto}</td><td>${h.tipo}</td><td>${h.qtd}</td><td>${h.motivo}</td><td><button onclick="deletarHist(${h.id})">🗑</button></td>`;
+    tbody.appendChild(tr);
+  });
+}
+function deletar(id){ db=db.filter(p=>p.id!==id); salvarProdutos(); render(); }
+function deletarHist(id){ historico=historico.filter(h=>h.id!==id); salvarHistorico(); renderHistory(); }
+function limparHistorico(){ if(confirm("Limpar tudo?")){ historico=[]; salvarHistorico(); renderHistory(); } }
+function toggleHistory(){
+  const p=document.getElementById('historyPanel');
+  p.style.display=p.style.display==='none'?'block':'none';
+}
+
+// ======= EXPORT/IMPORT =======
+function exportarBackup(){ const data={produtos:db,historico:historico}; const a=document.createElement('a'); a.href='data:text/json,'+encodeURIComponent(JSON.stringify(data)); a.download='backup.json'; a.click(); }
+function importarBackup(input){ if(!input.files[0]) return; const reader=new FileReader(); reader.onload=e=>{ const data=JSON.parse(e.target.result); db=data.produtos||[]; historico=data.historico||[]; salvarProdutos(); salvarHistorico(); render(); renderHistory(); }; reader.readAsText(input.files[0]); }
+
+// ======= PDF =======
+function imprimirProdutos(){ window.print(); }
+function imprimirHistorico(){ window.print(); }
+
+// ======= AUX =======
+function getColor(c){
+  const colors={"Tinta Hardtop":"#2563eb","Tinta Pilot":"#f97316","Componente B":"#16a34a","Jotamastic A":"#8b5cf6","Jotamastic B":"#eab308","Solvente":"#f43f5e","Outros":"#64748b"};
+  return colors[c]||'#64748b';
+}
 
 initDB();
 </script>
