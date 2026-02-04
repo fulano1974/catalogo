@@ -7,7 +7,6 @@
 <meta name="theme-color" content="#2563eb">
 <link rel="icon" href="https://cdn-icons-png.flaticon.com">
 <style>
-/* ===== CSS ORIGINAL (INALTERADO) ===== */
 :root{
   --primary:#1e293b;
   --accent:#2563eb;
@@ -22,35 +21,58 @@ body{margin:0;padding:15px;font-family:sans-serif;background:var(--bg);color:var
 .search-input{flex:1;padding:10px;border-radius:8px;border:1px solid #e2e8f0;font-size:0.85rem;}
 .sort-select{width:110px;padding:9px;border-radius:8px;border:1px solid #e2e8f0;background:#fff;font-size:0.75rem;}
 .nav-btns{display:flex;gap:5px;}
-.btn-cat{padding:10px 18px;border-radius:30px;border:none;background:white;cursor:pointer;font-size:0.8rem;}
+.btn-cat{padding:10px 18px;border-radius:30px;border:none;background:white;cursor:pointer;font-size:0.8rem;transition:0.3s;box-shadow:0 2px 5px rgba(0,0,0,0.05);}
 .btn-cat.active{background:var(--accent);color:white;}
 .cat-filter{display:flex;gap:5px;margin-bottom:15px;flex-wrap:wrap;}
-#adminPanel{display:none;background:white;padding:15px;border-radius:12px;grid-template-columns:2fr 1fr 1fr 1fr auto;gap:10px;margin-bottom:15px;}
-.stats-bar{display:flex;justify-content:space-between;align-items:center;margin-bottom:15px;background:white;padding:10px 15px;border-radius:10px;}
-#historyPanel{display:none;background:white;padding:25px;border-radius:16px;margin-bottom:30px;}
-.hist-table{width:100%;border-collapse:collapse;margin-top:15px;}
-.hist-table th,.hist-table td{padding:12px;border-bottom:1px solid #eee;}
+#adminPanel{display:none;background:white;padding:15px;border-radius:12px;grid-template-columns:2fr 1fr 1fr 1fr auto;gap:10px;margin-bottom:15px;align-items:end;border-left:5px solid var(--accent);}
+.input-group label{font-size:0.65rem;font-weight:700;color:#64748b;margin-bottom:3px;display:block;}
+input,select,textarea{padding:8px;border:1px solid #e2e8f0;border-radius:8px;width:100%;box-sizing:border-box;font-size:0.8rem;}
+.stats-bar{display:flex;justify-content:space-between;align-items:center;margin-bottom:15px;background:white;padding:10px 15px;border-radius:10px;border:1px solid #e2e8f0;font-size:0.8rem;}
+.backup-group{display:none;gap:5px;}
+#historyPanel{display:none;background:white;padding:25px;border-radius:16px;margin-bottom:30px;border-left:5px solid var(--primary);box-shadow:0 4px 12px rgba(0,0,0,0.05);}
+.hist-table{width:100%;border-collapse:collapse;margin-top:15px;font-size:0.85rem;}
+.hist-table th,.hist-table td{padding:12px;text-align:left;border-bottom:1px solid #eee;}
 .hist-table tr:nth-child(even){background:#f5f5f5;}
+.hist-table input{font-weight:bold;font-family:sans-serif;}
+.tag-add{color:var(--success);font-weight:bold;}
+.tag-sub{color:var(--danger);font-weight:bold;}
 .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:15px;}
-.card{background:white;border-radius:12px;border:1px solid #e2e8f0;text-align:center;padding:10px;}
-.card img{width:100%;height:130px;object-fit:contain;}
-.admin-actions{display:flex;gap:6px;justify-content:center;}
+.card{background:white;border-radius:12px;overflow:hidden;border:1px solid #e2e8f0;text-align:center;transition:0.3s;padding:10px;break-inside:avoid;position:relative;}
+.card img{width:100%;height:130px;object-fit:contain;background:#f9faf9;border-radius:8px;}
+.card-info{padding:8px 0;display:flex;flex-direction:column;align-items:center;}
+.badge-cat{font-size:0.55rem;padding:3px 8px;border-radius:5px;color:white;font-weight:bold;text-transform:uppercase;margin-top:4px;}
+.admin-actions{display:flex;flex-direction:row;justify-content:center;gap:6px;margin-top:6px;}
+.btn-edit-card,.btn-delete-card{font-size:0.65rem;padding:4px 6px;background:#f8fafc;border:1px solid #ddd;border-radius:5px;cursor:pointer;}
+.btn-delete-card{background:#fef2f2;border-color:#fca5a5;color:#b91c1c;}
+#modal{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background: rgba(15,23,42,0.8);z-index:1000;align-items:center;justify-content:center;backdrop-filter:blur(3px);}
+.modal-content{background:white;padding:25px;border-radius:20px;width:320px;text-align:center;}
 .print-only{display:none;}
 @media print{
-.no-print{display:none!important;}
-.print-only{display:block;}
+  body{background:white;padding:0; counter-reset: page;}
+  .no-print{display:none !important;}
+  .print-only{display:block;}
+  .print-header{text-align:center;font-size:28px;font-weight:bold;border-bottom:2px solid #000;padding-bottom:10px;margin-bottom:20px;}
+  .grid{display:grid !important;grid-template-columns:repeat(6,1fr)!important;gap:5px!important;}
+  .card{border:1px solid #eee !important;box-shadow:none !important;padding:5px !important;page-break-inside:avoid;}
+  .card img{height:80px !important;}
+  .card h3{font-size:0.6rem !important;}
+  .admin-actions{display:none !important;}
+  .footer-print{position:fixed;bottom:0;width:100%;display:flex;justify-content:center;font-size:10px;border-top:1px solid #ddd;padding-top:5px;background:white;}
+  .page-counter{position:fixed;bottom:0;right:0;font-size:10px;padding-top:5px;}
+  .page-counter::after{counter-increment: page; content: "Página " counter(page, decimal-leading-zero);}
 }
 </style>
 </head>
-
 <body>
 <div class="container">
 
-<!-- ===== HEADER ===== -->
-<div class="header no-print">
+<div class="print-only print-header">📦 Relatório de Estoque Haris</div>
+
+<div class="no-print">
+<div class="header">
 <h1>📦 Haris</h1>
 <div class="search-container">
-<input id="inputBusca" class="search-input" placeholder="Pesquisar..." oninput="render()">
+<input type="text" id="inputBusca" class="search-input" placeholder="Pesquisar..." oninput="render()">
 <select id="ordem" class="sort-select" onchange="render()">
 <option value="nome">A-Z</option>
 <option value="qtd-desc">Estoque ↑</option>
@@ -58,229 +80,265 @@ body{margin:0;padding:15px;font-family:sans-serif;background:var(--bg);color:var
 </select>
 </div>
 <div class="nav-btns">
-<button class="btn-cat" onclick="toggleAdmin()">🔑 Admin</button>
-<button class="btn-cat" onclick="imprimirProdutos()">📄 PDF</button>
+<button class="btn-cat" id="btnAdmin" onclick="toggleAdmin()">🔑 Admin</button>
+<button class="btn-cat" onclick="imprimirProdutos()" style="background:var(--primary);color:white;">📄 PDF</button>
 </div>
 </div>
 
-<!-- ===== STATS ===== -->
-<div class="stats-bar no-print">
-<div>Produtos: <b id="totalProdutos">0</b> | Total Unid: <b id="totalEstoque">0</b></div>
-<div class="backup-group" id="backupGroup" style="display:none;">
-<button class="btn-cat" onclick="toggleHistory()">📋 Histórico</button>
+<div class="stats-bar">
+<div style="display:flex; gap:15px;">
+<div>Produtos: <b id="totalProdutos">0</b></div>
+<div>Total Unid: <b id="totalEstoque">0</b></div>
+</div>
+<div class="backup-group" id="backupGroup" style="display:none; gap:5px;">
+<button class="btn-cat" style="background:#2563eb;color:white;" onclick="toggleHistory()">📋 Histórico</button>
 <button class="btn-cat" onclick="exportarBackup()">📥 Exportar</button>
 <button class="btn-cat" onclick="document.getElementById('importInput').click()">📤 Importar</button>
 <input type="file" id="importInput" style="display:none" onchange="importarBackup(this)">
 </div>
 </div>
 
-<!-- ===== ADMIN PANEL (CADASTRO) ===== -->
-<div id="adminPanel" class="no-print">
-<input id="nome" placeholder="Nome">
-<select id="categoria">
-<option>Tinta Hardtop</option>
-<option>Tinta Pilot</option>
-<option>Componente B</option>
-<option>Jotamastic A</option>
-<option>Jotamastic B</option>
-<option>Solvente</option>
-<option>Outros</option>
-</select>
-<input type="number" id="qtd" placeholder="Qtd">
-<input type="file" id="foto" accept="image/*">
-<button onclick="cadastrar()">CADASTRAR</button>
+<div id="historyPanel">
+<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+<h2 style="margin:0; font-size:1.1rem;">📋 Histórico</h2>
+<div style="display:flex; gap:5px;">
+<button class="btn-cat" style="background:#2563eb;color:white;" onclick="imprimirHistorico()">📄 PDF Histórico</button>
+<button class="btn-cat" onclick="limparHistorico()">Limpar Tudo</button>
 </div>
-
-<!-- ===== HISTÓRICO ===== -->
-<div id="historyPanel" class="no-print">
-<h2>📋 Histórico</h2>
-<input id="inputBuscaHist" placeholder="Buscar..." oninput="renderHistory()">
-<select id="filtroCatHist" onchange="renderHistory()">
-<option value="Todos">Todas</option>
-<option>Tinta Hardtop</option>
-<option>Tinta Pilot</option>
-<option>Componente B</option>
-<option>Jotamastic A</option>
-<option>Jotamastic B</option>
-<option>Solvente</option>
-<option>Outros</option>
+</div>
+<div style="display:flex; gap:8px; margin-bottom:15px;">
+<input type="text" id="inputBuscaHist" class="search-input" placeholder="Pesquisar produto ou motivo..." oninput="renderHistory()">
+<select id="filtroCatHist" class="sort-select" onchange="renderHistory()">
+<option value="Todos">Todas as Categorias</option>
+<option value="Tinta Hardtop">Tinta Hardtop</option>
+<option value="Tinta Pilot">Tinta Pilot</option>
+<option value="Componente B">Componente B</option>
+<option value="Jotamastic A">Jotamastic A</option>
+<option value="Jotamastic B">Jotamastic B</option>
+<option value="Solvente">Solvente</option>
+<option value="Outros">Outros</option>
 </select>
-<button onclick="imprimirHistorico()">📄 PDF Histórico</button>
-<button onclick="limparHistorico()">Limpar Tudo</button>
-
+</div>
 <table class="hist-table">
-<thead>
-<tr>
-<th>Data</th><th>Produto</th><th>Tipo</th><th>Qtd</th><th>Motivo</th><th>Ação</th>
-</tr>
-</thead>
+<thead><tr><th>Data</th><th>Produto</th><th>Tipo</th><th>Qtd</th><th>Motivo</th><th>Ação</th></tr></thead>
 <tbody id="listaHist"></tbody>
 </table>
 </div>
 
-<!-- ===== PRODUTOS ===== -->
-<div class="grid" id="vitrine"></div>
+<div class="cat-filter" id="catFiltros"></div>
+
+<div id="adminPanel">
+<div class="input-group"><label>Nome</label><input type="text" id="nome"></div>
+<div class="input-group"><label>Categoria</label>
+<select id="categoria">
+<option value="Tinta Hardtop">Tinta Hardtop</option>
+<option value="Tinta Pilot">Tinta Pilot</option>
+<option value="Componente B">Componente B</option>
+<option value="Jotamastic A">Jotamastic A</option>
+<option value="Jotamastic B">Jotamastic B</option>
+<option value="Solvente">Solvente</option>
+<option value="Outros">Outros</option>
+</select>
+</div>
+<div class="input-group"><label>Qtd</label><input type="number" id="qtd"></div>
+<div class="input-group"><label>Foto</label><input type="file" id="foto" accept="image/*"></div>
+<button class="btn-cat" style="background:var(--accent);color:white;height:35px;" onclick="cadastrar()">CADASTRAR</button>
 </div>
 
-<!-- ===== MODAL ===== -->
-<div id="modal" class="no-print" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);align-items:center;justify-content:center;">
-<div style="background:#fff;padding:20px;border-radius:12px;width:300px;text-align:center;">
-<input id="mNomeEdit" disabled>
-<p>Estoque: <b id="mQtd">0</b></p>
-<input type="number" id="valMov">
-<textarea id="mNota" placeholder="Motivo"></textarea>
-<button onclick="movimentar('add')">ENTRADA</button>
-<button onclick="movimentar('sub')">SAÍDA</button>
-<button onclick="fecharModal()">SALVAR E FECHAR</button>
+<div class="grid" id="vitrine"></div>
+<div class="print-only footer-print" id="printDateTime"></div>
+<div class="print-only page-counter"></div>
+</div>
+
+<div id="modal" class="no-print">
+<div class="modal-content">
+<p style="font-size:0.7rem; font-weight:bold; margin-bottom:5px;">EDITAR PRODUTO</p>
+<input type="text" id="mNomeEdit" style="margin-bottom:10px; font-weight:bold; text-align:center;">
+<div style="background:#f8fafc; padding:8px; border-radius:8px; margin-bottom:10px;">
+<p style="margin:0; font-size:0.6rem;">Estoque Atual</p>
+<b id="mQtd" style="font-size:1.5rem;">0</b>
+</div>
+<input type="number" id="valMov" value="0" style="text-align:center; width:60px; margin:auto;">
+<textarea id="mNota" placeholder="Motivo..." style="margin-top:8px; height:40px; font-size:0.7rem;"></textarea>
+<div style="margin-top:8px;">
+<label>Alterar Foto:</label>
+<input type="file" id="mFoto" accept="image/*">
+</div>
+<div style="display:flex; gap:8px; margin-top:12px;">
+<button class="btn-cat" style="background:var(--success); color:white; flex:1;" onclick="movimentar('add')">ENTRADA</button>
+<button class="btn-cat" style="background:var(--danger); color:white; flex:1;" onclick="movimentar('sub')">SAÍDA</button>
+</div>
+<button onclick="fecharModal()" style="margin-top:15px; cursor:pointer; background:none; border:none; text-decoration:underline; font-size:0.7rem;">SALVAR E FECHAR</button>
 </div>
 </div>
 
 <script>
 let isAdmin=false,editIdx=null;
-let db=[],historico=[];
+let db=[], historico=[];
+let catAtiva='Todos';
+let listaCategorias=["Tinta Hardtop","Tinta Pilot","Componente B","Jotamastic A","Jotamastic B","Solvente","Outros"];
+let dbHaris;
 
-/* ===== ADMIN ===== */
+function initDB(){
+    const request = indexedDB.open('db_haris_v30', 1);
+    request.onerror = e=>console.log('Erro DB', e);
+    request.onsuccess = e=>{
+        dbHaris = e.target.result;
+        carregarDados();
+    };
+    request.onupgradeneeded = e=>{
+        const dbObj = e.target.result;
+        dbObj.createObjectStore('produtos', {keyPath:'id', autoIncrement:true});
+        dbObj.createObjectStore('historico', {keyPath:'id', autoIncrement:true});
+    };
+}
+
+function carregarDados(){
+    const t = dbHaris.transaction(['produtos','historico'],'readonly');
+    t.objectStore('produtos').getAll().onsuccess = e=>{ db = e.target.result; render(); }
+    t.objectStore('historico').getAll().onsuccess = e=>{ historico = e.target.result; renderHistory(); }
+}
+
 function toggleAdmin(){
 if(!isAdmin){
 if(prompt("Senha:")==="RebocadorHaris"){
 isAdmin=true;
-adminPanel.style.display='grid';
-backupGroup.style.display='flex';
+document.getElementById('adminPanel').style.display='grid';
+document.getElementById('backupGroup').style.display='flex';
+render();
 }
 }else{
 isAdmin=false;
-adminPanel.style.display='none';
-backupGroup.style.display='none';
-historyPanel.style.display='none';
-}
-}
-
-/* ===== CADASTRO ===== */
-function cadastrar(){
-const f=foto.files[0];
-if(!nome.value||!f)return alert("Preencha tudo");
-const r=new FileReader();
-r.onload=e=>{
-db.push({id:Date.now(),nome:nome.value,cat:categoria.value,qtd:+qtd.value||0,foto:e.target.result});
-nome.value='';qtd.value='';foto.value='';
+document.getElementById('adminPanel').style.display='none';
+document.getElementById('backupGroup').style.display='none';
+document.getElementById('historyPanel').style.display='none';
 render();
+}
+}
+
+function toggleHistory(){
+const p=document.getElementById('historyPanel');
+p.style.display=p.style.display==='block'?'none':'block';
+if(p.style.display==='block') renderHistory();
+}
+
+function cadastrar(){
+const n=document.getElementById('nome').value;
+const c=document.getElementById('categoria').value;
+const q=parseInt(document.getElementById('qtd').value)||0;
+const f=document.getElementById('foto').files[0];
+if(!n){alert("Digite o nome!");return;}
+if(!f){alert("Selecione uma foto!");return;}
+const reader = new FileReader();
+reader.onload=e=>{
+db.push({id:Date.now(),nome:n,cat:c,qtd:q,foto:e.target.result});
+render();
+document.getElementById('nome').value='';
+document.getElementById('qtd').value='';
+document.getElementById('foto').value='';
+salvar();
 };
-r.readAsDataURL(f);
+reader.readAsDataURL(f);
 }
 
-/* ===== RENDER ===== */
-function render(){
-vitrine.innerHTML='';
-let tp=0,te=0;
-db.forEach(p=>{
-tp++;te+=p.qtd;
-vitrine.innerHTML+=`
-<div class="card">
-<img src="${p.foto}">
-<p>${p.nome}</p>
-<p>Qtd: ${p.qtd}</p>
-<button onclick="abrirModal(${p.id})">Editar</button>
-</div>`;
-});
-totalProdutos.innerText=tp;
-totalEstoque.innerText=te;
-}
-
-/* ===== MODAL ===== */
 function abrirModal(id){
 editIdx=db.findIndex(p=>p.id===id);
 const p=db[editIdx];
-mNomeEdit.value=p.nome;
-mQtd.innerText=p.qtd;
-valMov.value='';
-mNota.value='';
-modal.style.display='flex';
+document.getElementById('mNomeEdit').value=p.nome;
+document.getElementById('mQtd').innerText=p.qtd;
+document.getElementById('mFoto').value='';
+document.getElementById('valMov').value=0;
+document.getElementById('mNota').value='';
+document.getElementById('modal').style.display='flex';
 }
-function fecharModal(){modal.style.display='none';}
 
-/* ===== MOVIMENTAÇÃO (AJUSTADA) ===== */
+function fecharModal(){document.getElementById('modal').style.display='none'; salvar(); render(); renderHistory();}
+
 function movimentar(tipo){
-const val=parseInt(valMov.value)||0;
-const nota=mNota.value||'';
-if(val<=0)return;
+const val=parseInt(document.getElementById('valMov').value)||0;
+const nota=document.getElementById('mNota').value;
+if(val<=0){alert("Digite valor >0"); return;}
 const p=db[editIdx];
-if(tipo==='sub'&&val>p.qtd)return;
-
-p.qtd=tipo==='add'?p.qtd+val:p.qtd-val;
-
-historico.push({
-id:Date.now(),
-data:new Date().toLocaleString(),
-produto:p.nome,
-tipo,
-qtd:val,
-motivo:nota,
-cat:p.cat
-});
-
-mQtd.innerText=p.qtd;
-valMov.value='';
-mNota.value='';
-render();
-renderHistory();
+if(tipo==='sub'&&val>p.qtd){alert("Estoque insuficiente"); return;}
+p.qtd = tipo==='add'?p.qtd+val:p.qtd-val;
+if(document.getElementById('mFoto').files[0]){
+const reader=new FileReader();
+reader.onload=e=>{p.foto=e.target.result; salvar(); render(); renderHistory();}
+reader.readAsDataURL(document.getElementById('mFoto').files[0]);
+}else{salvar(); render(); renderHistory();}
+historico.push({id:Date.now(),data:new Date().toLocaleString(),produto:p.nome,tipo:tipo,qtd:val,motivo:nota,cat:p.cat});
+document.getElementById('valMov').value=0;
+document.getElementById('mNota').value='';
+render(); renderHistory();
 }
 
-/* ===== HISTÓRICO (FILTRO CORRIGIDO) ===== */
 function renderHistory(){
-listaHist.innerHTML='';
-const t=inputBuscaHist.value.toLowerCase();
-const c=filtroCatHist.value;
+const termo=document.getElementById('inputBuscaHist').value.toLowerCase();
+const catFiltro=document.getElementById('filtroCatHist').value;
+const lista=document.getElementById('listaHist');
+lista.innerHTML='';
 historico.filter(h=>{
-return (h.produto.toLowerCase().includes(t)||(h.motivo||'').toLowerCase().includes(t))
-&&(c==='Todos'||h.cat===c);
+return (h.produto.toLowerCase().includes(termo)||(h.motivo||'').toLowerCase().includes(termo)) &&
+(catFiltro==='Todos'?true:h.cat===catFiltro);
 }).forEach(h=>{
-listaHist.innerHTML+=`
-<tr>
+lista.innerHTML+=`<tr>
 <td>${h.data}</td>
 <td>${h.produto}</td>
-<td>${h.tipo==='add'?'Entrada':'Saída'}</td>
-<td>${h.qtd}</td>
+<td style="text-align:center">${h.tipo==='add'?'Entrada':'Saída'}</td>
+<td style="text-align:center">${h.qtd}</td>
 <td>${h.motivo}</td>
 <td><button onclick="deletarHist(${h.id})">🗑</button></td>
 </tr>`;
 });
 }
 
-function deletarHist(id){
-historico=historico.filter(h=>h.id!==id);
-renderHistory();
+function deletarHist(id){historico=historico.filter(h=>h.id!==id); renderHistory(); }
+
+function limparHistorico(){if(confirm("Limpar todo histórico?")){historico=[]; renderHistory(); }}
+
+function render(){
+const vitrine=document.getElementById('vitrine');
+vitrine.innerHTML='';
+let totalProd=0,totalQtd=0;
+db.forEach(p=>{
+totalProd++; totalQtd+=p.qtd;
+vitrine.innerHTML+=`
+<div class="card">
+<img src="${p.foto}">
+<div class="card-info">
+<p>${p.nome}</p>
+<p>Qtd: ${p.qtd}</p>
+<div class="admin-actions">
+<button class="btn-edit-card" onclick="abrirModal(${p.id})">Editar</button>
+</div>
+</div>
+</div>`;
+});
+document.getElementById('totalProdutos').innerText=totalProd;
+document.getElementById('totalEstoque').innerText=totalQtd;
 }
 
-function limparHistorico(){
-if(confirm("Limpar todo histórico?")){
-historico=[];
-renderHistory();
-}
-}
-
-/* ===== PDF ===== */
 function imprimirProdutos(){window.print();}
 function imprimirHistorico(){window.print();}
 
-/* ===== BACKUP ===== */
 function exportarBackup(){
-const data=JSON.stringify({db,historico});
 const a=document.createElement('a');
-a.href=URL.createObjectURL(new Blob([data],{type:'application/json'}));
-a.download='backup.json';
-a.click();
-}
-function importarBackup(i){
-const r=new FileReader();
-r.onload=e=>{
-const d=JSON.parse(e.target.result);
-db=d.db||[];
-historico=d.historico||[];
-render();renderHistory();
-};
-r.readAsText(i.files[0]);
+a.href=URL.createObjectURL(new Blob([JSON.stringify({db,historico})],{type:'application/json'}));
+a.download='backup.json';a.click();
 }
 
+function importarBackup(input){
+const reader=new FileReader();
+reader.onload=e=>{
+const d=JSON.parse(e.target.result);
+db=d.db||[]; historico=d.historico||[];
+render(); renderHistory();
+};
+reader.readAsText(input.files[0]);
+}
+
+function salvar(){/* opcional IndexedDB */ }
+render(); renderHistory();
 </script>
 </body>
 </html>
