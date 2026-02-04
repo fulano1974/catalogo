@@ -5,7 +5,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Controle de Estoque Haris</title>
 <meta name="theme-color" content="#2563eb">
-<link rel="icon" href="https://cdn-icons-png.flaticon.com">
 <style>
 :root{
   --primary:#1e293b;
@@ -40,7 +39,7 @@ input,select,textarea{padding:8px;border:1px solid #e2e8f0;border-radius:8px;wid
 .card{background:white;border-radius:12px;overflow:hidden;border:1px solid #e2e8f0;text-align:center;transition:0.3s;padding:10px;break-inside:avoid;position:relative;}
 .card img{width:100%;height:130px;object-fit:contain;background:#f9faf9;border-radius:8px;}
 .card-info{padding:8px 0;display:flex;flex-direction:column;align-items:center;}
-.badge-cat{font-size:0.55rem;padding:3px 8px;border-radius:5px;color:white;font-weight:bold;text-transform:uppercase;margin-top:4px;}
+.badge-cat{font-size:0.65rem;padding:3px 8px;border-radius:8px;color:white;font-weight:bold;text-transform:uppercase;margin-top:4px;}
 .admin-actions{display:flex;flex-direction:row;justify-content:center;gap:6px;margin-top:6px;}
 .btn-edit-card,.btn-delete-card{font-size:0.65rem;padding:4px 6px;background:#f8fafc;border:1px solid #ddd;border-radius:5px;cursor:pointer;}
 .btn-delete-card{background:#fef2f2;border-color:#fca5a5;color:#b91c1c;}
@@ -59,15 +58,12 @@ input,select,textarea{padding:8px;border:1px solid #e2e8f0;border-radius:8px;wid
   .admin-actions{display:none !important;}
   .footer-print{position:fixed;bottom:0;width:100%;display:flex;justify-content:center;font-size:10px;border-top:1px solid #ddd;padding-top:5px;background:white;}
   .page-counter{position:fixed;bottom:0;right:0;font-size:10px;padding-top:5px;}
-  .page-counter::after{counter-increment: page; content: "Página " counter(page, decimal-leading-zero);}
 }
 </style>
 </head>
 <body>
 <div class="container">
-
 <div class="print-only print-header">📦 Relatório de Estoque Haris</div>
-
 <div class="no-print">
 <div class="header">
 <h1>📦 Haris</h1>
@@ -90,7 +86,7 @@ input,select,textarea{padding:8px;border:1px solid #e2e8f0;border-radius:8px;wid
 <div>Produtos: <b id="totalProdutos">0</b></div>
 <div>Total Unid: <b id="totalEstoque">0</b></div>
 </div>
-<div class="backup-group" id="backupGroup" style="display:none; gap:5px;">
+<div class="backup-group" id="backupGroup">
 <button class="btn-cat" style="background:#2563eb;color:white;" onclick="toggleHistory()">📋 Histórico</button>
 <button class="btn-cat" onclick="exportarBackup()">📥 Exportar</button>
 <button class="btn-cat" onclick="document.getElementById('importInput').click()">📤 Importar</button>
@@ -146,8 +142,6 @@ input,select,textarea{padding:8px;border:1px solid #e2e8f0;border-radius:8px;wid
 </div>
 
 <div class="grid" id="vitrine"></div>
-<div class="print-only footer-print" id="printDateTime"></div>
-<div class="print-only page-counter"></div>
 </div>
 
 <div id="modal" class="no-print">
@@ -173,172 +167,220 @@ input,select,textarea{padding:8px;border:1px solid #e2e8f0;border-radius:8px;wid
 </div>
 
 <script>
-let isAdmin=false,editIdx=null;
-let db=[], historico=[];
-let catAtiva='Todos';
-let listaCategorias=["Tinta Hardtop","Tinta Pilot","Componente B","Jotamastic A","Jotamastic B","Solvente","Outros"];
-let dbHaris;
+let dbHaris, db=[], historico=[], isAdmin=false, editIdx=null, catAtiva='Todos';
+const listaCategorias=["Tinta Hardtop","Tinta Pilot","Componente B","Jotamastic A","Jotamastic B","Solvente","Outros"];
 
 function initDB(){
-    const request = indexedDB.open('db_haris_v30', 1);
-    request.onerror = e=>console.log('Erro DB', e);
-    request.onsuccess = e=>{
-        dbHaris = e.target.result;
-        carregarDados();
-    };
-    request.onupgradeneeded = e=>{
-        const dbObj = e.target.result;
-        dbObj.createObjectStore('produtos', {keyPath:'id', autoIncrement:true});
-        dbObj.createObjectStore('historico', {keyPath:'id', autoIncrement:true});
-    };
+  const request=indexedDB.open('db_haris_v30',1);
+  request.onerror=e=>console.log('Erro DB',e);
+  request.onsuccess=e=>{dbHaris=e.target.result; carregarDados();}
+  request.onupgradeneeded=e=>{
+    const dbObj=e.target.result;
+    dbObj.createObjectStore('produtos',{keyPath:'id',autoIncrement:true});
+    dbObj.createObjectStore('historico',{keyPath:'id',autoIncrement:true});
+  }
 }
 
 function carregarDados(){
-    const t = dbHaris.transaction(['produtos','historico'],'readonly');
-    t.objectStore('produtos').getAll().onsuccess = e=>{ db = e.target.result; render(); }
-    t.objectStore('historico').getAll().onsuccess = e=>{ historico = e.target.result; renderHistory(); }
+  const t=dbHaris.transaction(['produtos','historico'],'readonly');
+  t.objectStore('produtos').getAll().onsuccess=e=>{db=e.target.result; render();}
+  t.objectStore('historico').getAll().onsuccess=e=>{historico=e.target.result; renderHistory();}
 }
 
 function toggleAdmin(){
-if(!isAdmin){
-if(prompt("Senha:")==="RebocadorHaris"){
-isAdmin=true;
-document.getElementById('adminPanel').style.display='grid';
-document.getElementById('backupGroup').style.display='flex';
-render();
-}
-}else{
-isAdmin=false;
-document.getElementById('adminPanel').style.display='none';
-document.getElementById('backupGroup').style.display='none';
-document.getElementById('historyPanel').style.display='none';
-render();
-}
+  if(!isAdmin){
+    if(prompt("Senha:")==="RebocadorHaris"){
+      isAdmin=true;
+      document.getElementById('adminPanel').style.display='grid';
+      document.getElementById('backupGroup').style.display='flex';
+      render();
+    }
+  }else{
+    isAdmin=false;
+    document.getElementById('adminPanel').style.display='none';
+    document.getElementById('backupGroup').style.display='none';
+    document.getElementById('historyPanel').style.display='none';
+  }
 }
 
 function toggleHistory(){
-const p=document.getElementById('historyPanel');
-p.style.display=p.style.display==='block'?'none':'block';
-if(p.style.display==='block') renderHistory();
+  const p=document.getElementById('historyPanel');
+  p.style.display=p.style.display==='block'?'none':'block';
+  if(p.style.display==='block') renderHistory();
 }
 
+function salvar(){
+  const t=dbHaris.transaction(['produtos','historico'],'readwrite');
+  const produtosStore=t.objectStore('produtos');
+  const historicoStore=t.objectStore('historico');
+  produtosStore.clear().onsuccess=()=>{db.forEach(p=>produtosStore.add(p));}
+  historicoStore.clear().onsuccess=()=>{historico.forEach(h=>historicoStore.add(h));}
+}
+
+function render(){
+  const v=document.getElementById('vitrine');
+  const termo=document.getElementById('inputBusca').value.toLowerCase();
+  const fBox=document.getElementById('catFiltros');
+  const ordem=document.getElementById('ordem').value;
+  v.innerHTML=''; 
+  fBox.innerHTML=['Todos',...listaCategorias].map(c=>`<button class="btn-cat ${catAtiva===c?'active':''}" onclick="setCat('${c}')">${c}</button>`).join('');
+  
+  let totalProd=0,totalQtd=0;
+  let copiaDb=[...db];
+  if(ordem==='nome') copiaDb.sort((a,b)=>a.nome.localeCompare(b.nome));
+  else if(ordem==='qtd-desc') copiaDb.sort((a,b)=>b.qtd-a.qtd);
+  else if(ordem==='qtd-asc') copiaDb.sort((a,b)=>a.qtd-b.qtd);
+  
+  copiaDb.forEach(p=>{
+    if(p.nome.toLowerCase().includes(termo) && (catAtiva==='Todos' || p.cat===catAtiva)){
+      totalProd++; totalQtd+=parseInt(p.qtd);
+      v.innerHTML+=`
+      <div class="card">
+      <img src="${p.foto}">
+      <div class="card-info">
+      <h3 style="margin:2px 0; font-size:0.75rem; line-height:1.1;">${p.nome}</h3>
+      <span class="badge-cat" style="background:${getCorCat(p.cat)}">${p.cat}</span>
+      <p style="margin:0; font-size:0.7rem; color:gray;">Estoque: <b style="font-size:0.9rem;">${p.qtd}</b></p>
+      ${isAdmin?`<div class="admin-actions">
+      <button class="btn-edit-card" onclick="abrirModal(${p.id})">Editar</button>
+      <button class="btn-delete-card" onclick="deletar(${p.id})">Deletar</button>
+      </div>`:''}
+      </div></div>`;
+    }
+  });
+  document.getElementById('totalProdutos').innerText=totalProd;
+  document.getElementById('totalEstoque').innerText=totalQtd;
+}
+
+function getCorCat(cat){
+  switch(cat){
+    case 'Tinta Hardtop': return '#2563eb';
+    case 'Tinta Pilot': return '#1d4ed8';
+    case 'Componente B': return '#f59e0b';
+    case 'Jotamastic A': return '#10b981';
+    case 'Jotamastic B': return '#14b8a6';
+    case 'Solvente': return '#f97316';
+    default: return '#64748b';
+  }
+}
+
+function setCat(c){catAtiva=c; render();}
+
 function cadastrar(){
-const n=document.getElementById('nome').value;
-const c=document.getElementById('categoria').value;
-const q=parseInt(document.getElementById('qtd').value)||0;
-const f=document.getElementById('foto').files[0];
-if(!n){alert("Digite o nome!");return;}
-if(!f){alert("Selecione uma foto!");return;}
-const reader = new FileReader();
-reader.onload=e=>{
-db.push({id:Date.now(),nome:n,cat:c,qtd:q,foto:e.target.result});
-render();
-document.getElementById('nome').value='';
-document.getElementById('qtd').value='';
-document.getElementById('foto').value='';
-salvar();
-};
-reader.readAsDataURL(f);
+  const n=document.getElementById('nome').value;
+  const c=document.getElementById('categoria').value;
+  const q=parseInt(document.getElementById('qtd').value)||0;
+  const f=document.getElementById('foto').files[0];
+  if(!n){alert("Digite o nome!");return;}
+  if(!f){alert("Selecione uma foto!");return;}
+  const reader=new FileReader();
+  reader.onload=e=>{
+    db.push({id:Date.now(),nome:n,cat:c,qtd:q,foto:e.target.result});
+    salvar(); render();
+    document.getElementById('nome').value='';
+    document.getElementById('qtd').value=''; document.getElementById('foto').value='';
+  }
+  reader.readAsDataURL(f);
 }
 
 function abrirModal(id){
-editIdx=db.findIndex(p=>p.id===id);
-const p=db[editIdx];
-document.getElementById('mNomeEdit').value=p.nome;
-document.getElementById('mQtd').innerText=p.qtd;
-document.getElementById('mFoto').value='';
-document.getElementById('valMov').value=0;
-document.getElementById('mNota').value='';
-document.getElementById('modal').style.display='flex';
+  editIdx=db.findIndex(p=>p.id===id);
+  const p=db[editIdx];
+  document.getElementById('mNomeEdit').value=p.nome;
+  document.getElementById('mQtd').innerText=p.qtd;
+  document.getElementById('modal').style.display='flex';
 }
 
-function fecharModal(){document.getElementById('modal').style.display='none'; salvar(); render(); renderHistory();}
+function fecharModal(){
+  const p=db[editIdx];
+  p.nome=document.getElementById('mNomeEdit').value;
+  const f=document.getElementById('mFoto').files[0];
+  if(f){
+    const reader=new FileReader();
+    reader.onload=e=>{p.foto=e.target.result; salvar(); render();}
+    reader.readAsDataURL(f);
+  }
+  salvar(); render();
+  document.getElementById('modal').style.display='none';
+  document.getElementById('mNota').value=''; document.getElementById('valMov').value=0;
+}
 
 function movimentar(tipo){
-const val=parseInt(document.getElementById('valMov').value)||0;
-const nota=document.getElementById('mNota').value;
-if(val<=0){alert("Digite valor >0"); return;}
-const p=db[editIdx];
-if(tipo==='sub'&&val>p.qtd){alert("Estoque insuficiente"); return;}
-p.qtd = tipo==='add'?p.qtd+val:p.qtd-val;
-if(document.getElementById('mFoto').files[0]){
-const reader=new FileReader();
-reader.onload=e=>{p.foto=e.target.result; salvar(); render(); renderHistory();}
-reader.readAsDataURL(document.getElementById('mFoto').files[0]);
-}else{salvar(); render(); renderHistory();}
-historico.push({id:Date.now(),data:new Date().toLocaleString(),produto:p.nome,tipo:tipo,qtd:val,motivo:nota,cat:p.cat});
-document.getElementById('valMov').value=0;
-document.getElementById('mNota').value='';
-render(); renderHistory();
+  const p=db[editIdx];
+  let val=parseInt(document.getElementById('valMov').value)||0;
+  const nota=document.getElementById('mNota').value || '';
+  if(tipo==='sub' && val>p.qtd){alert("Quantidade insuficiente!");return;}
+  p.qtd+=(tipo==='add'?val:-val);
+  historico.push({id:Date.now(),data:new Date().toLocaleString(),produto:p.nome,tipo:(tipo==='add'?'Entrada':'Saída'),qtd:val,motivo:nota});
+  salvar(); render(); renderHistory();
+  document.getElementById('mQtd').innerText=p.qtd;
 }
 
 function renderHistory(){
-const termo=document.getElementById('inputBuscaHist').value.toLowerCase();
-const catFiltro=document.getElementById('filtroCatHist').value;
-const lista=document.getElementById('listaHist');
-lista.innerHTML='';
-historico.filter(h=>{
-return (h.produto.toLowerCase().includes(termo)||(h.motivo||'').toLowerCase().includes(termo)) &&
-(catFiltro==='Todos'?true:h.cat===catFiltro);
-}).forEach(h=>{
-lista.innerHTML+=`<tr>
-<td>${h.data}</td>
-<td>${h.produto}</td>
-<td style="text-align:center">${h.tipo==='add'?'Entrada':'Saída'}</td>
-<td style="text-align:center">${h.qtd}</td>
-<td>${h.motivo}</td>
-<td><button onclick="deletarHist(${h.id})">🗑</button></td>
-</tr>`;
-});
+  const termo=document.getElementById('inputBuscaHist').value.toLowerCase();
+  const filtro=document.getElementById('filtroCatHist').value;
+  let lista=historico.filter(h=>h.produto.toLowerCase().includes(termo) || h.motivo.toLowerCase().includes(termo));
+  if(filtro!=='Todos') lista=lista.filter(h=>db.find(p=>p.nome===h.produto)?.cat===filtro);
+  const tbody=document.getElementById('listaHist');
+  tbody.innerHTML='';
+  lista.forEach(h=>{
+    tbody.innerHTML+=`<tr>
+    <td>${h.data}</td>
+    <td>${h.produto}</td>
+    <td>${h.tipo}</td>
+    <td>${h.qtd}</td>
+    <td>${h.motivo}</td>
+    <td><button onclick="deletarHist(${h.id})" style="background:none;border:none;color:red;cursor:pointer;">🗑️</button></td>
+    </tr>`;
+  });
 }
 
-function deletarHist(id){historico=historico.filter(h=>h.id!==id); renderHistory(); }
-
-function limparHistorico(){if(confirm("Limpar todo histórico?")){historico=[]; renderHistory(); }}
-
-function render(){
-const vitrine=document.getElementById('vitrine');
-vitrine.innerHTML='';
-let totalProd=0,totalQtd=0;
-db.forEach(p=>{
-totalProd++; totalQtd+=p.qtd;
-vitrine.innerHTML+=`
-<div class="card">
-<img src="${p.foto}">
-<div class="card-info">
-<p>${p.nome}</p>
-<p>Qtd: ${p.qtd}</p>
-<div class="admin-actions">
-<button class="btn-edit-card" onclick="abrirModal(${p.id})">Editar</button>
-</div>
-</div>
-</div>`;
-});
-document.getElementById('totalProdutos').innerText=totalProd;
-document.getElementById('totalEstoque').innerText=totalQtd;
+function deletar(id){
+  if(confirm("Deletar produto?")){db=db.filter(p=>p.id!==id); salvar(); render();}
 }
 
-function imprimirProdutos(){window.print();}
-function imprimirHistorico(){window.print();}
+function deletarHist(id){
+  if(confirm("Deletar registro?")){historico=historico.filter(h=>h.id!==id); salvar(); renderHistory();}
+}
+
+function limparHistorico(){
+  if(confirm("Apagar todo histórico?")){historico=[]; salvar(); renderHistory();}
+}
+
+function imprimirProdutos(){
+  window.print();
+}
+
+function imprimirHistorico(){
+  let html='<div class="print-only print-header">📋 Histórico de Movimentações</div><table style="width:100%; border-collapse:collapse; font-size:12px;"><tr style="background:#2563eb; color:white;"><th>Data</th><th>Produto</th><th>Tipo</th><th>Qtd</th><th>Motivo</th></tr>';
+  historico.forEach(h=>{
+    html+=`<tr style="border-bottom:1px solid #eee;"><td>${h.data}</td><td>${h.produto}</td><td>${h.tipo}</td><td>${h.qtd}</td><td>${h.motivo}</td></tr>`;
+  });
+  html+='</table>';
+  const w=window.open('','Histórico');
+  w.document.write(html);
+  w.document.close();
+  w.print();
+}
 
 function exportarBackup(){
-const a=document.createElement('a');
-a.href=URL.createObjectURL(new Blob([JSON.stringify({db,historico})],{type:'application/json'}));
-a.download='backup.json';a.click();
+  const data=JSON.stringify({produtos:db,historico:historico});
+  const blob=new Blob([data],{type:'application/json'});
+  const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='backup_haris.json'; a.click();
 }
 
 function importarBackup(input){
-const reader=new FileReader();
-reader.onload=e=>{
-const d=JSON.parse(e.target.result);
-db=d.db||[]; historico=d.historico||[];
-render(); renderHistory();
-};
-reader.readAsText(input.files[0]);
+  const file=input.files[0];
+  const reader=new FileReader();
+  reader.onload=e=>{
+    const data=JSON.parse(e.target.result);
+    db=data.produtos||[]; historico=data.historico||[];
+    salvar(); render(); renderHistory();
+  }
+  reader.readAsText(file);
 }
 
-function salvar(){/* opcional IndexedDB */ }
-render(); renderHistory();
+initDB();
 </script>
 </body>
 </html>
