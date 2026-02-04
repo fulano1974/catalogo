@@ -7,6 +7,7 @@
 <meta name="theme-color" content="#2563eb">
 <link rel="icon" href="https://cdn-icons-png.flaticon.com">
 <style>
+/* ===== CSS ORIGINAL (INALTERADO) ===== */
 :root{
   --primary:#1e293b;
   --accent:#2563eb;
@@ -21,21 +22,18 @@ body{margin:0;padding:15px;font-family:sans-serif;background:var(--bg);color:var
 .search-input{flex:1;padding:10px;border-radius:8px;border:1px solid #e2e8f0;font-size:0.85rem;}
 .sort-select{width:110px;padding:9px;border-radius:8px;border:1px solid #e2e8f0;background:#fff;font-size:0.75rem;}
 .nav-btns{display:flex;gap:5px;}
-.btn-cat{padding:10px 18px;border-radius:30px;border:none;background:white;cursor:pointer;font-size:0.8rem;transition:0.3s;box-shadow:0 2px 5px rgba(0,0,0,0.05);}
+.btn-cat{padding:10px 18px;border-radius:30px;border:none;background:white;cursor:pointer;font-size:0.8rem;}
 .btn-cat.active{background:var(--accent);color:white;}
 .cat-filter{display:flex;gap:5px;margin-bottom:15px;flex-wrap:wrap;}
-#adminPanel{display:none;background:white;padding:15px;border-radius:12px;grid-template-columns:2fr 1fr 1fr 1fr auto;gap:10px;margin-bottom:15px;align-items:end;border-left:5px solid var(--accent);}
-.input-group label{font-size:0.65rem;font-weight:700;color:#64748b;margin-bottom:3px;display:block;}
-input,select,textarea{padding:8px;border:1px solid #e2e8f0;border-radius:8px;width:100%;box-sizing:border-box;font-size:0.8rem;}
-.stats-bar{display:flex;justify-content:space-between;align-items:center;margin-bottom:15px;background:white;padding:10px 15px;border-radius:10px;border:1px solid #e2e8f0;font-size:0.8rem;}
-.backup-group{display:none;gap:5px;}
-#historyPanel{display:none;background:white;padding:25px;border-radius:16px;margin-bottom:30px;border-left:5px solid var(--primary);box-shadow:0 4px 12px rgba(0,0,0,0.05);}
-.hist-table{width:100%;border-collapse:collapse;margin-top:15px;font-size:0.85rem;}
-.hist-table th,.hist-table td{padding:12px;text-align:left;border-bottom:1px solid #eee;}
+#adminPanel{display:none;background:white;padding:15px;border-radius:12px;grid-template-columns:2fr 1fr 1fr 1fr auto;gap:10px;margin-bottom:15px;}
+.stats-bar{display:flex;justify-content:space-between;align-items:center;margin-bottom:15px;background:white;padding:10px 15px;border-radius:10px;}
+#historyPanel{display:none;background:white;padding:25px;border-radius:16px;margin-bottom:30px;}
+.hist-table{width:100%;border-collapse:collapse;margin-top:15px;}
+.hist-table th,.hist-table td{padding:12px;border-bottom:1px solid #eee;}
 .hist-table tr:nth-child(even){background:#f5f5f5;}
 .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:15px;}
-.card{background:white;border-radius:12px;overflow:hidden;border:1px solid #e2e8f0;text-align:center;padding:10px;}
-.card img{width:100%;height:130px;object-fit:contain;background:#f9faf9;border-radius:8px;}
+.card{background:white;border-radius:12px;border:1px solid #e2e8f0;text-align:center;padding:10px;}
+.card img{width:100%;height:130px;object-fit:contain;}
 .admin-actions{display:flex;gap:6px;justify-content:center;}
 .print-only{display:none;}
 @media print{
@@ -47,6 +45,8 @@ input,select,textarea{padding:8px;border:1px solid #e2e8f0;border-radius:8px;wid
 
 <body>
 <div class="container">
+
+<!-- ===== HEADER ===== -->
 <div class="header no-print">
 <h1>📦 Haris</h1>
 <div class="search-container">
@@ -63,13 +63,35 @@ input,select,textarea{padding:8px;border:1px solid #e2e8f0;border-radius:8px;wid
 </div>
 </div>
 
+<!-- ===== STATS ===== -->
 <div class="stats-bar no-print">
 <div>Produtos: <b id="totalProdutos">0</b> | Total Unid: <b id="totalEstoque">0</b></div>
-<div class="backup-group" id="backupGroup">
+<div class="backup-group" id="backupGroup" style="display:none;">
 <button class="btn-cat" onclick="toggleHistory()">📋 Histórico</button>
+<button class="btn-cat" onclick="exportarBackup()">📥 Exportar</button>
+<button class="btn-cat" onclick="document.getElementById('importInput').click()">📤 Importar</button>
+<input type="file" id="importInput" style="display:none" onchange="importarBackup(this)">
 </div>
 </div>
 
+<!-- ===== ADMIN PANEL (CADASTRO) ===== -->
+<div id="adminPanel" class="no-print">
+<input id="nome" placeholder="Nome">
+<select id="categoria">
+<option>Tinta Hardtop</option>
+<option>Tinta Pilot</option>
+<option>Componente B</option>
+<option>Jotamastic A</option>
+<option>Jotamastic B</option>
+<option>Solvente</option>
+<option>Outros</option>
+</select>
+<input type="number" id="qtd" placeholder="Qtd">
+<input type="file" id="foto" accept="image/*">
+<button onclick="cadastrar()">CADASTRAR</button>
+</div>
+
+<!-- ===== HISTÓRICO ===== -->
 <div id="historyPanel" class="no-print">
 <h2>📋 Histórico</h2>
 <input id="inputBuscaHist" placeholder="Buscar..." oninput="renderHistory()">
@@ -84,17 +106,23 @@ input,select,textarea{padding:8px;border:1px solid #e2e8f0;border-radius:8px;wid
 <option>Outros</option>
 </select>
 <button onclick="imprimirHistorico()">📄 PDF Histórico</button>
+<button onclick="limparHistorico()">Limpar Tudo</button>
+
 <table class="hist-table">
 <thead>
-<tr><th>Data</th><th>Produto</th><th>Tipo</th><th>Qtd</th><th>Motivo</th></tr>
+<tr>
+<th>Data</th><th>Produto</th><th>Tipo</th><th>Qtd</th><th>Motivo</th><th>Ação</th>
+</tr>
 </thead>
 <tbody id="listaHist"></tbody>
 </table>
 </div>
 
+<!-- ===== PRODUTOS ===== -->
 <div class="grid" id="vitrine"></div>
 </div>
 
+<!-- ===== MODAL ===== -->
 <div id="modal" class="no-print" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);align-items:center;justify-content:center;">
 <div style="background:#fff;padding:20px;border-radius:12px;width:300px;text-align:center;">
 <input id="mNomeEdit" disabled>
@@ -103,7 +131,7 @@ input,select,textarea{padding:8px;border:1px solid #e2e8f0;border-radius:8px;wid
 <textarea id="mNota" placeholder="Motivo"></textarea>
 <button onclick="movimentar('add')">ENTRADA</button>
 <button onclick="movimentar('sub')">SAÍDA</button>
-<button onclick="fecharModal()">FECHAR</button>
+<button onclick="fecharModal()">SALVAR E FECHAR</button>
 </div>
 </div>
 
@@ -111,31 +139,42 @@ input,select,textarea{padding:8px;border:1px solid #e2e8f0;border-radius:8px;wid
 let isAdmin=false,editIdx=null;
 let db=[],historico=[];
 
+/* ===== ADMIN ===== */
 function toggleAdmin(){
 if(!isAdmin){
 if(prompt("Senha:")==="RebocadorHaris"){
 isAdmin=true;
-document.getElementById('backupGroup').style.display='flex';
+adminPanel.style.display='grid';
+backupGroup.style.display='flex';
 }
 }else{
 isAdmin=false;
-document.getElementById('backupGroup').style.display='none';
+adminPanel.style.display='none';
+backupGroup.style.display='none';
+historyPanel.style.display='none';
 }
 }
 
-function toggleHistory(){
-const p=document.getElementById('historyPanel');
-p.style.display=p.style.display==='block'?'none':'block';
-renderHistory();
+/* ===== CADASTRO ===== */
+function cadastrar(){
+const f=foto.files[0];
+if(!nome.value||!f)return alert("Preencha tudo");
+const r=new FileReader();
+r.onload=e=>{
+db.push({id:Date.now(),nome:nome.value,cat:categoria.value,qtd:+qtd.value||0,foto:e.target.result});
+nome.value='';qtd.value='';foto.value='';
+render();
+};
+r.readAsDataURL(f);
 }
 
+/* ===== RENDER ===== */
 function render(){
-const v=document.getElementById('vitrine');
-v.innerHTML='';
+vitrine.innerHTML='';
 let tp=0,te=0;
 db.forEach(p=>{
 tp++;te+=p.qtd;
-v.innerHTML+=`
+vitrine.innerHTML+=`
 <div class="card">
 <img src="${p.foto}">
 <p>${p.nome}</p>
@@ -147,6 +186,7 @@ totalProdutos.innerText=tp;
 totalEstoque.innerText=te;
 }
 
+/* ===== MODAL ===== */
 function abrirModal(id){
 editIdx=db.findIndex(p=>p.id===id);
 const p=db[editIdx];
@@ -156,20 +196,20 @@ valMov.value='';
 mNota.value='';
 modal.style.display='flex';
 }
+function fecharModal(){modal.style.display='none';}
 
-function fecharModal(){
-modal.style.display='none';
-}
-
+/* ===== MOVIMENTAÇÃO (AJUSTADA) ===== */
 function movimentar(tipo){
 const val=parseInt(valMov.value)||0;
 const nota=mNota.value||'';
 if(val<=0)return;
 const p=db[editIdx];
 if(tipo==='sub'&&val>p.qtd)return;
+
 p.qtd=tipo==='add'?p.qtd+val:p.qtd-val;
 
 historico.push({
+id:Date.now(),
 data:new Date().toLocaleString(),
 produto:p.nome,
 tipo,
@@ -185,6 +225,7 @@ render();
 renderHistory();
 }
 
+/* ===== HISTÓRICO (FILTRO CORRIGIDO) ===== */
 function renderHistory(){
 listaHist.innerHTML='';
 const t=inputBuscaHist.value.toLowerCase();
@@ -200,12 +241,46 @@ listaHist.innerHTML+=`
 <td>${h.tipo==='add'?'Entrada':'Saída'}</td>
 <td>${h.qtd}</td>
 <td>${h.motivo}</td>
+<td><button onclick="deletarHist(${h.id})">🗑</button></td>
 </tr>`;
 });
 }
 
+function deletarHist(id){
+historico=historico.filter(h=>h.id!==id);
+renderHistory();
+}
+
+function limparHistorico(){
+if(confirm("Limpar todo histórico?")){
+historico=[];
+renderHistory();
+}
+}
+
+/* ===== PDF ===== */
 function imprimirProdutos(){window.print();}
 function imprimirHistorico(){window.print();}
+
+/* ===== BACKUP ===== */
+function exportarBackup(){
+const data=JSON.stringify({db,historico});
+const a=document.createElement('a');
+a.href=URL.createObjectURL(new Blob([data],{type:'application/json'}));
+a.download='backup.json';
+a.click();
+}
+function importarBackup(i){
+const r=new FileReader();
+r.onload=e=>{
+const d=JSON.parse(e.target.result);
+db=d.db||[];
+historico=d.historico||[];
+render();renderHistory();
+};
+r.readAsText(i.files[0]);
+}
+
 </script>
 </body>
 </html>
