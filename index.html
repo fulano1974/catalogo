@@ -33,6 +33,9 @@ input,select,textarea{padding:8px;border:1px solid #e2e8f0;border-radius:8px;wid
 .hist-table{width:100%;border-collapse:collapse;margin-top:15px;font-size:0.85rem;}
 .hist-table th,.hist-table td{padding:12px;text-align:left;border-bottom:1px solid #eee;}
 .hist-table tr:nth-child(even){background:#f5f5f5;}
+.hist-table input{font-weight:bold;font-family:sans-serif;}
+.tag-add{color:var(--success);font-weight:bold;}
+.tag-sub{color:var(--danger);font-weight:bold;}
 .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:15px;}
 .card{background:white;border-radius:12px;overflow:hidden;border:1px solid #e2e8f0;text-align:center;transition:0.3s;padding:10px;break-inside:avoid;position:relative;}
 .card img{width:100%;height:130px;object-fit:contain;background:#f9faf9;border-radius:8px;}
@@ -44,7 +47,6 @@ input,select,textarea{padding:8px;border:1px solid #e2e8f0;border-radius:8px;wid
 #modal{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background: rgba(15,23,42,0.8);z-index:1000;align-items:center;justify-content:center;backdrop-filter:blur(3px);}
 .modal-content{background:white;padding:25px;border-radius:20px;width:320px;text-align:center;}
 .print-only{display:none;}
-
 @media print{
   body{background:white;padding:0; counter-reset: page;}
   .no-print{display:none !important;}
@@ -63,10 +65,11 @@ input,select,textarea{padding:8px;border:1px solid #e2e8f0;border-radius:8px;wid
 </head>
 <body>
 <div class="container">
+
 <div class="print-only print-header">📋 Histórico de Movimentações</div>
 
-<!-- Cabeçalho e filtros -->
-<div class="header no-print">
+<div class="no-print">
+<div class="header">
 <h1>📦 Haris</h1>
 <div class="search-container">
 <input type="text" id="inputBusca" class="search-input" placeholder="Pesquisar..." oninput="render()">
@@ -78,25 +81,21 @@ input,select,textarea{padding:8px;border:1px solid #e2e8f0;border-radius:8px;wid
 </div>
 <div class="nav-btns">
 <button class="btn-cat" id="btnAdmin" onclick="toggleAdmin()">🔑 Admin</button>
-<button class="btn-cat" onclick="imprimirProdutosPDF()" style="background:var(--primary);color:white;">📄 PDF</button>
+<button class="btn-cat" onclick="imprimirProdutos()" style="background:var(--primary);color:white;">📄 PDF</button>
 </div>
 </div>
 
-<div class="stats-bar no-print">
+<div class="stats-bar">
 <div style="display:flex; gap:15px;">
 <div>Produtos: <b id="totalProdutos">0</b></div>
 <div>Total Unid: <b id="totalEstoque">0</b></div>
 </div>
 <div class="backup-group" id="backupGroup" style="display:none; gap:5px;">
 <button class="btn-cat" onclick="toggleHistory()">📋 Histórico</button>
-<button class="btn-cat" onclick="exportarBackup()">📥 Exportar</button>
-<button class="btn-cat" onclick="document.getElementById('importInput').click()">📤 Importar</button>
-<input type="file" id="importInput" style="display:none" onchange="importarBackup(this)">
 </div>
 </div>
 
-<!-- Painel de Histórico -->
-<div id="historyPanel" class="no-print">
+<div id="historyPanel">
 <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
 <h2 style="margin:0; font-size:1.1rem;">📋 Histórico</h2>
 <div style="display:flex; gap:5px;">
@@ -104,29 +103,14 @@ input,select,textarea{padding:8px;border:1px solid #e2e8f0;border-radius:8px;wid
 <button class="btn-cat" onclick="limparHistorico()">Limpar Tudo</button>
 </div>
 </div>
-<div style="display:flex; gap:8px; margin-bottom:15px;">
-<input type="text" id="inputBuscaHist" class="search-input" placeholder="Pesquisar produto ou motivo..." oninput="renderHistory()">
-<select id="filtroCatHist" class="sort-select" onchange="renderHistory()">
-<option value="Todos">Todas as Categorias</option>
-<option value="Tinta Hardtop">Tinta Hardtop</option>
-<option value="Tinta Pilot">Tinta Pilot</option>
-<option value="Componente B">Componente B</option>
-<option value="Jotamastic A">Jotamastic A</option>
-<option value="Jotamastic B">Jotamastic B</option>
-<option value="Solvente">Solvente</option>
-<option value="Outros">Outros</option>
-</select>
-</div>
 <table class="hist-table">
 <thead><tr><th>Data</th><th>Produto</th><th>Tipo</th><th>Qtd</th><th>Motivo</th><th>Ação</th></tr></thead>
 <tbody id="listaHist"></tbody>
 </table>
 </div>
 
-<!-- Filtros de categorias -->
 <div class="cat-filter" id="catFiltros"></div>
 
-<!-- Painel Admin -->
 <div id="adminPanel">
 <div class="input-group"><label>Nome</label><input type="text" id="nome"></div>
 <div class="input-group"><label>Categoria</label>
@@ -144,15 +128,14 @@ input,select,textarea{padding:8px;border:1px solid #e2e8f0;border-radius:8px;wid
 <div class="input-group"><label>Foto</label><input type="file" id="foto" accept="image/*"></div>
 <button class="btn-cat" style="background:var(--accent);color:white;height:35px;" onclick="cadastrar()">CADASTRAR</button>
 </div>
+</div>
 
-<!-- Vitrine de produtos -->
 <div class="grid" id="vitrine"></div>
 
-<!-- Footer para impressão -->
 <div class="print-only footer-print" id="printDateTime"></div>
 <div class="print-only page-counter"></div>
+</div>
 
-<!-- Modal de edição -->
 <div id="modal" class="no-print">
 <div class="modal-content">
 <p style="font-size:0.7rem; font-weight:bold; margin-bottom:5px;">EDITAR PRODUTO</p>
@@ -176,86 +159,24 @@ input,select,textarea{padding:8px;border:1px solid #e2e8f0;border-radius:8px;wid
 </div>
 
 <script>
-let isAdmin=false, editIdx=null;
+//=== DADOS INICIAIS ===
+let isAdmin=false,editIdx=null;
 let db=[], historico=[];
 let catAtiva='Todos';
 let listaCategorias=["Tinta Hardtop","Tinta Pilot","Componente B","Jotamastic A","Jotamastic B","Solvente","Outros"];
-let dbHaris;
 
-function initDB(){
-    const request = indexedDB.open('db_haris_v30', 1);
-    request.onerror = e=>console.log('Erro DB', e);
-    request.onsuccess = e=>{
-        dbHaris = e.target.result;
-        carregarDados();
-    };
-    request.onupgradeneeded = e=>{
-        const dbObj = e.target.result;
-        dbObj.createObjectStore('produtos', {keyPath:'id', autoIncrement:true});
-        dbObj.createObjectStore('historico', {keyPath:'id', autoIncrement:true});
-    };
-}
-
-function carregarDados(){
-    const t = dbHaris.transaction(['produtos','historico'],'readonly');
-    t.objectStore('produtos').getAll().onsuccess = e=>{ db = e.target.result; render(); }
-    t.objectStore('historico').getAll().onsuccess = e=>{ historico = e.target.result; renderHistory(); }
-}
-
-// Admin
-function toggleAdmin(){
-    if(!isAdmin){
-        if(prompt("Senha:")==="RebocadorHaris"){
-            isAdmin=true;
-            document.getElementById('adminPanel').style.display='grid';
-            document.getElementById('backupGroup').style.display='flex';
-            render();
-        }
-    }else{
-        isAdmin=false;
-        document.getElementById('adminPanel').style.display='none';
-        document.getElementById('backupGroup').style.display='none';
-        document.getElementById('historyPanel').style.display='none';
-        render();
-    }
-}
-
-// Cadastro
-function cadastrar(){
-    const n=document.getElementById('nome').value;
-    const c=document.getElementById('categoria').value;
-    const q=parseInt(document.getElementById('qtd').value)||0;
-    const f=document.getElementById('foto').files[0];
-    if(!n){alert("Digite o nome!");return;}
-    if(!f){alert("Selecione uma foto!");return;}
-    const reader = new FileReader();
-    reader.onload=e=>{
-        db.push({id:Date.now(), nome:n, cat:c, qtd:q, foto:e.target.result});
-        salvar();
-        document.getElementById('nome').value=''; 
-        document.getElementById('qtd').value=''; 
-        document.getElementById('foto').value='';
-    };
-    reader.readAsDataURL(f);
-}
-
-// Render produtos
+//=== RENDERIZAÇÃO ===
 function render(){
-    const v=document.getElementById('vitrine');
-    const termo=document.getElementById('inputBusca').value.toLowerCase();
-    const fBox=document.getElementById('catFiltros');
-    const ordem=document.getElementById('ordem').value;
-    v.innerHTML='';
-    fBox.innerHTML=['Todos',...listaCategorias].map(c=>`<button class="btn-cat ${catAtiva===c?'active':''}" onclick="setCat('${c}')">${c}</button>`).join('');
-    let cProd=0, cEst=0;
-    let copiaDb=[...db];
-    if(ordem==='nome') copiaDb.sort((a,b)=>a.nome.localeCompare(b.nome));
-    else if(ordem==='qtd-desc') copiaDb.sort((a,b)=>b.qtd-a.qtd);
-    else if(ordem==='qtd-asc') copiaDb.sort((a,b)=>a.qtd-b.qtd);
-    copiaDb.forEach((p,i)=>{
-        if(p.nome.toLowerCase().includes(termo)&&(catAtiva==='Todos'||p.cat===catAtiva)){
-            cProd++; cEst+=parseInt(p.qtd);
-            v.innerHTML+=`
+const v=document.getElementById('vitrine');
+const termo=document.getElementById('inputBusca').value.toLowerCase();
+const fBox=document.getElementById('catFiltros');
+v.innerHTML='';
+fBox.innerHTML=['Todos',...listaCategorias].map(c=>`<button class="btn-cat ${catAtiva===c?'active':''}" onclick="setCat('${c}')">${c}</button>`).join('');
+let cProd=0,cEst=0;
+db.forEach((p,i)=>{
+if(p.nome.toLowerCase().includes(termo)&&(catAtiva==='Todos'||p.cat===catAtiva)){
+cProd++; cEst+=parseInt(p.qtd);
+v.innerHTML+=`
 <div class="card">
 <img src="${p.foto}">
 <div class="card-info">
@@ -263,103 +184,113 @@ function render(){
 <span class="badge-cat" style="background:${getCorCat(p.cat)}">${p.cat||'Outros'}</span>
 <p style="margin:0; font-size:0.7rem; color:gray;">Estoque: <b style="font-size:0.9rem;">${p.qtd}</b></p>
 ${isAdmin?`<div class="admin-actions">
-<button class="btn-edit-card" onclick="abrirModal(${p.id})">Editar</button>
-<button class="btn-delete-card" onclick="deletar(${p.id})">Deletar</button>
+<button class="btn-edit-card" onclick="abrirModal(${i})">Editar</button>
+<button class="btn-delete-card" onclick="deletar(${i})">Deletar</button>
 </div>`:''}
 </div>
-</div>`;  
-        }
-    });
-    document.getElementById('totalProdutos').innerText=cProd;
-    document.getElementById('totalEstoque').innerText=cEst;
+</div>`; }
+});
+document.getElementById('totalProdutos').innerText=cProd;
+document.getElementById('totalEstoque').innerText=cEst;
 }
 
 function getCorCat(cat){
-    switch(cat){
-        case 'Tinta Hardtop': return '#2563eb';
-        case 'Tinta Pilot': return '#1d4ed8';
-        case 'Componente B': return '#f59e0b';
-        case 'Jotamastic A': return '#10b981';
-        case 'Jotamastic B': return '#14b8a6';
-        case 'Solvente': return '#f97316';
-        default: return '#64748b';
-    }
+switch(cat){
+case 'Tinta Hardtop': return '#2563eb';
+case 'Tinta Pilot': return '#1d4ed8';
+case 'Componente B': return '#f59e0b';
+case 'Jotamastic A': return '#10b981';
+case 'Jotamastic B': return '#14b8a6';
+case 'Solvente': return '#f97316';
+default: return '#64748b';
+}
 }
 
 function setCat(c){catAtiva=c; render();}
 
-// Histórico
-function renderHistory(){
-    const termo=document.getElementById('inputBuscaHist').value.toLowerCase();
-    const cat=document.getElementById('filtroCatHist').value;
-    const tb=document.getElementById('listaHist');
-    tb.innerHTML='';
-    historico.forEach(h=>{
-        if((h.prod.toLowerCase().includes(termo)||h.motivo.toLowerCase().includes(termo))&&(cat==='Todos'||h.cat===cat)){
-            tb.innerHTML+=`<tr>
-<td>${h.data}</td>
-<td>${h.prod}</td>
-<td>${h.tipo}</td>
-<td>${h.qtd}</td>
-<td>${h.motivo}</td>
-<td><button onclick="deletarHist(${h.id})">❌</button></td>
-</tr>`;
-        }
-    });
+//=== ADMIN ===
+function toggleAdmin(){
+isAdmin=!isAdmin;
+document.getElementById('adminPanel').style.display=isAdmin?'grid':'none';
+document.getElementById('backupGroup').style.display=isAdmin?'flex':'none';
+render();
 }
 
-function toggleHistory(){ 
-    const h=document.getElementById('historyPanel'); 
-    h.style.display=h.style.display==='none'?'block':'none';
+function cadastrar(){
+const n=document.getElementById('nome').value;
+const c=document.getElementById('categoria').value;
+const q=parseInt(document.getElementById('qtd').value)||0;
+const f=document.getElementById('foto').files[0];
+if(!n||!f){alert('Preencha nome e foto!'); return;}
+const r=new FileReader();
+r.onload=e=>{
+db.push({nome:n, cat:c, qtd:q, foto:e.target.result});
+document.getElementById('nome').value=''; document.getElementById('qtd').value=''; document.getElementById('foto').value='';
+render();
+}
+r.readAsDataURL(f);
 }
 
-// Modal
-function abrirModal(id){
-    editIdx=db.findIndex(p=>p.id===id);
-    const p=db[editIdx];
-    document.getElementById('mNomeEdit').value=p.nome;
-    document.getElementById('mQtd').innerText=p.qtd;
-    document.getElementById('modal').style.display='flex';
+function deletar(idx){if(confirm('Deletar produto?')){db.splice(idx,1); render();}}
+
+//=== MODAL ===
+function abrirModal(idx){
+editIdx=idx;
+const p=db[idx];
+document.getElementById('mNomeEdit').value=p.nome;
+document.getElementById('mQtd').innerText=p.qtd;
+document.getElementById('mNota').value='';
+document.getElementById('modal').style.display='flex';
+}
+
+function fecharModal(){
+if(editIdx===null) return;
+const p=db[editIdx];
+p.nome=document.getElementById('mNomeEdit').value;
+const f=document.getElementById('mFoto').files[0];
+if(f){
+const r=new FileReader();
+r.onload=e=>{p.foto=e.target.result; editIdx=null; document.getElementById('modal').style.display='none'; render();}
+r.readAsDataURL(f);
+}else{editIdx=null; document.getElementById('modal').style.display='none'; render();}
 }
 
 function movimentar(tipo){
-    const val=parseInt(document.getElementById('valMov').value)||0;
-    const nota=document.getElementById('mNota').value;
-    if(val<=0){alert('Digite valor válido'); return;}
-    if(editIdx===null) return;
-    if(tipo==='sub'&&db[editIdx].qtd<val){alert('Estoque insuficiente'); return;}
-    db[editIdx].qtd+=tipo==='add'?val:-val;
-    historico.push({id:Date.now(), data:new Date().toLocaleString(), prod:db[editIdx].nome, tipo:tipo==='add'?'Entrada':'Saída', qtd:val, motivo:nota, cat:db[editIdx].cat});
-    salvar(); render(); renderHistory();
+if(editIdx===null) return;
+const p=db[editIdx];
+let val=parseInt(document.getElementById('valMov').value)||0;
+const nota=document.getElementById('mNota').value;
+if(tipo==='add'){p.qtd+=val; historico.push({data:new Date().toLocaleString(), produto:p.nome, tipo:'Entrada', qtd:val, nota:nota});}
+else{p.qtd=Math.max(0,p.qtd-val); historico.push({data:new Date().toLocaleString(), produto:p.nome, tipo:'Saída', qtd:val, nota:nota});}
+document.getElementById('mQtd').innerText=p.qtd; renderHistory(); render();
 }
 
-// Fecha modal somente com botão
-function fecharModal(){ editIdx=null; document.getElementById('modal').style.display='none'; }
-
-// Deletar
-function deletar(id){ db=db.filter(p=>p.id!==id); salvar(); render();}
-function deletarHist(id){ historico=historico.filter(h=>h.id!==id); salvar(); renderHistory();}
-
-// Salvar
-function salvar(){
-    const t=dbHaris.transaction(['produtos','historico'],'readwrite');
-    const s=t.objectStore('produtos'); s.clear().onsuccess=()=>{db.forEach(p=>s.put(p));};
-    const s2=t.objectStore('historico'); s2.clear().onsuccess=()=>{historico.forEach(h=>s2.put(h));};
+//=== HISTÓRICO ===
+function renderHistory(){
+const tbody=document.getElementById('listaHist');
+tbody.innerHTML='';
+historico.forEach((h,i)=>{
+tbody.innerHTML+=`<tr>
+<td>${h.data}</td><td>${h.produto}</td><td>${h.tipo}</td><td>${h.qtd}</td><td>${h.nota}</td><td><button onclick="historico.splice(${i},1);renderHistory()">X</button></td>
+</tr>`;
+});
 }
 
-// PDFs
-function imprimirProdutosPDF(){
-    const conteudo = db.map(p=>`Produto: ${p.nome}\nCategoria: ${p.cat}\nQtd: ${p.qtd}\n\n`).join('');
-    const w=window.open('','PDF');
-    w.document.write('<pre>'+conteudo+'</pre>'); w.print();
+//=== PDFs ===
+function imprimirProdutos(){
+window.print();
 }
 
 function imprimirHistorico(){
-    window.print();
+document.getElementById('printDateTime').innerText='Impressão em: '+new Date().toLocaleString();
+window.print();
 }
 
-// Inicialização
-initDB();
+//=== LIMPAR HISTÓRICO ===
+function limparHistorico(){if(confirm('Limpar todo histórico?')){historico=[]; renderHistory();}}
+
+//=== INIT ===
+render();
 </script>
 </body>
 </html>
