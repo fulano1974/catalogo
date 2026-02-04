@@ -48,38 +48,10 @@ input,select,textarea{padding:8px;border:1px solid #e2e8f0;border-radius:8px;wid
 .modal-content{background:white;padding:25px;border-radius:20px;width:320px;text-align:center;}
 .print-only{display:none;}
 @media print{
-  body{background:white;padding:0; counter-reset: page;}
-  .no-print{display:none !important;}
-  .print-only{display:block;}
-  .print-header{text-align:center;font-size:28px;font-weight:bold;border-bottom:2px solid #000;padding-bottom:10px;margin-bottom:20px;}
-  .grid{display:grid !important;grid-template-columns:repeat(6,1fr)!important;gap:5px!important;}
-  .card{border:1px solid #eee !important;box-shadow:none !important;padding:5px !important;page-break-inside:avoid;}
-  .card img{height:80px !important;}
-  .card h3{font-size:0.6rem !important;}
-  .admin-actions{display:none !important;}
-  .footer-print{position:fixed;bottom:0;width:100%;display:flex;justify-content:center;font-size:10px;border-top:1px solid #ddd;padding-top:5px;background:white;}
-  .page-counter{position:fixed;bottom:0;right:0;font-size:10px;padding-top:5px;}
-  .page-counter::after{counter-increment: page; content: "Página " counter(page, decimal-leading-zero);}
-
-  /* PDF Histórico: mostra apenas o histórico */
-  body.print-historico * {
-    display: none !important;
-  }
-
-  body.print-historico #historyPanel,
-  body.print-historico #historyPanel * {
-    display: block !important;
-  }
-
-  body.print-historico #historyPanel {
-    border-left: none !important;
-    box-shadow: none !important;
-    margin: 0 !important;
-  }
-
-  body.print-historico .hist-table tr:nth-child(even){
-    background:#f5f5f5 !important; /* mantém zebramento */
-  }
+  /* NOVA REGRA: imprimir somente o histórico mantendo zebramento */
+  body * {display:none !important;}
+  #historyPanel, #historyPanel * {display:block !important;}
+  .hist-table tr:nth-child(even){background:#f5f5f5 !important;}
 }
 </style>
 </head>
@@ -193,7 +165,6 @@ let catAtiva='Todos';
 let listaCategorias=["Tinta Hardtop","Tinta Pilot","Componente B","Jotamastic A","Jotamastic B","Solvente","Outros"];
 let dbHaris;
 
-// === INICIALIZAÇÃO DO INDEXEDDB ===
 function initDB(){
     const request = indexedDB.open('db_haris_v30', 1);
     request.onerror = e=>console.log('Erro DB', e);
@@ -217,7 +188,6 @@ function carregarDados(){
     historicoStore.getAll().onsuccess = e=>{ historico = e.target.result; renderHistory(); }
 }
 
-// === FUNÇÕES PRINCIPAIS ===
 function toggleAdmin(){
 if(!isAdmin){
 if(prompt("Senha:")==="RebocadorHaris"){
@@ -302,42 +272,90 @@ default: return '#64748b';
 
 function setCat(c){catAtiva=c;render();}
 
-// === HISTÓRICO ===
-function renderHistory(){
-const termo=document.getElementById('inputBuscaHist').value.toLowerCase();
-const filtro=document.getElementById('filtroCatHist').value;
-const tbody=document.getElementById('listaHist');
-tbody.innerHTML='';
-historico.filter(h=>(
-(h.produto.toLowerCase().includes(termo)||h.motivo.toLowerCase().includes(termo))&&
-(filtro==='Todos'||h.cat===filtro)
-)).forEach(h=>{
-tbody.innerHTML+=`<tr>
-<td>${h.data}</td>
-<td>${h.produto}</td>
-<td>${h.tipo}</td>
-<td>${h.qtd}</td>
-<td>${h.motivo}</td>
-<td><button onclick="deletarHist(${h.id})">❌</button></td>
-</tr>`;
-});
+function cadastrar(){
+const n=document.getElementById('nome').value;
+const c=document.getElementById('categoria').value;
+const q=parseInt(document.getElementById('qtd').value)||0;
+const f=document.getElementById('foto').files[0];
+if(!n){alert("Digite o nome!");return;}
+if(!f){alert("Selecione uma foto!");return;}
+const reader = new FileReader();
+reader.onload=e=>{
+db.push({id:Date.now(), nome:n, cat:c, qtd:q, foto:e.target.result});
+salvar();
+document.getElementById('nome').value=''; document.getElementById('qtd').value=''; document.getElementById('foto').value='';
+};
+reader.readAsDataURL(f);
 }
 
-function imprimirPDF(){
-window.print();
+function abrirModal(id){
+editIdx=db.findIndex(p=>p.id===id);
+if(editIdx<0) return;
+const p=db[editIdx];
+document.getElementById('mNomeEdit').value=p.nome;
+document.getElementById('mQtd').innerText=p.qtd;
+document.getElementById('mNota').value='';
+document.getElementById('modal').style.display='flex';
 }
 
-function imprimirHistorico(){
-document.body.classList.add('print-historico');
-window.print();
-setTimeout(()=>{document.body.classList.remove('print-historico');},500);
+function fecharModal(){
+if(editIdx>=0){
+let p=db[editIdx];
+p.nome=document.getElementById('mNomeEdit').value;
+const f=document.getElementById('mFoto').files[0];
+if(f){
+const r=new FileReader();
+r.onload=e=>{p.foto=e.target.result; salvar();}
+r.readAsDataURL(f);
+} else salvar();
+editIdx=null;
+}
+document.getElementById('modal').style.display='none';
+}
+
+function movimentar(tipo){
+if(editIdx<0) return;
+let p=db[editIdx];
+let val=parseInt(document.getElementById('valMov').value)||0;
+if(tipo==='sub') val=-val;
+p.qtd+=val;
+historico.push({id:Date.now(), data:new Date().toLocaleString(), produto:p.nome, tipo:tipo, qtd:val, motivo:document.getElementById('mNota').value});
+salvar();
+render();
+renderHistory();
+fecharModal();
+}
+
+function deletar(id){
+if(confirm("Deletar produto?")){
+db=db.filter(p=>p.id!==id);
+salvar();
+}
 }
 
 function limparHistorico(){
-if(confirm('Tem certeza que deseja limpar o histórico?')){
-historico=[]; salvar(); renderHistory();
+if(confirm("Limpar todo histórico?")){
+historico=[];
+salvar();
 }
 }
+
+function renderHistory(){
+const termo=document.getElementById('inputBuscaHist').value.toLowerCase();
+const catFiltro=document.getElementById('filtroCatHist').value;
+let lista=historico.filter(h=>h.produto.toLowerCase().includes(termo)&&(catFiltro==='Todos'||db.find(p=>p.nome===h.produto)?.cat===catFiltro));
+document.getElementById('listaHist').innerHTML=lista.map(h=>`<tr>
+<td>${h.data}</td>
+<td>${h.produto}</td>
+<td>${h.tipo==='add'?'Entrada':'Saída'}</td>
+<td>${h.qtd}</td>
+<td>${h.motivo}</td>
+<td><button onclick="historico.splice(historico.findIndex(x=>x.id===h.id),1); salvar();">❌</button></td>
+</tr>`).join('');
+}
+
+function imprimirPDF(){window.print();}
+function imprimirHistorico(){window.print();}
 
 initDB();
 </script>
