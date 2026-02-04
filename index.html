@@ -162,7 +162,7 @@ input,select,textarea{padding:8px;border:1px solid #e2e8f0;border-radius:8px;wid
 <button class="btn-cat" style="background:var(--success); color:white; flex:1;" onclick="movimentar('add')">ENTRADA</button>
 <button class="btn-cat" style="background:var(--danger); color:white; flex:1;" onclick="movimentar('sub')">SAÍDA</button>
 </div>
-<button onclick="fecharModal()" style="margin-top:15px; cursor:pointer; background:none; border:none; text-decoration:underline; font-size:0.7rem;">SALVAR E FECHAR</button>
+<button onclick="salvarEdicao()" style="margin-top:15px; cursor:pointer; background:none; border:none; text-decoration:underline; font-size:0.7rem;">SALVAR E FECHAR</button>
 </div>
 </div>
 
@@ -281,180 +281,92 @@ default: return '#64748b';
 
 function setCat(c){catAtiva=c;render();}
 
+// === CADASTRO ===
 function cadastrar(){
 const n=document.getElementById('nome').value;
 const c=document.getElementById('categoria').value;
-const q=parseInt(document.getElementById('qtd').value)||0;
+const q=document.getElementById('qtd').value;
 const f=document.getElementById('foto').files[0];
-if(!n){alert("Digite o nome!");return;}
-if(!f){alert("Selecione uma foto!");return;}
-const reader = new FileReader();
+if(!n||!q) return alert('Preencha nome e quantidade');
+const reader=new FileReader();
 reader.onload=e=>{
-db.push({id:Date.now(),nome:n,cat:c,qtd:q,foto:e.target.result});
-render();
-document.getElementById('nome').value='';
-document.getElementById('qtd').value='';
-document.getElementById('foto').value='';
-salvar();
+    const produto={nome:n,cat:c,qtd:parseInt(q),foto:e.target.result};
+    db.push(produto); 
+    salvar(); 
 };
-reader.readAsDataURL(f);
+if(f) reader.readAsDataURL(f);
+else{
+    db.push({nome:n,cat:c,qtd:parseInt(q),foto:''});
+    salvar();
+}
 }
 
+// === MODAL E EDIÇÃO ===
 function abrirModal(id){
-editIdx=db.findIndex(p=>p.id===id);
+editIdx=db.findIndex(p=>p.id===id || p===id);
 const p=db[editIdx];
 document.getElementById('mNomeEdit').value=p.nome;
 document.getElementById('mQtd').innerText=p.qtd;
-document.getElementById('mFoto').value='';
 document.getElementById('valMov').value=0;
 document.getElementById('mNota').value='';
+document.getElementById('mFoto').value='';
 document.getElementById('modal').style.display='flex';
 }
 
-function fecharModal(){document.getElementById('modal').style.display='none'; salvar(); render(); renderHistory();}
-
 function movimentar(tipo){
-const val=parseInt(document.getElementById('valMov').value)||0;
-const nota=document.getElementById('mNota').value;
-if(val<=0){alert("Digite valor >0"); return;}
-const p=db[editIdx];
-if(tipo==='sub'&&val>p.qtd){alert("Estoque insuficiente"); return;}
-p.qtd = tipo==='add'?p.qtd+val:p.qtd-val;
-if(document.getElementById('mFoto').files[0]){
-const reader=new FileReader();
-reader.onload=e=>{p.foto=e.target.result; salvar(); render(); renderHistory();}
-reader.readAsDataURL(document.getElementById('mFoto').files[0]);
-}else{salvar(); render(); renderHistory();}
-historico.push({id:Date.now(),data:new Date().toLocaleString(),produto:p.nome,tipo:tipo,qtd:val,motivo:nota,cat:p.cat});
-fecharModal();
+let qtd=parseInt(document.getElementById('valMov').value);
+if(isNaN(qtd)||qtd<=0) return alert('Quantidade inválida');
+let motivo=document.getElementById('mNota').value;
+if(tipo==='add') db[editIdx].qtd+=qtd;
+else db[editIdx].qtd-=qtd;
+historico.push({data:new Date().toLocaleString(),nome:db[editIdx].nome,tipo:(tipo==='add'?'Entrada':'Saída'),qtd,qtdRestante:db[editIdx].qtd,motivo});
+render();
+renderHistory();
+document.getElementById('mQtd').innerText=db[editIdx].qtd;
 }
 
+function salvarEdicao(){
+const p=db[editIdx];
+p.nome=document.getElementById('mNomeEdit').value;
+const f=document.getElementById('mFoto').files[0];
+if(f){
+const reader=new FileReader();
+reader.onload=e=>{p.foto=e.target.result; salvar(); document.getElementById('modal').style.display='none'; render();}
+reader.readAsDataURL(f);
+}else{
+salvar();
+document.getElementById('modal').style.display='none';
+render();
+}
+}
+
+// === HISTÓRICO ===
 function renderHistory(){
 const termo=document.getElementById('inputBuscaHist').value.toLowerCase();
-const catFiltro=document.getElementById('filtroCatHist').value;
-const lista=document.getElementById('listaHist');
-lista.innerHTML='';
-historico.filter(h=>{
-return (h.produto.toLowerCase().includes(termo)||h.motivo.toLowerCase().includes(termo)) &&
-(catFiltro==='Todos'?true:h.cat===catFiltro);
-}).forEach(h=>{
-lista.innerHTML+=`<tr>
-<td>${h.data}</td>
-<td>${h.produto}</td>
-<td style="text-align:center">${h.tipo==='add'?'Entrada':'Saída'}</td>
-<td style="text-align:center">${h.qtd}</td>
-<td>${h.motivo}</td>
-<td><button onclick="deletarHist(${h.id})" style="font-size:0.7rem;">Deletar</button></td>
+const filtro=document.getElementById('filtroCatHist').value;
+const tbody=document.getElementById('listaHist');
+tbody.innerHTML='';
+let hFiltrado=historico.filter(h=>{
+let prod=db.find(p=>p.nome===h.nome);
+if(!prod) return false;
+let cat=prod.cat||'Outros';
+return (h.nome.toLowerCase().includes(termo)||h.motivo.toLowerCase().includes(termo))&&(filtro==='Todos'||cat===filtro);
+});
+hFiltrado.forEach((h,i)=>{
+tbody.innerHTML+=`<tr style="background:${i%2===0?'#fff':'#f5f5f5'}">
+<td>${h.data}</td><td>${h.nome}</td><td>${h.tipo}</td><td>${h.qtd}</td><td>${h.motivo}</td><td></td>
 </tr>`;
 });
-}
 
-function deletar(id){db=db.filter(p=>p.id!==id);salvar(); render();}
-function deletarHist(id){historico=historico.filter(h=>h.id!==id);salvar(); renderHistory();}
-function limparHistorico(){if(confirm("Limpar todo histórico?")){historico=[]; salvar(); renderHistory();}}
-
-//------------------------ PDF PROFISSIONAL ------------------------
-function imprimirProdutos(){
-    const termo = document.getElementById('inputBusca').value.toLowerCase();
-    const produtosFiltrados = db.filter(p =>
-        p.nome.toLowerCase().includes(termo) &&
-        (catAtiva === 'Todos' || p.cat === catAtiva) &&
-        p.foto
-    );
-    if(produtosFiltrados.length === 0){
-        alert("Nenhum produto com foto para imprimir.");
-        return;
-    }
-    const printContent = document.createElement('div');
-    printContent.classList.add('print-only');
-    printContent.innerHTML = '<h2 style="text-align:center; margin-bottom:15px;">📦 Produtos Cadastrados</h2>';
-    const tabela = document.createElement('table');
-    tabela.style.width = '100%';
-    tabela.style.borderCollapse = 'collapse';
-    tabela.style.fontSize = '0.85rem';
-    tabela.innerHTML = `
-        <thead>
-            <tr style="background:#2563eb; color:white;">
-                <th style="padding:8px; border:1px solid #000;">Foto</th>
-                <th style="padding:8px; border:1px solid #000;">Nome</th>
-                <th style="padding:8px; border:1px solid #000;">Categoria</th>
-                <th style="padding:8px; border:1px solid #000;">Estoque</th>
-            </tr>
-        </thead>
-        <tbody>
-            ${produtosFiltrados.map((p,i) => `
-                <tr style="background:${i%2===0?'#f5f5f5':'#ffffff'}">
-                    <td style="padding:5px; border:1px solid #000; text-align:center;">
-                        <img src="${p.foto}" style="width:60px; height:60px; object-fit:contain;">
-                    </td>
-                    <td style="padding:5px; border:1px solid #000;">${p.nome}</td>
-                    <td style="padding:5px; border:1px solid #000;">${p.cat}</td>
-                    <td style="padding:5px; border:1px solid #000; text-align:center;">${p.qtd}</td>
-                </tr>
-            `).join('')}
-        </tbody>
-    `;
-    printContent.appendChild(tabela);
-    document.body.appendChild(printContent);
-    window.print();
-    printContent.remove();
-}
-
+// PDF Histórico
 function imprimirHistorico(){
-    const termo = document.getElementById('inputBuscaHist').value.toLowerCase();
-    const catFiltro = document.getElementById('filtroCatHist').value;
-
-    const historicoFiltrado = historico.filter(h=>{
-        const matchTerm = h.produto.toLowerCase().includes(termo) || h.motivo.toLowerCase().includes(termo);
-        const matchCat = (catFiltro==='Todos') ? true : h.cat===catFiltro;
-        return matchTerm && matchCat;
-    });
-
-    if(historicoFiltrado.length === 0){
-        alert("Nenhum histórico para imprimir.");
-        return;
-    }
-
-    const printContent = document.createElement('div');
-    printContent.classList.add('print-only');
-    printContent.innerHTML = '<h2 style="text-align:center; margin-bottom:15px;">📋 Histórico de Movimentações</h2>';
-
-    const tabela = document.createElement('table');
-    tabela.style.width = '100%';
-    tabela.style.borderCollapse = 'collapse';
-    tabela.style.fontSize = '0.85rem';
-
-    tabela.innerHTML = `
-        <thead>
-            <tr style="background:#2563eb; color:white;">
-                <th style="padding:8px; border:1px solid #000;">Data</th>
-                <th style="padding:8px; border:1px solid #000;">Produto</th>
-                <th style="padding:8px; border:1px solid #000;">Tipo</th>
-                <th style="padding:8px; border:1px solid #000;">Qtd</th>
-                <th style="padding:8px; border:1px solid #000;">Motivo</th>
-            </tr>
-        </thead>
-        <tbody>
-            ${historicoFiltrado.map((h,i)=>`
-                <tr style="background:${i%2===0?'#f5f5f5':'#ffffff'}">
-                    <td style="padding:5px; border:1px solid #000;">${h.data}</td>
-                    <td style="padding:5px; border:1px solid #000;">${h.produto}</td>
-                    <td style="padding:5px; border:1px solid #000; text-align:center;">${h.tipo==='add'?'Entrada':'Saída'}</td>
-                    <td style="padding:5px; border:1px solid #000; text-align:center;">${h.qtd}</td>
-                    <td style="padding:5px; border:1px solid #000;">${h.motivo}</td>
-                </tr>
-            `).join('')}
-        </tbody>
-    `;
-
-    printContent.appendChild(tabela);
-    document.body.appendChild(printContent);
-    window.print();
-    printContent.remove();
+window.print();
+}
 }
 
-// Inicialização
-initDB();
+// === EXTRAS ===
+function deletar(id){db=db.filter(p=>p.id!==id); salvar();}
+window.onload=initDB;
 </script>
 </body>
 </html>
