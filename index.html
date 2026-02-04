@@ -48,10 +48,10 @@ input,select,textarea{padding:8px;border:1px solid #e2e8f0;border-radius:8px;wid
 .modal-content{background:white;padding:25px;border-radius:20px;width:320px;text-align:center;}
 .print-only{display:none;}
 @media print{
-  /* NOVA REGRA: imprimir somente o histórico mantendo zebramento */
   body * {display:none !important;}
-  #historyPanel, #historyPanel * {display:block !important;}
-  .hist-table tr:nth-child(even){background:#f5f5f5 !important;}
+  .print-only, .print-only * {display:block !important;}
+  table, th, td {border:1px solid #000 !important; border-collapse:collapse !important;}
+  th, td {padding:5px !important; font-size:0.75rem !important;}
 }
 </style>
 </head>
@@ -71,7 +71,7 @@ input,select,textarea{padding:8px;border:1px solid #e2e8f0;border-radius:8px;wid
 </div>
 <div class="nav-btns">
 <button class="btn-cat" id="btnAdmin" onclick="toggleAdmin()">🔑 Admin</button>
-<button class="btn-cat" onclick="imprimirPDF()" style="background:var(--primary);color:white;">📄 PDF</button>
+<button class="btn-cat" onclick="imprimirProdutos()" style="background:var(--primary);color:white;">📄 PDF</button>
 </div>
 </div>
 <div class="stats-bar">
@@ -86,6 +86,7 @@ input,select,textarea{padding:8px;border:1px solid #e2e8f0;border-radius:8px;wid
 <input type="file" id="importInput" style="display:none" onchange="importarBackup(this)">
 </div>
 </div>
+
 <div id="historyPanel">
 <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
 <h2 style="margin:0; font-size:1.1rem;">📋 Histórico</h2>
@@ -98,13 +99,6 @@ input,select,textarea{padding:8px;border:1px solid #e2e8f0;border-radius:8px;wid
     <input type="text" id="inputBuscaHist" class="search-input" placeholder="Pesquisar produto ou motivo..." oninput="renderHistory()">
     <select id="filtroCatHist" class="sort-select" onchange="renderHistory()">
         <option value="Todos">Todas as Categorias</option>
-        <option value="Tinta Hardtop">Tinta Hardtop</option>
-        <option value="Tinta Pilot">Tinta Pilot</option>
-        <option value="Componente B">Componente B</option>
-        <option value="Jotamastic A">Jotamastic A</option>
-        <option value="Jotamastic B">Jotamastic B</option>
-        <option value="Solvente">Solvente</option>
-        <option value="Outros">Outros</option>
     </select>
 </div>
 <table class="hist-table">
@@ -112,26 +106,20 @@ input,select,textarea{padding:8px;border:1px solid #e2e8f0;border-radius:8px;wid
 <tbody id="listaHist"></tbody>
 </table>
 </div>
+
 <div class="cat-filter" id="catFiltros"></div>
 <div id="adminPanel">
 <div class="input-group"><label>Nome</label><input type="text" id="nome"></div>
 <div class="input-group"><label>Categoria</label>
-<select id="categoria">
-<option value="Tinta Hardtop">Tinta Hardtop</option>
-<option value="Tinta Pilot">Tinta Pilot</option>
-<option value="Componente B">Componente B</option>
-<option value="Jotamastic A">Jotamastic A</option>
-<option value="Jotamastic B">Jotamastic B</option>
-<option value="Solvente">Solvente</option>
-<option value="Outros">Outros</option>
-</select>
+<select id="categoria"></select>
 </div>
 <div class="input-group"><label>Qtd</label><input type="number" id="qtd"></div>
 <div class="input-group"><label>Foto</label><input type="file" id="foto" accept="image/*"></div>
 <button class="btn-cat" style="background:var(--accent);color:white;height:35px;" onclick="cadastrar()">CADASTRAR</button>
 </div>
-</div>
+
 <div class="grid" id="vitrine"></div>
+
 <div class="print-only footer-print" id="printDateTime"></div>
 <div class="print-only page-counter"></div>
 </div>
@@ -181,48 +169,18 @@ function initDB(){
 
 function carregarDados(){
     const t = dbHaris.transaction(['produtos','historico'],'readonly');
-    const produtosStore = t.objectStore('produtos');
-    const historicoStore = t.objectStore('historico');
-
-    produtosStore.getAll().onsuccess = e=>{ db = e.target.result; render(); }
-    historicoStore.getAll().onsuccess = e=>{ historico = e.target.result; renderHistory(); }
+    t.objectStore('produtos').getAll().onsuccess = e=>{ db = e.target.result; render(); popularCategorias(); }
+    t.objectStore('historico').getAll().onsuccess = e=>{ historico = e.target.result; renderHistory(); }
 }
 
-function toggleAdmin(){
-if(!isAdmin){
-if(prompt("Senha:")==="RebocadorHaris"){
-isAdmin=true;
-document.getElementById('adminPanel').style.display='grid';
-document.getElementById('backupGroup').style.display='flex';
-render();
-}
-}else{
-isAdmin=false;
-document.getElementById('adminPanel').style.display='none';
-document.getElementById('backupGroup').style.display='none';
-document.getElementById('historyPanel').style.display='none';
-render();
-}
+function popularCategorias(){
+    const sel=document.getElementById('categoria');
+    sel.innerHTML=listaCategorias.map(c=>`<option value="${c}">${c}</option>`).join('');
+    const selHist=document.getElementById('filtroCatHist');
+    selHist.innerHTML=`<option value="Todos">Todas as Categorias</option>`+listaCategorias.map(c=>`<option value="${c}">${c}</option>`).join('');
 }
 
-function toggleHistory(){
-const p=document.getElementById('historyPanel');
-p.style.display=p.style.display==='block'?'none':'block';
-if(p.style.display==='block') renderHistory();
-}
-
-function salvar(){
-const t = dbHaris.transaction(['produtos','historico'],'readwrite');
-t.objectStore('produtos').clear().onsuccess=()=>{
-    db.forEach(p=> t.objectStore('produtos').add(p));
-};
-t.objectStore('historico').clear().onsuccess=()=>{
-    historico.forEach(h=> t.objectStore('historico').add(h));
-};
-render();
-renderHistory();
-}
-
+//------------------------ RENDER PRODUTOS ------------------------
 function render(){
 const v=document.getElementById('vitrine');
 const termo=document.getElementById('inputBusca').value.toLowerCase();
@@ -236,7 +194,7 @@ if(ordem==='nome') copiaDb.sort((a,b)=>a.nome.localeCompare(b.nome));
 else if(ordem==='qtd-desc') copiaDb.sort((a,b)=>b.qtd-a.qtd);
 else if(ordem==='qtd-asc') copiaDb.sort((a,b)=>a.qtd-b.qtd);
 
-copiaDb.forEach((p,i)=>{
+copiaDb.forEach(p=>{
 if(p.nome.toLowerCase().includes(termo)&&(catAtiva==='Todos'||p.cat===catAtiva)){
 cProd++; cEst+=parseInt(p.qtd);
 v.innerHTML+=`
@@ -272,6 +230,7 @@ default: return '#64748b';
 
 function setCat(c){catAtiva=c;render();}
 
+//------------------------ CADASTRO ------------------------
 function cadastrar(){
 const n=document.getElementById('nome').value;
 const c=document.getElementById('categoria').value;
@@ -288,6 +247,7 @@ document.getElementById('nome').value=''; document.getElementById('qtd').value='
 reader.readAsDataURL(f);
 }
 
+//------------------------ MODAL ------------------------
 function abrirModal(id){
 editIdx=db.findIndex(p=>p.id===id);
 if(editIdx<0) return;
@@ -319,7 +279,7 @@ let p=db[editIdx];
 let val=parseInt(document.getElementById('valMov').value)||0;
 if(tipo==='sub') val=-val;
 p.qtd+=val;
-historico.push({id:Date.now(), data:new Date().toLocaleString(), produto:p.nome, tipo:tipo, qtd:val, motivo:document.getElementById('mNota').value});
+historico.push({id:Date.now(), data:new Date().toLocaleString(), produto:p.nome, tipo:tipo, qtd:val, motivo:document.getElementById('mNota').value, cat:p.cat});
 salvar();
 render();
 renderHistory();
@@ -340,22 +300,81 @@ salvar();
 }
 }
 
+//------------------------ HISTÓRICO ------------------------
 function renderHistory(){
 const termo=document.getElementById('inputBuscaHist').value.toLowerCase();
 const catFiltro=document.getElementById('filtroCatHist').value;
-let lista=historico.filter(h=>h.produto.toLowerCase().includes(termo)&&(catFiltro==='Todos'||db.find(p=>p.nome===h.produto)?.cat===catFiltro));
+let lista=historico.filter(h=>{
+let matchTerm=h.produto.toLowerCase().includes(termo)||h.motivo.toLowerCase().includes(termo);
+let matchCat=(catFiltro==='Todos')?true:h.cat===catFiltro;
+return matchTerm && matchCat;
+});
 document.getElementById('listaHist').innerHTML=lista.map(h=>`<tr>
 <td>${h.data}</td>
 <td>${h.produto}</td>
-<td>${h.tipo==='add'?'Entrada':'Saída'}</td>
+<td class="${h.tipo==='add'?'tag-add':'tag-sub'}">${h.tipo==='add'?'Entrada':'Saída'}</td>
 <td>${h.qtd}</td>
 <td>${h.motivo}</td>
-<td><button onclick="historico.splice(historico.findIndex(x=>x.id===h.id),1); salvar();">❌</button></td>
+<td><button onclick="historico.splice(historico.findIndex(x=>x.id===h.id),1); salvar(); renderHistory();">❌</button></td>
 </tr>`).join('');
 }
 
-function imprimirPDF(){window.print();}
-function imprimirHistorico(){window.print();}
+//------------------------ PDF ------------------------
+function imprimirProdutos(){
+const termo=document.getElementById('inputBusca').value.toLowerCase();
+const copiaDb=db.filter(p=>p.nome.toLowerCase().includes(termo)&&(catAtiva==='Todos'||p.cat===catAtiva));
+if(copiaDb.length===0){alert("Nenhum produto para imprimir"); return;}
+const printContent=document.createElement('div');
+printContent.classList.add('print-only');
+printContent.innerHTML='<h2>📦 Produtos Catalogados</h2><table border="1" style="width:100%;border-collapse:collapse;"><tr><th>Nome</th><th>Categoria</th><th>Qtd</th></tr>'+copiaDb.map(p=>`<tr><td>${p.nome}</td><td>${p.cat}</td><td>${p.qtd}</td></tr>`).join('')+'</table>';
+document.body.appendChild(printContent);
+window.print();
+printContent.remove();
+}
+
+function imprimirHistorico(){
+const termo=document.getElementById('inputBuscaHist').value.toLowerCase();
+const catFiltro=document.getElementById('filtroCatHist').value;
+let lista=historico.filter(h=>{
+let matchTerm=h.produto.toLowerCase().includes(termo)||h.motivo.toLowerCase().includes(termo);
+let matchCat=(catFiltro==='Todos')?true:h.cat===catFiltro;
+return matchTerm && matchCat;
+});
+if(lista.length===0){alert("Nenhum histórico para imprimir"); return;}
+const printContent=document.createElement('div');
+printContent.classList.add('print-only');
+printContent.innerHTML='<h2>📋 Histórico de Movimentações</h2><table border="1" style="width:100%;border-collapse:collapse;"><tr><th>Data</th><th>Produto</th><th>Tipo</th><th>Qtd</th><th>Motivo</th></tr>'+lista.map(h=>`<tr><td>${h.data}</td><td>${h.produto}</td><td>${h.tipo==='add'?'Entrada':'Saída'}</td><td>${h.qtd}</td><td>${h.motivo}</td></tr>`).join('')+'</table>';
+document.body.appendChild(printContent);
+window.print();
+printContent.remove();
+}
+
+//------------------------ ADMIN ------------------------
+function toggleAdmin(){isAdmin=!isAdmin; document.getElementById('adminPanel').style.display=isAdmin?'grid':'none'; document.getElementById('backupGroup').style.display=isAdmin?'flex':'none'; render();}
+function toggleHistory(){document.getElementById('historyPanel').style.display=(document.getElementById('historyPanel').style.display==='none')?'block':'none';}
+
+//------------------------ STORAGE ------------------------
+function salvar(){
+const t = dbHaris.transaction(['produtos','historico'],'readwrite');
+const storeProd = t.objectStore('produtos');
+storeProd.clear().onsuccess=()=>{db.forEach(p=>storeProd.add(p));}
+const storeHist = t.objectStore('historico');
+storeHist.clear().onsuccess=()=>{historico.forEach(h=>storeHist.add(h));}
+render();
+renderHistory();
+}
+function exportarBackup(){localStorage.setItem('backup_haris',JSON.stringify({db,historico})); alert("Backup exportado!");}
+function importarBackup(input){
+const f=input.files[0];
+if(!f) return;
+const reader=new FileReader();
+reader.onload=e=>{
+const data=JSON.parse(e.target.result);
+db=data.db||[]; historico=data.historico||[];
+salvar();
+};
+reader.readAsText(f);
+}
 
 initDB();
 </script>
