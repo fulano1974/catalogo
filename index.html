@@ -50,7 +50,7 @@ input,select,textarea{padding:8px;border:1px solid #e2e8f0;border-radius:8px;wid
 .lixeira:hover{background:#b91c1c;color:white;}
 .print-only{display:none;}
 @media print{
-  body{background:white;padding:0; counter-reset: page;}
+  body{background:white;padding:0; counter-reset: page;} /* Reset do contador de páginas no corpo */
 .no-print{display:none!important;}
 .print-only{display:block;}
 .print-header{text-align:center;font-size:28px;font-weight:bold;border-bottom:2px solid #000;padding-bottom:10px;margin-bottom:20px;}
@@ -67,7 +67,7 @@ input,select,textarea{padding:8px;border:1px solid #e2e8f0;border-radius:8px;wid
     left: 0;
     right: 0;
     display: flex;
-    justify-content: center; /* Centraliza o conteúdo principal do flex */
+    justify-content: space-between; /* Espaço entre os itens */
     align-items: center;
     font-size: 10px;
     border-top: 1px solid #ddd; /* Linha do rodapé */
@@ -78,16 +78,26 @@ input,select,textarea{padding:8px;border:1px solid #e2e8f0;border-radius:8px;wid
   }
 
 .product-print-footer.datetime-info {
-    text-align: center; /* Centraliza a data e hora */
-    flex-grow: 1; /* Permite que ocupe o espaço disponível */
+    text-align: left; /* Data e hora alinhadas à esquerda */
+    flex: 1; /* Permite que ocupe o espaço disponível */
   }
 .product-print-footer.page-number-info {
-    text-align: right; /* Alinha a numeração de página à direita */
-    flex-grow: 1; /* Permite que ocupe o espaço disponível */
+    text-align: right; /* Numeração de página alinhada à direita */
+    flex: 1; /* Permite que ocupe o espaço disponível */
+  }
+.product-print-footer.central-spacer {
+    flex: 1; /* Um espaço flexível no centro */
   }
 
-  /* Removendo page-counter que foi substituído */
-.page-counter{display:none!important;}
+  /* Estilos para a numeração de página via counter */
+.page-number-info::before {
+    content: "Página " counter(page) " de " counter(pages);
+    font-size: 10px;
+    font-family: sans-serif;
+  }
+/* Escondendo os spans originais que agora serão preenchidos pelo CSS ::before */
+.page-number-info span { display: none; }
+
 .hist-table th{font-weight:bold;}
 }
 </style>
@@ -185,6 +195,7 @@ input,select,textarea{padding:8px;border:1px solid #e2e8f0;border-radius:8px;wid
   <!-- Rodapé do PDF de produtos. Será preenchido com JS -->
   <div class="print-only product-print-footer">
     <span class="datetime-info"></span>
+    <span class="central-spacer"></span> <!-- Para empurrar a data para esquerda e página para direita -->
     <span class="page-number-info"></span>
   </div>
 </div>
@@ -383,50 +394,19 @@ function deletarHist(idx){historico.splice(idx,1); salvarHistorico(); renderHist
 
 // PDF Produtos
 function imprimirProdutos(){
-  window.onbeforeprint = () => {
-    const printFooter = document.querySelector('.product-print-footer');
-    const currentDateTime = new Date().toLocaleString();
-    
-    // Conteúdo da data/hora centralizado
-    printFooter.querySelector('.datetime-info').textContent = `Data de Emissão: ${currentDateTime}`;
-    
-    // Inserção do contador de páginas. O navegador irá preencher 'Página X de Y'.
-    // Usamos um truque aqui: um elemento com um id único para o navegador contar.
-    // Isso é mais confiável que tentar forçar um pseudoelemento em alguns browsers.
-    const pageNumberSpan = printFooter.querySelector('.page-number-info');
-    pageNumberSpan.innerHTML = `Página <span class="pageNumber"></span> de <span class="totalPages"></span>`;
-    
-    // Algum JS para tentar garantir que os contadores CSS funcionem
-    // Embora o ideal seja que o navegador faça isso sozinho para counter(page)
-    const style = document.createElement('style');
-    style.textContent = `
-      @page {
-        counter-increment: page;
-        counter-reset: page 1;
-        @bottom-right {
-          content: "Página " counter(page) " de " counter(pages);
-          font-size: 10px;
-          font-family: sans-serif;
-        }
-      }
-     .pageNumber::before { content: counter(page); }
-     .totalPages::before { content: counter(pages); }
-    `;
-    document.head.appendChild(style);
-  };
-
+  // Garante que o contador de página é resetado e incrementado corretamente
+  // Isso deve ser feito no CSS, mas o JS ajuda a garantir que o navegador veja a data.
+  const currentDateTime = new Date().toLocaleString();
+  const printFooter = document.querySelector('.product-print-footer');
+  
+  // Preenche a data e hora
+  printFooter.querySelector('.datetime-info').textContent = `Data de Emissão: ${currentDateTime}`;
+  
   window.print();
 
   window.onafterprint = () => {
     // Limpa o conteúdo do rodapé após a impressão
-    const printFooter = document.querySelector('.product-print-footer');
     printFooter.querySelector('.datetime-info').textContent = '';
-    printFooter.querySelector('.page-number-info').innerHTML = '';
-    // Remove o estilo dinâmico
-    const dynamicStyle = document.head.querySelector('style:last-child');
-    if (dynamicStyle) {
-      document.head.removeChild(dynamicStyle);
-    }
   };
 }
 
@@ -436,7 +416,7 @@ function imprimirHistorico(){
   let currentDateTime = new Date().toLocaleString();
 
   let html=`<html><head><title>Histórico de Movimentações</title><style>
-    body{font-family:sans-serif;padding:0; margin: 0; min-height: 100vh; display: flex; flex-direction: column; counter-reset: page;} /* counter-reset para numeração */
+    body{font-family:sans-serif;padding:0; margin: 0; min-height: 100vh; display: flex; flex-direction: column; counter-reset: page;} /* Reset do contador de páginas no corpo */
 .content-wrapper { flex-grow: 1; padding: 15mm; } /* Padding aqui */
     h1{text-align:center;font-size:24px;font-weight:bold;margin-bottom:20px;}
     table{width:100%;border-collapse:collapse;font-size:12px; margin-top: 15px;}
@@ -452,7 +432,7 @@ function imprimirHistorico(){
     left: 0;
     right: 0;
     display: flex;
-    justify-content: center;
+    justify-content: space-between; /* Espaço entre os itens */
     align-items: center;
     font-size: 10px;
     border-top: 1px solid #ddd;
@@ -460,17 +440,28 @@ function imprimirHistorico(){
     background: white;
     box-sizing: border-box;
     page-break-before: avoid;
-    text-align: center; /* Centraliza tudo no rodapé */
   }
-
 .history-print-footer.datetime-info {
-    text-align: center;
-    flex-grow: 1;
+    text-align: left; /* Data e hora alinhadas à esquerda */
+    flex: 1;
   }
 .history-print-footer.page-number-info {
-    text-align: right; /* Alinha a numeração à direita */
-    flex-grow: 1;
+    text-align: right; /* Numeração de página alinhada à direita */
+    flex: 1;
   }
+.history-print-footer.central-spacer {
+    flex: 1; /* Um espaço flexível no centro */
+  }
+
+  /* Estilos para a numeração de página via counter na nova janela */
+.page-number-info::before {
+    content: "Página " counter(page) " de " counter(pages);
+    font-size: 10px;
+    font-family: sans-serif;
+  }
+/* Escondendo os spans originais que agora serão preenchidos pelo CSS ::before */
+.page-number-info span { display: none; }
+    
     @page {
       margin: 15mm; /* Margens da página */
     }
@@ -501,26 +492,15 @@ function imprimirHistorico(){
   }
 
   html+=`</tbody></table></div>`;
-  // Rodapé HTML para o PDF do histórico, com data/hora e numeração via JS
+  // Rodapé HTML para o PDF do histórico, com data/hora e numeração via CSS (::before / ::after)
   html+=`<div class="history-print-footer">
     <span class="datetime-info">Data de Emissão: ${currentDateTime}</span>
-    <span class="page-number-info">Página <span class="pageNumber"></span> de <span class="totalPages"></span></span>
+    <span class="central-spacer"></span> <!-- Para empurrar a data para esquerda e página para direita -->
+    <span class="page-number-info"></span>
   </div></body></html>`;
   
   novaJan.document.write(html);
   novaJan.document.close();
-
-  // Injetar CSS para os contadores no head da nova janela
-  const newWindowStyle = novaJan.document.createElement('style');
-  newWindowStyle.textContent = `
-    @page {
-      counter-increment: page;
-      counter-reset: page 1;
-    }
-   .pageNumber::before { content: counter(page); }
-   .totalPages::before { content: counter(pages); }
-  `;
-  novaJan.document.head.appendChild(newWindowStyle);
 
   novaJan.print();
   
