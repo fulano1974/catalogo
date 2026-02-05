@@ -51,17 +51,17 @@ input,select,textarea{padding:8px;border:1px solid #e2e8f0;border-radius:8px;wid
 .print-only{display:none;}
 @media print{
   body{background:white;padding:0; counter-reset: page;}
-  .no-print{display:none !important;}
-  .print-only{display:block;}
-  .print-header{text-align:center;font-size:28px;font-weight:bold;border-bottom:2px solid #000;padding-bottom:10px;margin-bottom:20px;}
-  .grid{display:grid !important;grid-template-columns:repeat(6,1fr)!important;gap:5px!important;}
-  .card{border:1px solid #eee !important;box-shadow:none !important;padding:5px !important;page-break-inside:avoid;}
-  .card img{height:80px !important;}
-  .card h3{font-size:0.6rem !important;}
-  .admin-actions{display:none !important;}
-  .footer-print{position:fixed;bottom:0;width:100%;display:flex;justify-content:center;font-size:10px;border-top:1px solid #ddd;padding-top:5px;background:white;}
-  .page-counter{position:fixed;bottom:0;right:0;font-size:10px;padding-top:5px;}
-  .hist-table th{font-weight:bold;}
+ .no-print{display:none!important;}
+ .print-only{display:block;}
+ .print-header{text-align:center;font-size:28px;font-weight:bold;border-bottom:2px solid #000;padding-bottom:10px;margin-bottom:20px;}
+ .grid{display:grid!important;grid-template-columns:repeat(6,1fr)!important;gap:5px!important;}
+ .card{border:1px solid #eee!important;box-shadow:none!important;padding:5px!important;page-break-inside:avoid;}
+ .card img{height:80px!important;}
+ .card h3{font-size:0.6rem!important;}
+ .admin-actions{display:none!important;}
+ .footer-print{position:fixed;bottom:0;width:100%;display:flex;justify-content:center;font-size:10px;border-top:1px solid #ddd;padding-top:5px;background:white;}
+ .page-counter{position:fixed;bottom:0;right:0;font-size:10px;padding-top:5px;}
+ .hist-table th{font-weight:bold;}
 }
 </style>
 </head>
@@ -109,6 +109,270 @@ input,select,textarea{padding:8px;border:1px solid #e2e8f0;border-radius:8px;wid
       <div style="display:flex; gap:8px; margin-bottom:15px;">
         <input type="text" id="inputBuscaHist" class="search-input" placeholder="Pesquisar produto ou motivo..." oninput="renderHistory()">
         <select id="filtroCatHist" class="sort-select" onchange="renderHistory()">
+          <option value="Todos">Todas as Categorias</option>
+          <option value="Tinta Hardtop">Tinta Hardtop</option>
+          <option value="Tinta Pilot">Tinta Pilot</option>
+          <option value="Componente B">Componente B</option>
+          <option value="Jotamastic A">Jotamastic A</option>
+          <option value="Jotamastic B">Jotamastic B</option>
+          <option value="Solvente">Solvente</option>
+          <option value="Outros">Outros</option>
+        </select>
+      </div>
+      <table class="hist-table">
+        <thead>
+          <tr>
+            <th>Data</th>
+            <th>Produto</th>
+            <th>Tipo</th>
+            <th>Qtd</th>
+            <th>Motivo</th>
+            <th>Ação</th>
+          </tr>
+        </thead>
+        <tbody id="listaHist"></tbody>
+      </table>
+    </div>
+
+    <div class="cat-filter" id="catFiltros"></div>
+    <div id="adminPanel">
+      <div class="input-group"><label>Nome</label><input type="text" id="nome"></div>
+      <div class="input-group"><label>Categoria</label>
+        <select id="categoria">
+          <option value="Tinta Hardtop">Tinta Hardtop</option>
+          <option value="Tinta Pilot">Tinta Pilot</option>
+          <option value="Componente B">Componente B</option>
+          <option value="Jotamastic A">Jotamastic A</option>
+          <option value="Jotamastic B">Jotamastic B</option>
+          <option value="Solvente">Solvente</option>
+          <option value="Outros">Outros</option>
+        </select>
+      </div>
+      <div class="input-group"><label>Qtd</label><input type="number" id="qtd"></div>
+      <div class="input-group"><label>Foto</label><input type="file" id="foto" accept="image/*"></div>
+      <button class="btn-cat" style="background:var(--accent);color:white;height:35px;" onclick="cadastrar()">CADASTRAR</button>
+    </div>
+  </div>
+
+  <div class="grid" id="vitrine"></div>
+  <div class="print-only footer-print" id="printDateTime"></div>
+  <div class="print-only page-counter"></div>
+</div>
+
+<div id="modal" class="no-print">
+  <div class="modal-content">
+    <p style="font-size:0.7rem; font-weight:bold; margin-bottom:5px;">EDITAR PRODUTO</p>
+    <input type="text" id="mNomeEdit" style="margin-bottom:10px; font-weight:bold; text-align:center;">
+    <div style="background:#f8fafc; padding:8px; border-radius:8px; margin-bottom:10px;">
+      <p style="margin:0; font-size:0.6rem;">Estoque Atual</p>
+      <b id="mQtd" style="font-size:1.5rem;">0</b>
+    </div>
+    <input type="number" id="valMov" value="0" style="text-align:center; width:60px; margin:auto;">
+    <textarea id="mNota" placeholder="Motivo..." style="margin-top:8px; height:40px; font-size:0.7rem;"></textarea>
+    <div style="margin-top:8px;">
+      <label>Alterar Foto:</label>
+      <input type="file" id="mFoto" accept="image/*">
+    </div>
+    <div style="display:flex; gap:8px; margin-top:12px;">
+      <button class="btn-cat" style="background:var(--success); color:white; flex:1;" onclick="movimentar('add')">ENTRADA</button>
+      <button class="btn-cat" style="background:var(--danger); color:white; flex:1;" onclick="movimentar('sub')">SAÍDA</button>
+    </div>
+    <button onclick="fecharModal()" style="margin-top:15px; cursor:pointer; background:none; border:none; text-decoration:underline; font-size:0.7rem;">SALVAR E FECHAR</button>
+  </div>
+</div>
+
+<script>
+let isAdmin=false,editIdx=null;
+let db=[], historico=[];
+let catAtiva='Todos';
+let listaCategorias=["Tinta Hardtop","Tinta Pilot","Componente B","Jotamastic A","Jotamastic B","Solvente","Outros"];
+
+// IndexedDB
+let dbHaris;
+function initDB(){
+  const request=indexedDB.open('db_haris',1);
+  request.onsuccess=e=>{dbHaris=e.target.result; carregarDados();}
+  request.onerror=e=>console.log(e);
+  request.onupgradeneeded=e=>{
+    let dbe=e.target.result;
+    if(!dbe.objectStoreNames.contains('produtos')) dbe.createObjectStore('produtos',{keyPath:'id',autoIncrement:true});
+    if(!dbe.objectStoreNames.contains('historico')) dbe.createObjectStore('historico',{keyPath:'id',autoIncrement:true});
+  }
+}
+function carregarDados(){
+  const t=dbHaris.transaction(['produtos','historico'],'readonly');
+  t.objectStore('produtos').getAll().onsuccess=e=>{db=e.target.result; render();}
+  t.objectStore('historico').getAll().onsuccess=e=>{historico=e.target.result; renderHistory();}
+}
+function salvarProdutos(){
+  const t=dbHaris.transaction('produtos','readwrite');
+  const store=t.objectStore('produtos'); store.clear().onsuccess=()=>{db.forEach(p=>store.add(p));}
+}
+function salvarHistorico(){
+  const t=dbHaris.transaction('historico','readwrite');
+  const store=t.objectStore('historico'); store.clear().onsuccess=()=>{historico.forEach(h=>store.add(h));}
+}
+
+// Layout e funções
+function toggleAdmin(){
+  if(!isAdmin){if(prompt("Senha:")==="RebocadorHaris"){isAdmin=true;document.getElementById('adminPanel').style.display='grid';document.getElementById('backupGroup').style.display='flex';render();}}
+  else{isAdmin=false;document.getElementById('adminPanel').style.display='none';document.getElementById('backupGroup').style.display='none';document.getElementById('historyPanel').style.display='none';render();}
+}
+
+function render(){
+  const v=document.getElementById('vitrine');
+  const termo=document.getElementById('inputBusca').value.toLowerCase();
+  const fBox=document.getElementById('catFiltros');
+  const ordem=document.getElementById('ordem').value;
+  v.innerHTML=''; fBox.innerHTML=['Todos',...listaCategorias].map(c=>`<button class="btn-cat ${catAtiva===c?'active':''}" onclick="setCat('${c}')">${c}</button>`).join('');
+  let cProd=0,cEst=0;
+  let copia=[...db];
+  if(ordem==='nome') copia.sort((a,b)=>a.nome.localeCompare(b.nome));
+  else if(ordem==='qtd-desc') copia.sort((a,b)=>b.qtd-a.qtd);
+  else if(ordem==='qtd-asc') copia.sort((a,b)=>a.qtd-b.qtd);
+
+  copia.forEach((p,i)=>{
+    if(p.nome.toLowerCase().includes(termo)&&(catAtiva==='Todos'||p.cat===catAtiva)){
+      cProd++; cEst+=parseInt(p.qtd);
+      v.innerHTML+=`
+      <div class="card">
+      <img src="${p.foto}">
+      <div class="card-info">
+        <h3 style="margin:2px 0; font-size:0.75rem; line-height:1.1;">${p.nome}</h3>
+        <span class="badge-cat" style="background:${getCorCat(p.cat)}">${p.cat||'Outros'}</span>
+        <p style="margin:0; font-size:0.7rem; color:gray;">Estoque: <b style="font-size:0.9rem;">${p.qtd}</b></p>
+        ${isAdmin?`<div class="admin-actions">
+          <button class="btn-edit-card" onclick="abrirModal(${i})">✏️</button>
+          <button class="btn-delete-card" onclick="deletarProduto(${i})">🗑️</button>
+        </div>`:''}
+      </div>
+      </div>`;
+    }
+  });
+  document.getElementById('totalProdutos').innerText=cProd;
+  document.getElementById('totalEstoque').innerText=cEst;
+}
+
+function setCat(c){catAtiva=c; render();}
+
+function getCorCat(cat){
+  const cores={'Tinta Hardtop':'#f97316','Tinta Pilot':'#3b82f6','Componente B':'#14b8a6','Jotamastic A':'#facc15','Jotamastic B':'#8b5cf6','Solvente':'#ef4444','Outros':'#6b7280'};
+  return cores[cat]||'#6b7280';
+}
+
+// Cadastro
+function cadastrar(){
+  const n=document.getElementById('nome').value;
+  const c=document.getElementById('categoria').value;
+  const q=document.getElementById('qtd').value;
+  const f=document.getElementById('foto').files[0];
+  if(!n||!q||!f)return alert('Preencha todos os campos!');
+  const reader=new FileReader();
+  reader.onload=e=>{
+    db.push({nome:n,cat:c,qtd:parseInt(q),foto:e.target.result});
+    salvarProdutos(); render();
+    document.getElementById('nome').value='';document.getElementById('qtd').value='';document.getElementById('foto').value='';
+  }
+  reader.readAsDataURL(f);
+}
+
+// Modal edição
+function abrirModal(idx){
+  editIdx=idx;
+  const p=db[idx];
+  document.getElementById('mNomeEdit').value=p.nome;
+  document.getElementById('mQtd').innerText=p.qtd;
+  document.getElementById('mNota').value='';
+  document.getElementById('valMov').value=0;
+  document.getElementById('modal').style.display='flex';
+}
+function fecharModal(){
+  const p=db[editIdx];
+  p.nome=document.getElementById('mNomeEdit').value;
+  const f=document.getElementById('mFoto').files[0];
+  if(f){
+    const r=new FileReader();
+    r.onload=e=>{p.foto=e.target.result; salvarProdutos(); render();}
+    r.readAsDataURL(f);
+  }
+  salvarProdutos(); render(); document.getElementById('modal').style.display='none';
+}
+
+// Movimentação
+function movimentar(tipo){
+  const val=parseInt(document.getElementById('valMov').value)||0;
+  if(val<=0) return alert('Informe uma quantidade válida!');
+  const nota=document.getElementById('mNota').value||'-';
+  const p=db[editIdx];
+  if(tipo==='add') p.qtd+=val;
+  else if(tipo==='sub') p.qtd-=val;
+  if(p.qtd<0)p.qtd=0;
+  historico.push({data:new Date().toLocaleString(),produto:p.nome,cat:p.cat,tipo:tipo==='add'?'Entrada':'Saída',qtd:val,motivo:nota});
+  salvarProdutos(); salvarHistorico(); render(); renderHistory();
+  document.getElementById('mQtd').innerText=p.qtd;
+  document.getElementById('valMov').value=0;document.getElementById('mNota').value='';
+}
+
+// Deletar produto
+function deletarProduto(idx){
+  if(confirm('Deseja deletar este produto?')){db.splice(idx,1); salvarProdutos(); render();}
+}
+
+// Histórico
+function toggleHistory(){document.getElementById('historyPanel').style.display=document.getElementById('historyPanel').style.display==='none'?'block':'none'; renderHistory();}
+function limparHistorico(){if(confirm('Deseja limpar todo o histórico?')){historico=[]; salvarHistorico(); renderHistory();}}
+
+function renderHistory(){
+  const termo=document.getElementById('inputBuscaHist').value.toLowerCase();
+  const filtro=document.getElementById('filtroCatHist').value;
+  const tbody=document.getElementById('listaHist');
+  tbody.innerHTML='';
+  historico.forEach((h,i)=>{
+    // Correção aqui: Adicionado o campo `cat` ao objeto histórico e alterado o filtro para usar `h.cat`
+    if((h.produto.toLowerCase().includes(termo)||h.motivo.toLowerCase().includes(termo))&&(filtro==='Todos'||h.cat===filtro)){
+      tbody.innerHTML+=`
+      <tr>
+        <td>${h.data}</td>
+        <td>${h.produto}</td>
+        <td>${h.tipo}</td>
+        <td>${h.qtd}</td>
+        <td>${h.motivo}</td>
+        <td><button class="lixeira" onclick="deletarHist(${i})">🗑️</button></td>
+      </tr>`;
+    }
+  });
+}
+
+function deletarHist(idx){historico.splice(idx,1); salvarHistorico(); renderHistory();}
+
+// PDF Produtos
+function imprimirProdutos(){
+  window.print();
+  setTimeout(()=>{document.getElementById('printDateTime').innerText='Data: '+new Date().toLocaleString();},0);
+}
+
+// PDF Histórico
+function imprimirHistorico(){
+  let novaJan=window.open('','_blank');
+  let html=`<html><head><title>Histórico</title><style>
+    body{font-family:sans-serif;padding:15px;}
+    h1{text-align:center;font-size:24px;font-weight:bold;margin-bottom:20px;}
+    table{width:100%;border-collapse:collapse;font-size:12px;}
+    th,td{padding:8px;border:1px solid #ddd;text-align:left;}
+    th{font-weight:bold;}
+   .footer{position:fixed;bottom:0;width:100%;display:flex;justify-content:space-between;font-size:10px;border-top:1px solid #ddd;padding-top:5px;}
+  </style></head><body>`;
+  html+=`<h1>Histórico de Movimentações</h1><table><thead><tr><th>Data</th><th>Produto</th><th>Tipo</th><th>Qtd</th><th>Motivo</th></tr></thead><tbody>`;
+  historico.forEach(h=>{html+=`<tr><td>${h.data}</td><td>${h.produto}</td><td>${h.tipo}</td><td>${h.qtd}</td><td>${h.motivo}</td></tr>`;});
+  html+=`</tbody></table><div class="footer"><div>${new Date().toLocaleString()}</div><div>Página 1</div></div></body></html>`;
+  novaJan.document.write(html); novaJan.document.close(); novaJan.print();
+}
+
+// Inicialização
+initDB();
+</script>
+</body>
+</html>        <select id="filtroCatHist" class="sort-select" onchange="renderHistory()">
           <option value="Todos">Todas as Categorias</option>
           <option value="Tinta Hardtop">Tinta Hardtop</option>
           <option value="Tinta Pilot">Tinta Pilot</option>
@@ -372,4 +636,5 @@ initDB();
 </script>
 </body>
 </html>
+
 
