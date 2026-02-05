@@ -60,24 +60,43 @@ input,select,textarea{padding:8px;border:1px solid #e2e8f0;border-radius:8px;wid
 .card img{height:80px!important;}
 .card h3{font-size:0.6rem!important;}
 .admin-actions{display:none!important;}
-  /* Rodapé HTML para PDF de produtos, agora com numeração via JS no beforeprint */
-.footer-print{
+  /* Rodapé para PDF de produtos */
+.product-print-footer{
     position: fixed;
     bottom: 0;
-    width: 100%;
+    left: 0;
+    right: 0;
     display: flex;
-    justify-content: center; /* Centraliza o conteúdo (data + página) */
+    justify-content: center;
     align-items: center;
     font-size: 10px;
     border-top: 1px solid #ddd; /* Linha do rodapé */
-    padding: 5px 0;
+    padding: 5px 15mm; /* Adiciona padding para margens */
     background: white;
     box-sizing: border-box;
-    page-break-before: avoid;
-    text-align: center; /* Garante que o texto dentro seja centralizado */
+    page-break-before: avoid; /* Evita que o rodapé crie uma nova página sozinho */
+    text-align: center;
   }
-/* Esconde o.page-counter HTML para o print, pois será gerado dentro do footer-print */
-.page-counter{display:none!important;}
+
+.product-print-footer::before {
+    content: "Data de Emissão: " var(--print-datetime-product);
+    position: absolute;
+    left: 15mm; /* Posiciona no canto esquerdo */
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 10px;
+    font-family: sans-serif;
+  }
+.product-print-footer::after {
+    content: "Página " counter(page) " de " counter(pages);
+    position: absolute;
+    right: 15mm; /* Posiciona no canto direito */
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 10px;
+    font-family: sans-serif;
+  }
+
 .hist-table th{font-weight:bold;}
 }
 </style>
@@ -172,8 +191,8 @@ input,select,textarea{padding:8px;border:1px solid #e2e8f0;border-radius:8px;wid
   </div>
 
   <div class="grid" id="vitrine"></div>
-  <!-- O footer-print HTML agora será usado para a impressão de produtos, e o JS preencherá o conteúdo -->
-  <div class="print-only footer-print" id="printFooterProdutos"></div>
+  <!-- Rodapé do PDF de produtos -->
+  <div class="print-only product-print-footer"></div>
 </div>
 
 <div id="modal" class="no-print">
@@ -370,23 +389,9 @@ function deletarHist(idx){historico.splice(idx,1); salvarHistorico(); renderHist
 
 // PDF Produtos
 function imprimirProdutos(){
-  window.onbeforeprint = () => {
-    const printFooter = document.getElementById('printFooterProdutos');
-    const currentDateTime = new Date().toLocaleString();
-    // Preenche o rodapé com data/hora e espaço reservado para numeração
-    printFooter.innerHTML = `
-      <span style="flex-grow:1; text-align:left;"></span>
-      <span style="flex-grow:1; text-align:center;">Data de Emissão: ${currentDateTime}</span>
-      <span class="page-number-placeholder" style="flex-grow:1; text-align:right;"></span>
-    `;
-  };
-
-  // Funções que serão executadas depois da impressão, para limpar o rodapé temporário
-  window.onafterprint = () => {
-    const printFooter = document.getElementById('printFooterProdutos');
-    printFooter.innerHTML = ''; // Limpa o conteúdo para não atrapalhar a visualização na tela
-  };
-
+  // Define a data/hora para a variável CSS
+  const currentDateTime = new Date().toLocaleString();
+  document.documentElement.style.setProperty('--print-datetime-product', `'${currentDateTime}'`);
   window.print();
 }
 
@@ -396,7 +401,7 @@ function imprimirHistorico(){
   let currentDateTime = new Date().toLocaleString();
 
   let html=`<html><head><title>Histórico de Movimentações</title><style>
-    body{font-family:sans-serif;padding:0; margin: 0; min-height: 100vh; display: flex; flex-direction: column;} /* Ajusta body para flexbox */
+    body{font-family:sans-serif;padding:0; margin: 0; min-height: 100vh; display: flex; flex-direction: column; counter-reset: page;} /* counter-reset para numeração */
 .content-wrapper { flex-grow: 1; padding: 15mm; } /* Padding aqui */
     h1{text-align:center;font-size:24px;font-weight:bold;margin-bottom:20px;}
     table{width:100%;border-collapse:collapse;font-size:12px; margin-top: 15px;}
@@ -406,24 +411,43 @@ function imprimirHistorico(){
     tr:nth-child(odd){background-color:#ffffff!important;}
     table tbody tr { page-break-inside: avoid; page-break-after: auto;}
 
-.footer-pdf-hist{
+.history-print-footer{
     position: fixed;
     bottom: 0;
-    width: 100%;
+    left: 0;
+    right: 0;
     display: flex;
-    justify-content: center; /* Centraliza o conteúdo (data + página) */
+    justify-content: center;
     align-items: center;
     font-size: 10px;
     border-top: 1px solid #ddd;
-    padding: 5px 15mm; /* Padding para respeitar as margens da página */
+    padding: 5px 15mm;
     background: white;
     box-sizing: border-box;
     page-break-before: avoid;
-    text-align: center; /* Garante que o texto dentro seja centralizado */
+    text-align: center;
   }
+.history-print-footer::before {
+    content: "Data de Emissão: ${currentDateTime}"; /* Data e hora diretas */
+    position: absolute;
+    left: 15mm;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 10px;
+    font-family: sans-serif;
+  }
+.history-print-footer::after {
+    content: "Página " counter(page) " de " counter(pages); /* Numeração de página */
+    position: absolute;
+    right: 15mm;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 10px;
+    font-family: sans-serif;
+  }
+
     @page {
-      margin: 15mm; /* Mantém a margem da página */
-      /* Usaremos o footer-pdf-hist HTML diretamente na nova janela, então @bottom-right e @bottom-center não são necessários aqui */
+      margin: 15mm; /* Margens da página */
     }
     /* AJUSTES NAS LARGURAS DAS COLUNAS PARA O PDF DO HISTÓRICO */
     table th:nth-child(1), table td:nth-child(1) { width: 18%; } /* Data */
@@ -452,59 +476,12 @@ function imprimirHistorico(){
   }
 
   html+=`</tbody></table></div>`;
-  // Rodapé HTML para o PDF do histórico, com data/hora e numeração via JS
-  html+=`<div class="footer-pdf-hist">
-      <span style="flex-grow:1; text-align:left;"></span>
-      <span style="flex-grow:1; text-align:center;">Data de Emissão: ${currentDateTime}</span>
-      <span class="page-number-placeholder-hist" style="flex-grow:1; text-align:right;"></span>
-    </div></body></html>`;
+  // Rodapé HTML para o PDF do histórico, com data/hora e numeração via CSS (::before / ::after)
+  html+=`<div class="history-print-footer"></div></body></html>`;
   
   novaJan.document.write(html);
   novaJan.document.close();
-
-  // Para adicionar a numeração de página, precisamos de um pequeno script dentro da nova janela
-  // Este script será injetado após o HTML estar pronto.
-  novaJan.document.body.innerHTML += `
-    <script>
-      (function() {
-        // Encontra o placeholder da numeração de página
-        const pageNumberPlaceholder = document.querySelector('.page-number-placeholder-hist');
-        if (pageNumberPlaceholder) {
-          // Cria um elemento temporário para obter o total de páginas (truque comum)
-          const totalPages = Array.from(document.querySelectorAll('body *')).filter(el => {
-            // Conta elementos que são visíveis e têm algum tamanho para estimar páginas
-            return el.offsetHeight > 0 || el.offsetWidth > 0;
-          }).length; // Simplificado para fins de exemplo, pode não ser preciso
-
-          // A forma mais correta seria usar @page content: counter(page) / counter(pages)
-          // Mas como estamos com problemas com @page, faremos uma estimativa mais simples
-          // Ou, se o navegador suportar, podemos usar window.print() para essa janela e deixar ele gerenciar
-          // Para este contexto, vamos assumir 1 página se o conteúdo for pequeno
-          // Se o conteúdo for muito grande e precisarmos de múltiplas páginas, o navegador irá quebrar
-          // Mas a numeração "1 de 1" ou "1 de X" seria mais complexa sem o @page ou um renderizador de PDF
-          
-          // Por simplicidade, assumindo que a numeração real do navegador será feita pelo popup de impressão
-          // O texto que a gente quer é "Página 01 de N" onde N é o total de páginas impressas pelo navegador
-          // Isso é algo que o JS DOM não consegue ler diretamente do popup de impressão do navegador.
-          // A melhor forma de fazer isso é:
-          // 1. Usar @page se o navegador obedecer (mas estamos tendo problemas)
-          // 2. Usar uma biblioteca de geração de PDF (muito mais complexo)
-          // 3. Deixar em branco ou colocar um placeholder como "Página X de Y" e esperar que o navegador adicione a real.
-
-          // Dada a dificuldade, a solução mais prática para "Página 01 de 01" é:
-          pageNumberPlaceholder.textContent = 'Página 01 de 01'; // Assumindo uma única página. Se houver mais, será incorreto.
-          // Uma solução melhor para múltiplos páginas sem @page seria mais complexa com JS para dividir o conteúdo em divs para cada página
-          // E depois contar e numerar essas divs, o que foge do escopo de um ajuste CSS/JS rápido.
-        }
-      })();
-    <\/script>
-  `;
-
   novaJan.print();
-  // Fecha a janela depois de um tempo para garantir que a impressão tenha sido iniciada
-  setTimeout(() => {
-    novaJan.close();
-  }, 100); 
 }
 
 // Inicialização
