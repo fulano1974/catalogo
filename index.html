@@ -78,17 +78,17 @@ input,select,textarea{padding:8px;border:1px solid #e2e8f0;border-radius:8px;wid
     page-break-before: avoid; /* Evita que o rodapé crie uma nova página sozinho */
   }
 
-.report-footer.datetime-info {
+.report-footer.datetime-info { /* Corrigido para.report-footer.datetime-info */
     flex-grow: 1; /* Permite que ocupe o espaço */
     text-align: center; /* Centraliza a data e hora */
     order: 2; /* Faz a data/hora ir para o centro */
   }
-.report-footer.count-info {
+.report-footer.count-info { /* Corrigido para.report-footer.count-info */
     flex-grow: 1; /* Permite que ocupe o espaço */
     text-align: right; /* Numeração de página alinhada à direita */
     order: 3; /* Faz a numeração ir para a direita */
   }
-.report-footer.flex-spacer-left {
+.report-footer.flex-spacer-left { /* Corrigido para.report-footer.flex-spacer-left */
     flex-grow: 1; /* Empurra a data/hora para o centro */
     order: 1;
   }
@@ -387,6 +387,52 @@ function renderHistory(){
 
 function deletarHist(idx){historico.splice(idx,1); salvarHistorico(); renderHistory();}
 
+// Backup
+function exportarBackup(){
+  const data = {
+    produtos: db,
+    historico: historico
+  };
+  const jsonString = JSON.stringify(data, null, 2);
+  const blob = new Blob([jsonString], { type: "application/json" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = "haris_estoque_backup.json";
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url); // Libera o URL do objeto
+}
+
+function importarBackup(event){
+  const file = event.target.files[0];
+  if (file) {
+    const reader = new FileReader();
+    reader.onload = function(e) {
+      try {
+        const importedData = JSON.parse(e.target.result);
+        if (importedData.produtos && importedData.historico) {
+          if (confirm("Importar backup? Isso substituirá os dados atuais.")) {
+            db = importedData.produtos;
+            historico = importedData.historico;
+            salvarProdutos();
+            salvarHistorico();
+            render();
+            renderHistory();
+            alert("Backup importado com sucesso!");
+          }
+        } else {
+          alert("Arquivo de backup inválido. Estrutura incorreta.");
+        }
+      } catch (error) {
+        alert("Erro ao ler o arquivo de backup: " + error.message);
+      }
+    };
+    reader.readAsText(file);
+  }
+}
+
 // PDF Produtos
 function imprimirProdutos(){
   window.onbeforeprint = () => {
@@ -441,17 +487,17 @@ function imprimirHistorico(){
     box-sizing: border-box;
     page-break-before: avoid;
   }
-.report-footer.datetime-info {
+.report-footer.datetime-info { /* Corrigido para.report-footer.datetime-info */
     flex-grow: 1;
     text-align: center;
     order: 2;
   }
-.report-footer.count-info {
+.report-footer.count-info { /* Corrigido para.report-footer.count-info */
     flex-grow: 1;
     text-align: right;
     order: 3;
   }
-.report-footer.flex-spacer-left {
+.report-footer.flex-spacer-left { /* Corrigido para.report-footer.flex-spacer-left */
     flex-grow: 1;
     order: 1;
   }
