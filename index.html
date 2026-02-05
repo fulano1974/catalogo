@@ -389,10 +389,12 @@ function imprimirHistorico(){
     }
     /* AJUSTES NAS LARGURAS DAS COLUNAS PARA O PDF DO HISTÓRICO */
     table th:nth-child(1), table td:nth-child(1) { width: 18%; } /* Data */
-    table th:nth-child(2), table td:nth-child(2) { width: 28%; } /* Produto (aumentado) */
+    table th:nth-child(2), table td:nth-child(2) { width: 30%; } /* Produto (mais espaço) */
     table th:nth-child(3), table td:nth-child(3) { width: 12%; } /* Tipo */
-    table th:nth-child(4), table td:nth-child(4) { width: 8%; text-align:right;} /* Qtd (alinha à direita) */
-    table th:nth-child(5), table td:nth-child(5) { width: 34%; } /* Motivo (aumentado) */
+    table th:nth-child(4) { width: 8%; } /* Cabeçalho Qtd (mantém alinhamento padrão/esquerda) */
+    table td:nth-child(4) { width: 8%; text-align: center; } /* Conteúdo Qtd (centralizado) */
+    table th:nth-child(5), table td:nth-child(5) { width: 32%; } /* Motivo (mais espaço) */
+    /* A coluna "Ação" não é incluída no PDF, então a largura total das outras 5 colunas soma 100% */
   </style></head><body>`;
   html+=`<h1>Histórico de Movimentações Haris</h1><div class="content-wrapper"><table><thead><tr><th>Data</th><th>Produto</th><th>Tipo</th><th>Qtd</th><th>Motivo</th></tr></thead><tbody>`;
 
