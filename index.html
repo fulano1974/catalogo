@@ -51,17 +51,19 @@ input,select,textarea{padding:8px;border:1px solid #e2e8f0;border-radius:8px;wid
 .print-only{display:none;}
 @media print{
   body{background:white;padding:0; counter-reset: page;}
-.no-print{display:none!important;}
-.print-only{display:block;}
-.print-header{text-align:center;font-size:28px;font-weight:bold;border-bottom:2px solid #000;padding-bottom:10px;margin-bottom:20px;}
-.grid{display:grid!important;grid-template-columns:repeat(6,1fr)!important;gap:5px!important;}
-.card{border:1px solid #eee!important;box-shadow:none!important;padding:5px!important;page-break-inside:avoid;}
-.card img{height:80px!important;}
-.card h3{font-size:0.6rem!important;}
-.admin-actions{display:none!important;}
-.footer-print{position:fixed;bottom:0;width:100%;display:flex;justify-content:center;font-size:10px;border-top:1px solid #ddd;padding-top:5px;background:white;}
-.page-counter{position:fixed;bottom:0;right:0;font-size:10px;padding-top:5px;}
-.hist-table th{font-weight:bold;}
+ .no-print{display:none!important;}
+ .print-only{display:block;}
+ .print-header{text-align:center;font-size:28px;font-weight:bold;border-bottom:2px solid #000;padding-bottom:10px;margin-bottom:20px;}
+  /* Ajustes para o grid no PDF de produtos */
+ .grid{display:grid!important;grid-template-columns:repeat(6,1fr)!important;gap:5px!important;}
+ .card{border:1px solid #eee!important;box-shadow:none!important;padding:5px!important;page-break-inside:avoid;}
+ .card img{height:80px!important;}
+ .card h3{font-size:0.6rem!important;}
+ .admin-actions{display:none!important;}
+  /* Rodapé e contador de página para PDF de produtos */
+ .footer-print{position:fixed;bottom:0;width:100%;display:flex;justify-content:center;font-size:10px;border-top:1px solid #ddd;padding-top:5px;background:white;}
+ .page-counter{position:fixed;bottom:0;right:15px;font-size:10px;padding-top:5px;}
+ .hist-table th{font-weight:bold;}
 }
 </style>
 </head>
@@ -155,8 +157,9 @@ input,select,textarea{padding:8px;border:1px solid #e2e8f0;border-radius:8px;wid
   </div>
 
   <div class="grid" id="vitrine"></div>
+  <!-- Rodapé e contador de página para PDF de produtos -->
   <div class="print-only footer-print" id="printDateTime"></div>
-  <div class="print-only page-counter"></div>
+  <div class="print-only page-counter">Página <span class="pageNumber"></span></div>
 </div>
 
 <div id="modal" class="no-print">
@@ -307,7 +310,6 @@ function movimentar(tipo){
   if(tipo==='add') p.qtd+=val;
   else if(tipo==='sub') p.qtd-=val;
   if(p.qtd<0)p.qtd=0;
-  // CORREÇÃO AQUI: Adicionando a categoria do produto ao objeto do histórico
   historico.push({data:new Date().toLocaleString(),produto:p.nome,cat:p.cat,tipo:tipo==='add'?'Entrada':'Saída',qtd:val,motivo:nota});
   salvarProdutos(); salvarHistorico(); render(); renderHistory();
   document.getElementById('mQtd').innerText=p.qtd;
@@ -328,9 +330,11 @@ function renderHistory(){
   const filtro=document.getElementById('filtroCatHist').value;
   const tbody=document.getElementById('listaHist');
   tbody.innerHTML='';
+  let totalMovimentacoes = 0; // Para contar o total de movimentações exibidas
+
   historico.forEach((h,i)=>{
-    // CORREÇÃO AQUI: Agora 'h.cat' existe e pode ser comparado
     if((h.produto.toLowerCase().includes(termo)||h.motivo.toLowerCase().includes(termo))&&(filtro==='Todos'||h.cat===filtro)){
+      totalMovimentacoes++; // Incrementa o contador
       tbody.innerHTML+=`
       <tr>
         <td>${h.data}</td>
@@ -342,31 +346,79 @@ function renderHistory(){
       </tr>`;
     }
   });
+
+  // Adiciona uma linha de total ou mensagem se não houver resultados
+  if (totalMovimentacoes === 0) {
+      tbody.innerHTML += `<tr><td colspan="6" style="text-align:center;">Nenhuma movimentação encontrada.</td></tr>`;
+  } else {
+      // Opcional: Adicionar um rodapé com o total de itens na tabela do histórico, se desejar.
+      // Por enquanto, vou deixar sem um total visível na tabela da interface, apenas para a impressão.
+  }
 }
 
 function deletarHist(idx){historico.splice(idx,1); salvarHistorico(); renderHistory();}
 
 // PDF Produtos
 function imprimirProdutos(){
+  // Garante que o contador de páginas do navegador funcione
+  window.onbeforeprint = () => {
+    const pageCounters = document.querySelectorAll('.page-counter.pageNumber');
+    pageCounters.forEach((counter, index) => {
+      // Esta parte é mais complexa de controlar com window.print() para cada página,
+      // geralmente o próprio navegador injeta a numeração.
+      // O 'counter-reset: page;' no CSS e 'pageNumber' no span auxiliam o navegador.
+    });
+    document.getElementById('printDateTime').innerText='Data de Emissão: '+new Date().toLocaleString();
+  };
   window.print();
-  setTimeout(()=>{document.getElementById('printDateTime').innerText='Data: '+new Date().toLocaleString();},0);
 }
 
 // PDF Histórico
 function imprimirHistorico(){
   let novaJan=window.open('','_blank');
-  let html=`<html><head><title>Histórico</title><style>
-    body{font-family:sans-serif;padding:15px;}
+  let currentDateTime = new Date().toLocaleString(); // Captura a data/hora uma vez
+
+  // Estilos para o PDF do histórico, incluindo o zebramento
+  let html=`<html><head><title>Histórico de Movimentações</title><style>
+    body{font-family:sans-serif;padding:15px; margin: 0; display: flex; flex-direction: column; min-height: 100vh;}
+   .content-wrapper { flex-grow: 1; }
     h1{text-align:center;font-size:24px;font-weight:bold;margin-bottom:20px;}
-    table{width:100%;border-collapse:collapse;font-size:12px;}
+    table{width:100%;border-collapse:collapse;font-size:12px; margin-top: 15px;}
     th,td{padding:8px;border:1px solid #ddd;text-align:left;}
-    th{font-weight:bold;}
-  .footer{position:fixed;bottom:0;width:100%;display:flex;justify-content:space-between;font-size:10px;border-top:1px solid #ddd;padding-top:5px;}
+    th{font-weight:bold; background-color: #f0f0f0;} /* Cor de fundo para o cabeçalho da tabela */
+    tr:nth-child(even){background:#f5f5f5;} /* Zebramento */
+   .footer-pdf{position: fixed; bottom: 0; width: calc(100% - 30px); display: flex; justify-content: space-between; font-size: 10px; border-top: 1px solid #ddd; padding-top: 5px; background: white; margin: 0 15px;}
+    /* Para a numeração de página funcionar no PDF da nova janela */
+    @page {
+      @bottom-right {
+        content: "Página " counter(page) " de " counter(pages);
+        font-size: 10px;
+        font-family: sans-serif;
+      }
+    }
   </style></head><body>`;
-  html+=`<h1>Histórico de Movimentações</h1><table><thead><tr><th>Data</th><th>Produto</th><th>Tipo</th><th>Qtd</th><th>Motivo</th></tr></thead><tbody>`;
-  historico.forEach(h=>{html+=`<tr><td>${h.data}</td><td>${h.produto}</td><td>${h.tipo}</td><td>${h.qtd}</td><td>${h.motivo}</td></tr>`;});
-  html+=`</tbody></table><div class="footer"><div>${new Date().toLocaleString()}</div><div>Página 1</div></div></body></html>`;
-  novaJan.document.write(html); novaJan.document.close(); novaJan.print();
+  html+=`<h1>Histórico de Movimentações Haris</h1><div class="content-wrapper"><table><thead><tr><th>Data</th><th>Produto</th><th>Tipo</th><th>Qtd</th><th>Motivo</th></tr></thead><tbody>`;
+
+  let totalMovimentacoesImpressao = 0;
+  historico.forEach(h=>{
+      // Filtra o histórico antes de imprimir no PDF da nova janela
+      const termo=document.getElementById('inputBuscaHist').value.toLowerCase();
+      const filtro=document.getElementById('filtroCatHist').value;
+      if((h.produto.toLowerCase().includes(termo)||h.motivo.toLowerCase().includes(termo))&&(filtro==='Todos'||h.cat===filtro)){
+          totalMovimentacoesImpressao++;
+          html+=`<tr><td>${h.data}</td><td>${h.produto}</td><td>${h.tipo}</td><td>${h.qtd}</td><td>${h.motivo}</td></tr>`;
+      }
+  });
+
+  if (totalMovimentacoesImpressao === 0) {
+      html += `<tr><td colspan="5" style="text-align:center;">Nenhuma movimentação encontrada para o filtro atual.</td></tr>`;
+  }
+
+  html+=`</tbody></table></div>`;
+  html+=`<div class="footer-pdf"><span>Data de Emissão: ${currentDateTime}</span><span>Total de Movimentações: ${totalMovimentacoesImpressao}</span></div></body></html>`;
+  novaJan.document.write(html);
+  novaJan.document.close();
+  novaJan.print(); // Invoca a impressão da nova janela
 }
 
 // Inicialização
