@@ -50,7 +50,7 @@ input,select,textarea{padding:8px;border:1px solid #e2e8f0;border-radius:8px;wid
 .lixeira:hover{background:#b91c1c;color:white;}
 .print-only{display:none;}
 @media print{
-  body{background:white;padding:0;} 
+  body{background:white;padding:0;}
 .no-print{display:none!important;}
 .print-only{display:block;}
 .print-header{text-align:center;font-size:28px;font-weight:bold;border-bottom:2px solid #000;padding-bottom:10px;margin-bottom:20px;}
@@ -61,14 +61,14 @@ input,select,textarea{padding:8px;border:1px solid #e2e8f0;border-radius:8px;wid
 .card h3{font-size:0.6rem!important;}
 .admin-actions{display:none!important;}
 
-  /* Rodapé para PDF de produtos (imprimirProdutos) */
-.product-print-footer{
+/* Rodapé para PDF de produtos (imprimirProdutos) e histórico (imprimirHistorico) */
+.report-footer{
     position: fixed;
     bottom: 0;
     left: 0;
     right: 0;
     display: flex;
-    justify-content: space-between; /* Espaço entre os itens */
+    justify-content: space-between; /* Itens espaçados */
     align-items: center;
     font-size: 10px;
     border-top: 1px solid #ddd; /* Linha do rodapé */
@@ -78,18 +78,17 @@ input,select,textarea{padding:8px;border:1px solid #e2e8f0;border-radius:8px;wid
     page-break-before: avoid; /* Evita que o rodapé crie uma nova página sozinho */
   }
 
-.product-print-footer.datetime-info {
+.report-footer.datetime-info {
     flex-grow: 1; /* Permite que ocupe o espaço */
     text-align: center; /* Centraliza a data e hora */
-    /* Vamos centralizar a data/hora no espaço disponível */
     order: 2; /* Faz a data/hora ir para o centro */
   }
-.product-print-footer.page-number-placeholder {
+.report-footer.count-info {
     flex-grow: 1; /* Permite que ocupe o espaço */
     text-align: right; /* Numeração de página alinhada à direita */
     order: 3; /* Faz a numeração ir para a direita */
   }
-.product-print-footer.flex-spacer-left {
+.report-footer.flex-spacer-left {
     flex-grow: 1; /* Empurra a data/hora para o centro */
     order: 1;
   }
@@ -189,10 +188,10 @@ input,select,textarea{padding:8px;border:1px solid #e2e8f0;border-radius:8px;wid
 
   <div class="grid" id="vitrine"></div>
   <!-- Rodapé do PDF de produtos. Será preenchido com JS -->
-  <div class="print-only product-print-footer">
-    <span class="flex-spacer-left"></span> <!-- Espaçador à esquerda para empurrar data/hora para o centro -->
+  <div class="print-only report-footer" id="productPrintFooter">
+    <span class="flex-spacer-left"></span>
     <span class="datetime-info"></span>
-    <span class="page-number-placeholder"></span> <!-- Este será preenchido pelo navegador se ele suportar -->
+    <span class="count-info"></span>
   </div>
 </div>
 
@@ -391,22 +390,23 @@ function deletarHist(idx){historico.splice(idx,1); salvarHistorico(); renderHist
 // PDF Produtos
 function imprimirProdutos(){
   window.onbeforeprint = () => {
-    const printFooter = document.querySelector('.product-print-footer');
+    const printFooter = document.getElementById('productPrintFooter');
     const currentDateTime = new Date().toLocaleString();
+    const totalProductsCount = db.length; // Conta todos os produtos no DB
     
-    // Injetar a data e hora no span correto
+    // Preenche a data e hora no span central
     printFooter.querySelector('.datetime-info').textContent = `Data de Emissão: ${currentDateTime}`;
-    // O span page-number-placeholder ficará vazio, o navegador preencherá a numeração
-    printFooter.querySelector('.page-number-placeholder').textContent = ''; 
+    // Preenche o contador de produtos no span direito
+    printFooter.querySelector('.count-info').textContent = `QTD Produtos: ${totalProductsCount}`; 
   };
 
   window.print();
 
   window.onafterprint = () => {
     // Limpa o conteúdo do rodapé após a impressão
-    const printFooter = document.querySelector('.product-print-footer');
+    const printFooter = document.getElementById('productPrintFooter');
     printFooter.querySelector('.datetime-info').textContent = '';
-    printFooter.querySelector('.page-number-placeholder').textContent = '';
+    printFooter.querySelector('.count-info').textContent = '';
   };
 }
 
@@ -426,7 +426,7 @@ function imprimirHistorico(){
     tr:nth-child(odd){background-color:#ffffff!important;}
     table tbody tr { page-break-inside: avoid; page-break-after: auto;}
 
-.history-print-footer{
+.report-footer{ /* Renomeado para consistência */
     position: fixed;
     bottom: 0;
     left: 0;
@@ -441,18 +441,18 @@ function imprimirHistorico(){
     box-sizing: border-box;
     page-break-before: avoid;
   }
-.history-print-footer.datetime-info {
+.report-footer.datetime-info {
     flex-grow: 1;
     text-align: center;
-    order: 2; /* Faz a data/hora ir para o centro */
+    order: 2;
   }
-.history-print-footer.page-number-placeholder {
+.report-footer.count-info {
     flex-grow: 1;
     text-align: right;
-    order: 3; /* Faz a numeração ir para a direita */
+    order: 3;
   }
-.history-print-footer.flex-spacer-left {
-    flex-grow: 1; /* Empurra a data/hora para o centro */
+.report-footer.flex-spacer-left {
+    flex-grow: 1;
     order: 1;
   }
     
@@ -471,6 +471,7 @@ function imprimirHistorico(){
   html+=`<div class="content-wrapper"><h1>Histórico de Movimentações Haris</h1><table><thead><tr><th>Data</th><th>Produto</th><th>Tipo</th><th>Qtd</th><th>Motivo</th></tr></thead><tbody>`;
 
   let totalMovimentacoesImpressao = 0;
+  // Filtrar o histórico para contar apenas o que será impresso
   historico.forEach(h=>{
       const termo=document.getElementById('inputBuscaHist').value.toLowerCase();
       const filtro=document.getElementById('filtroCatHist').value;
@@ -487,10 +488,10 @@ function imprimirHistorico(){
 
   html+=`</tbody></table></div>`;
   // Rodapé HTML para o PDF do histórico
-  html+=`<div class="history-print-footer">
+  html+=`<div class="report-footer">
     <span class="flex-spacer-left"></span>
     <span class="datetime-info">Data de Emissão: ${currentDateTime}</span>
-    <span class="page-number-placeholder"></span>
+    <span class="count-info">QTD Movimentações: ${totalMovimentacoesImpressao}</span>
   </div></body></html>`;
   
   novaJan.document.write(html);
