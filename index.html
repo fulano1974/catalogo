@@ -367,15 +367,20 @@ function imprimirHistorico(){
   let novaJan=window.open('','_blank');
   let currentDateTime = new Date().toLocaleString();
 
+  // Estilos para o PDF do histórico, incluindo o zebramento (com!important para forçar)
+  // E remoção da coluna "Ação" e ajuste de larguras
   let html=`<html><head><title>Histórico de Movimentações</title><style>
     body{font-family:sans-serif;padding:15px; margin: 0; display: flex; flex-direction: column; min-height: 100vh;}
- .content-wrapper { flex-grow: 1; }
+.content-wrapper { flex-grow: 1; }
     h1{text-align:center;font-size:24px;font-weight:bold;margin-bottom:20px;}
     table{width:100%;border-collapse:collapse;font-size:12px; margin-top: 15px;}
     th,td{padding:8px;border:1px solid #ddd;text-align:left;}
     th{font-weight:bold; background-color: #f0f0f0;}
-    tr:nth-child(even){background-color:#f5f5f5!important;} /* Zebramento forçado */
- .footer-pdf{position: fixed; bottom: 0; width: calc(100% - 30px); display: flex; justify-content: space-between; font-size: 10px; border-top: 1px solid #ddd; padding-top: 5px; background: white; margin: 0 15px;}
+    /* TENTATIVA 1 DE ZEBRAMENTO: Adicionado!important para forçar a aplicação no PDF */
+    tr:nth-child(even){background-color:#f5f5f5!important;}
+    /* TENTATIVA 2 DE ZEBRAMENTO: Especifíca a cor das linhas ímpares para garantir o contraste */
+    tr:nth-child(odd){background-color:#ffffff!important;} 
+.footer-pdf{position: fixed; bottom: 0; width: calc(100% - 30px); display: flex; justify-content: space-between; font-size: 10px; border-top: 1px solid #ddd; padding-top: 5px; background: white; margin: 0 15px;}
     @page {
       @bottom-right {
         content: "Página " counter(page) " de " counter(pages);
@@ -383,26 +388,33 @@ function imprimirHistorico(){
         font-family: sans-serif;
       }
     }
-    /* NOVAS REGRAS: Ajustando largura das colunas no PDF do Histórico */
+    /* AJUSTES NAS LARGURAS DAS COLUNAS PARA O PDF DO HISTÓRICO */
     table th:nth-child(1), table td:nth-child(1) { width: 18%; } /* Data */
-    table th:nth-child(2), table td:nth-child(2) { width: 28%; } /* Produto */
+    table th:nth-child(2), table td:nth-child(2) { width: 28%; } /* Produto (aumentado) */
     table th:nth-child(3), table td:nth-child(3) { width: 12%; } /* Tipo */
     table th:nth-child(4), table td:nth-child(4) { width: 8%; } /* Qtd */
-    table th:nth-child(5), table td:nth-child(5) { width: 34%; } /* Motivo */
+    table th:nth-child(5), table td:nth-child(5) { width: 34%; } /* Motivo (aumentado) */
+    /* A coluna "Ação" não é incluída no PDF, então a largura total das outras 5 colunas soma 100% */
   </style></head><body>`;
   html+=`<h1>Histórico de Movimentações Haris</h1><div class="content-wrapper"><table><thead><tr><th>Data</th><th>Produto</th><th>Tipo</th><th>Qtd</th><th>Motivo</th></tr></thead><tbody>`;
 
   let totalMovimentacoesImpressao = 0;
+  // A classe 'index' é usada para o zebramento. Iremos alternar manualmente.
+  let rowIndex = 0;
   historico.forEach(h=>{
       const termo=document.getElementById('inputBuscaHist').value.toLowerCase();
       const filtro=document.getElementById('filtroCatHist').value;
       if((h.produto.toLowerCase().includes(termo)||h.motivo.toLowerCase().includes(termo))&&(filtro==='Todos'||h.cat===filtro)){
           totalMovimentacoesImpressao++;
-          html+=`<tr><td>${h.data}</td><td>${h.produto}</td><td>${h.tipo}</td><td>${h.qtd}</td><td>${h.motivo}</td></tr>`;
+          // Aplica a classe para o zebramento manual no HTML gerado
+          let rowClass = (rowIndex % 2 === 0)? 'row-even' : 'row-odd';
+          html+=`<tr class="${rowClass}"><td>${h.data}</td><td>${h.produto}</td><td>${h.tipo}</td><td>${h.qtd}</td><td>${h.motivo}</td></tr>`;
+          rowIndex++;
       }
   });
 
   if (totalMovimentacoesImpressao === 0) {
+      // Nota: o colspan é 5 porque a coluna "Ação" não é impressa no PDF
       html += `<tr><td colspan="5" style="text-align:center;">Nenhuma movimentação encontrada para o filtro atual.</td></tr>`;
   }
 
