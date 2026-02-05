@@ -50,7 +50,7 @@ input,select,textarea{padding:8px;border:1px solid #e2e8f0;border-radius:8px;wid
 .lixeira:hover{background:#b91c1c;color:white;}
 .print-only{display:none;}
 @media print{
-  body{background:white;padding:0; counter-reset: page;} /* Reset do contador de páginas no corpo */
+  body{background:white;padding:0;} 
 .no-print{display:none!important;}
 .print-only{display:block;}
 .print-header{text-align:center;font-size:28px;font-weight:bold;border-bottom:2px solid #000;padding-bottom:10px;margin-bottom:20px;}
@@ -60,6 +60,7 @@ input,select,textarea{padding:8px;border:1px solid #e2e8f0;border-radius:8px;wid
 .card img{height:80px!important;}
 .card h3{font-size:0.6rem!important;}
 .admin-actions{display:none!important;}
+
   /* Rodapé para PDF de produtos (imprimirProdutos) */
 .product-print-footer{
     position: fixed;
@@ -67,7 +68,7 @@ input,select,textarea{padding:8px;border:1px solid #e2e8f0;border-radius:8px;wid
     left: 0;
     right: 0;
     display: flex;
-    justify-content: space-between; /* Itens espaçados */
+    justify-content: space-between; /* Espaço entre os itens */
     align-items: center;
     font-size: 10px;
     border-top: 1px solid #ddd; /* Linha do rodapé */
@@ -78,25 +79,20 @@ input,select,textarea{padding:8px;border:1px solid #e2e8f0;border-radius:8px;wid
   }
 
 .product-print-footer.datetime-info {
+    flex-grow: 1; /* Permite que ocupe o espaço */
     text-align: center; /* Centraliza a data e hora */
-    flex: 1; /* Permite que ocupe o espaço */
+    /* Vamos centralizar a data/hora no espaço disponível */
+    order: 2; /* Faz a data/hora ir para o centro */
   }
-.product-print-footer.page-number-info {
+.product-print-footer.page-number-placeholder {
+    flex-grow: 1; /* Permite que ocupe o espaço */
     text-align: right; /* Numeração de página alinhada à direita */
-    flex: 1; /* Permite que ocupe o espaço */
+    order: 3; /* Faz a numeração ir para a direita */
   }
-.product-print-footer.flex-spacer {
-    flex: 1; /* Empurra os outros elementos para as laterais */
+.product-print-footer.flex-spacer-left {
+    flex-grow: 1; /* Empurra a data/hora para o centro */
+    order: 1;
   }
-
-/* Estilos para a numeração de página via counter */
-.page-number-info::before {
-    content: "Página " counter(page) " de " counter(pages);
-    font-size: 10px;
-    font-family: sans-serif;
-  }
-/* Escondendo os spans originais que agora serão preenchidos pelo CSS ::before */
-.page-number-info span { display: none; }
 
 .hist-table th{font-weight:bold;}
 }
@@ -194,9 +190,9 @@ input,select,textarea{padding:8px;border:1px solid #e2e8f0;border-radius:8px;wid
   <div class="grid" id="vitrine"></div>
   <!-- Rodapé do PDF de produtos. Será preenchido com JS -->
   <div class="print-only product-print-footer">
+    <span class="flex-spacer-left"></span> <!-- Espaçador à esquerda para empurrar data/hora para o centro -->
     <span class="datetime-info"></span>
-    <span class="flex-spacer"></span> <!-- Para empurrar a data para esquerda e página para direita -->
-    <span class="page-number-info"></span>
+    <span class="page-number-placeholder"></span> <!-- Este será preenchido pelo navegador se ele suportar -->
   </div>
 </div>
 
@@ -394,20 +390,23 @@ function deletarHist(idx){historico.splice(idx,1); salvarHistorico(); renderHist
 
 // PDF Produtos
 function imprimirProdutos(){
-  // Garante que o contador de página é resetado e incrementado corretamente
-  // Isso deve ser feito no CSS, mas o JS ajuda a garantir que o navegador veja a data.
-  const currentDateTime = new Date().toLocaleString();
-  const printFooter = document.querySelector('.product-print-footer');
-  
-  // Preenche a data e hora no span correto
-  printFooter.querySelector('.datetime-info').textContent = `Data de Emissão: ${currentDateTime}`;
-  // O span page-number-info usará o CSS ::before para a numeração
-  
+  window.onbeforeprint = () => {
+    const printFooter = document.querySelector('.product-print-footer');
+    const currentDateTime = new Date().toLocaleString();
+    
+    // Injetar a data e hora no span correto
+    printFooter.querySelector('.datetime-info').textContent = `Data de Emissão: ${currentDateTime}`;
+    // O span page-number-placeholder ficará vazio, o navegador preencherá a numeração
+    printFooter.querySelector('.page-number-placeholder').textContent = ''; 
+  };
+
   window.print();
 
   window.onafterprint = () => {
     // Limpa o conteúdo do rodapé após a impressão
+    const printFooter = document.querySelector('.product-print-footer');
     printFooter.querySelector('.datetime-info').textContent = '';
+    printFooter.querySelector('.page-number-placeholder').textContent = '';
   };
 }
 
@@ -417,8 +416,8 @@ function imprimirHistorico(){
   let currentDateTime = new Date().toLocaleString();
 
   let html=`<html><head><title>Histórico de Movimentações</title><style>
-    body{font-family:sans-serif;padding:0; margin: 0; min-height: 100vh; display: flex; flex-direction: column; counter-reset: page;} /* Reset do contador de páginas no corpo */
-.content-wrapper { flex-grow: 1; padding: 15mm; } /* Padding aqui */
+    body{font-family:sans-serif;padding:0; margin: 0; min-height: 100vh; display: flex; flex-direction: column;}
+.content-wrapper { flex-grow: 1; padding: 15mm; }
     h1{text-align:center;font-size:24px;font-weight:bold;margin-bottom:20px;}
     table{width:100%;border-collapse:collapse;font-size:12px; margin-top: 15px;}
     th,td{padding:8px;border:1px solid #ccc;text-align:left; page-break-inside: avoid;}
@@ -433,7 +432,7 @@ function imprimirHistorico(){
     left: 0;
     right: 0;
     display: flex;
-    justify-content: space-between; /* Itens espaçados */
+    justify-content: space-between;
     align-items: center;
     font-size: 10px;
     border-top: 1px solid #ddd;
@@ -443,28 +442,22 @@ function imprimirHistorico(){
     page-break-before: avoid;
   }
 .history-print-footer.datetime-info {
-    text-align: center; /* Centraliza a data e hora */
-    flex: 1;
+    flex-grow: 1;
+    text-align: center;
+    order: 2; /* Faz a data/hora ir para o centro */
   }
-.history-print-footer.page-number-info {
-    text-align: right; /* Numeração de página alinhada à direita */
-    flex: 1;
+.history-print-footer.page-number-placeholder {
+    flex-grow: 1;
+    text-align: right;
+    order: 3; /* Faz a numeração ir para a direita */
   }
-.history-print-footer.flex-spacer {
-    flex: 1; /* Empurra os outros elementos para as laterais */
+.history-print-footer.flex-spacer-left {
+    flex-grow: 1; /* Empurra a data/hora para o centro */
+    order: 1;
   }
-
-  /* Estilos para a numeração de página via counter na nova janela */
-.page-number-info::before {
-    content: "Página " counter(page) " de " counter(pages);
-    font-size: 10px;
-    font-family: sans-serif;
-  }
-/* Escondendo os spans originais que agora serão preenchidos pelo CSS ::before */
-.page-number-info span { display: none; }
     
     @page {
-      margin: 15mm; /* Margens da página */
+      margin: 15mm;
     }
     /* AJUSTES NAS LARGURAS DAS COLUNAS PARA O PDF DO HISTÓRICO */
     table th:nth-child(1), table td:nth-child(1) { width: 18%; } /* Data */
@@ -493,11 +486,11 @@ function imprimirHistorico(){
   }
 
   html+=`</tbody></table></div>`;
-  // Rodapé HTML para o PDF do histórico, com data/hora e numeração via CSS (::before / ::after)
+  // Rodapé HTML para o PDF do histórico
   html+=`<div class="history-print-footer">
+    <span class="flex-spacer-left"></span>
     <span class="datetime-info">Data de Emissão: ${currentDateTime}</span>
-    <span class="flex-spacer"></span> <!-- Para empurrar a data para esquerda e página para direita -->
-    <span class="page-number-info"></span>
+    <span class="page-number-placeholder"></span>
   </div></body></html>`;
   
   novaJan.document.write(html);
@@ -505,7 +498,6 @@ function imprimirHistorico(){
 
   novaJan.print();
   
-  // Fecha a janela depois de um tempo para garantir que a impressão tenha sido iniciada
   setTimeout(() => {
     novaJan.close();
   }, 100); 
