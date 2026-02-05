@@ -60,18 +60,28 @@ input,select,textarea{padding:8px;border:1px solid #e2e8f0;border-radius:8px;wid
 .card img{height:80px!important;}
 .card h3{font-size:0.6rem!important;}
 .admin-actions{display:none!important;}
-  /* Rodapé e contador de página para PDF de produtos */
-.footer-print{position:fixed;bottom:0;width:100%;display:flex;justify-content:center;align-items:center;font-size:10px;border-top:1px solid #ddd;padding-top:5px;background:white;}
-/* Adiciona a numeração de página no rodapé do PDF de produtos */
+  /* O footer-print HTML será escondido para o PDF de produtos,
+     pois as informações de rodapé serão geradas pelo @page */
+.footer-print{display:none!important;}
+
+/* RODAPÉ E NUMERAÇÃO DE PÁGINA PARA PDF DE PRODUTOS */
 @page {
-  @bottom-center {
+  /* Define as margens da página */
+  margin: 15mm;
+  /* Numeração de página no canto inferior direito */
+  @bottom-right {
     content: "Página " counter(page) " de " counter(pages);
     font-size: 10px;
     font-family: sans-serif;
   }
+  /* Data e hora centralizadas no rodapé */
+  @bottom-center {
+    content: "Data de Emissão: " var(--print-datetime); /* Usaremos uma variável CSS para a data */
+    font-size: 10px;
+    font-family: sans-serif;
+    text-align: center;
+  }
 }
-/* Esconde o.page-counter porque a numeração é feita pelo @page */
-.page-counter{display:none!important;}
 .hist-table th{font-weight:bold;}
 }
 </style>
@@ -166,7 +176,7 @@ input,select,textarea{padding:8px;border:1px solid #e2e8f0;border-radius:8px;wid
   </div>
 
   <div class="grid" id="vitrine"></div>
-  <!-- Rodapé do PDF de produtos -->
+  <!-- O footer-print HTML agora não é mais usado para a impressão de produtos, mas é mantido para compatibilidade, com display:none no CSS de print. -->
   <div class="print-only footer-print" id="printDateTime"></div>
 </div>
 
@@ -364,10 +374,10 @@ function deletarHist(idx){historico.splice(idx,1); salvarHistorico(); renderHist
 
 // PDF Produtos
 function imprimirProdutos(){
-  window.onbeforeprint = () => {
-    // A data e hora serão centralizadas no CSS do footer-print
-    document.getElementById('printDateTime').innerText='Data de Emissão: '+new Date().toLocaleString();
-  };
+  // Captura a data e hora uma única vez ao imprimir
+  const currentDateTime = new Date().toLocaleString();
+  // Define uma variável CSS que pode ser usada no @page
+  document.documentElement.style.setProperty('--print-datetime', `'${currentDateTime}'`);
   window.print();
 }
 
@@ -398,6 +408,12 @@ function imprimirHistorico(){
         font-size: 10px;
         font-family: sans-serif;
       }
+      @bottom-center {
+        content: "Data de Emissão: " var(--print-datetime-hist);
+        font-size: 10px;
+        font-family: sans-serif;
+        text-align: center;
+      }
     }
     /* AJUSTES NAS LARGURAS DAS COLUNAS PARA O PDF DO HISTÓRICO */
     table th:nth-child(1), table td:nth-child(1) { width: 18%; } /* Data */
@@ -408,6 +424,9 @@ function imprimirHistorico(){
     table th:nth-child(5), table td:nth-child(5) { width: 32%; } /* Motivo (mais espaço) */
     /* A coluna "Ação" não é incluída no PDF, então a largura total das outras 5 colunas soma 100% */
   </style></head><body>`;
+  // Define a variável CSS para o rodapé da impressão do histórico, antes de escrever o HTML
+  novaJan.document.documentElement.style.setProperty('--print-datetime-hist', `'${currentDateTime}'`);
+
   html+=`<div class="content-wrapper"><h1>Histórico de Movimentações Haris</h1><table><thead><tr><th>Data</th><th>Produto</th><th>Tipo</th><th>Qtd</th><th>Motivo</th></tr></thead><tbody>`;
 
   let totalMovimentacoesImpressao = 0;
@@ -427,7 +446,8 @@ function imprimirHistorico(){
   }
 
   html+=`</tbody></table></div>`;
-  html+=`<div class="footer-pdf"><span>Data de Emissão: ${currentDateTime}</span><span>Total de Movimentações: ${totalMovimentacoesImpressao}</span></div></body></html>`;
+  // O footer-pdf HTML não é mais necessário aqui, o @page cuida disso.
+  html+=`</body></html>`;
   novaJan.document.write(html);
   novaJan.document.close();
   novaJan.print();
