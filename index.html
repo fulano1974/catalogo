@@ -416,8 +416,8 @@ function importarBackup(event){
           if (confirm("Importar backup? Isso substituirá os dados atuais.")) {
             db = importedData.produtos;
             historico = importedData.historico;
-            salvarProdutos();
-            salvarHistorico();
+            salvarProdutos(); // LINHA ADICIONADA
+            salvarHistorico(); // LINHA ADICIONADA
             render();
             renderHistory();
             alert("Backup importado com sucesso!");
