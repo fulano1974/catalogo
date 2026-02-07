@@ -278,7 +278,7 @@ function render(){
         <span class="badge-cat" style="background:${getCorCat(p.cat)}">${p.cat||'Outros'}</span>
         <p style="margin:0; font-size:0.7rem; color:gray;">Estoque: <b style="font-size:0.9rem;">${p.qtd}</b></p>
         ${isAdmin?`<div class="admin-actions">
-          <button class="btn-edit-card" onclick="abrirModal(${i})">✏️</button>
+         <button class="btn-edit-card" onclick="abrirModal(${i})">✏️</button>
           <button class="btn-delete-card" onclick="deletarProduto(${i})">🗑️</button>
         </div>`:''}
       </div>
@@ -314,8 +314,15 @@ function cadastrar(){
 
 // Modal edição
 function abrirModal(idx){
-  editIdx=idx;
-  const p=db[idx];
+  const termo = document.getElementById('inputBusca').value.toLowerCase();
+  const ordem = document.getElementById('ordem').value;
+  let copia = [...db];
+  if(ordem==='nome') copia.sort((a,b)=>a.nome.localeCompare(b.nome));
+  else if(ordem==='qtd-desc') copia.sort((a,b)=>b.qtd-a.qtd);
+  else if(ordem==='qtd-asc') copia.sort((a,b)=>a.qtd-b.qtd);
+
+  const p = copia[idx];
+  editIdx = db.indexOf(p); // Encontra o índice real no db
   document.getElementById('mNomeEdit').value=p.nome;
   document.getElementById('mQtd').innerText=p.qtd;
   document.getElementById('mNota').value='';
@@ -555,3 +562,4 @@ initDB();
 </script>
 </body>
 </html>
+
