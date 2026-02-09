@@ -242,7 +242,14 @@ function carregarDados(){
 }
 function salvarProdutos(){
   const t=dbHaris.transaction('produtos','readwrite');
-  const store=t.objectStore('produtos'); store.clear().onsuccess=()=>{db.forEach(p=>store.add(p));}
+  const store=t.objectStore('produtos'); 
+  // Limpar e adicionar novamente para garantir que os IDs sejam consistentes
+  store.clear().onsuccess=()=>{
+    db.forEach(p=> {
+        const addRequest = store.add(p);
+        addRequest.onerror = (event) => console.error("Erro ao adicionar produto:", event.target.error);
+    });
+  }
 }
 function salvarHistorico(){
   const t=dbHaris.transaction('historico','readwrite');
@@ -262,15 +269,19 @@ function render(){
   const ordem=document.getElementById('ordem').value;
   v.innerHTML=''; fBox.innerHTML=['Todos',...listaCategorias].map(c=>`<button class="btn-cat ${catAtiva===c?'active':''}" onclick="setCat('${c}')">${c}</button>`).join('');
   let cProd=0,cEst=0;
-  let copia=[...db];
-  if(ordem==='nome') copia.sort((a,b)=>a.nome.localeCompare(b.nome));
-  else if(ordem==='qtd-desc') copia.sort((a,b)=>b.qtd-a.qtd);
-  else if(ordem==='qtd-asc') copia.sort((a,b)=>a.qtd-b.qtd);
+  
+  // Criar uma cópia filtrada e ordenada para exibição
+  let produtosExibidos = db.filter(p => {
+    return p.nome.toLowerCase().includes(termo) && (catAtiva === 'Todos' || p.cat === catAtiva);
+  });
 
-  copia.forEach((p,i)=>{
-    if(p.nome.toLowerCase().includes(termo)&&(catAtiva==='Todos'||p.cat===catAtiva)){
-      cProd++; cEst+=parseInt(p.qtd);
-      v.innerHTML+=`
+  if(ordem==='nome') produtosExibidos.sort((a,b)=>a.nome.localeCompare(b.nome));
+  else if(ordem==='qtd-desc') produtosExibidos.sort((a,b)=>b.qtd-a.qtd);
+  else if(ordem==='qtd-asc') produtosExibidos.sort((a,b)=>a.qtd-b.qtd);
+
+  produtosExibidos.forEach(p=>{
+    cProd++; cEst+=parseInt(p.qtd);
+    v.innerHTML+=`
       <div class="card">
       <img src="${p.foto}">
       <div class="card-info">
@@ -278,12 +289,11 @@ function render(){
         <span class="badge-cat" style="background:${getCorCat(p.cat)}">${p.cat||'Outros'}</span>
         <p style="margin:0; font-size:0.7rem; color:gray;">Estoque: <b style="font-size:0.9rem;">${p.qtd}</b></p>
         ${isAdmin?`<div class="admin-actions">
-         <button class="btn-edit-card" onclick="abrirModal(${i})">✏️</button>
-          <button class="btn-delete-card" onclick="deletarProduto(${i})">🗑️</button>
+         <button class="btn-edit-card" onclick="abrirModal('${p.id}')">✏️</button>
+          <button class="btn-delete-card" onclick="deletarProduto('${p.id}')">🗑️</button>
         </div>`:''}
       </div>
       </div>`;
-    }
   });
   document.getElementById('totalProdutos').innerText=cProd;
   document.getElementById('totalEstoque').innerText=cEst;
@@ -305,24 +315,38 @@ function cadastrar(){
   if(!n||!q||!f)return alert('Preencha todos os campos!');
   const reader=new FileReader();
   reader.onload=e=>{
-    db.push({nome:n,cat:c,qtd:parseInt(q),foto:e.target.result});
-    salvarProdutos(); render();
-    document.getElementById('nome').value='';document.getElementById('qtd').value='';document.getElementById('foto').value='';
+    // Adicionar um ID ao produto. O IndexedDB vai gerar um se autoIncrement for true, mas é bom ter no objeto
+    const novoProduto = {nome:n,cat:c,qtd:parseInt(q),foto:e.target.result};
+    db.push(novoProduto); // Adiciona ao array local
+    
+    // Adicionar ao IndexedDB
+    const transaction = dbHaris.transaction('produtos', 'readwrite');
+    const store = transaction.objectStore('produtos');
+    const addRequest = store.add(novoProduto); // Adiciona o objeto com ID gerado
+
+    addRequest.onsuccess = (event) => {
+        // Atualiza o ID do objeto no array local com o ID gerado pelo IndexedDB
+        novoProduto.id = event.target.result; 
+        salvarProdutos(); // Salva o array atualizado de volta no IndexedDB (se for para sobrescrever)
+        render();
+        document.getElementById('nome').value='';document.getElementById('qtd').value='';document.getElementById('foto').value='';
+    };
+    addRequest.onerror = (event) => {
+        console.error("Erro ao cadastrar produto no IndexedDB:", event.target.error);
+        alert("Erro ao cadastrar produto.");
+    };
   }
   reader.readAsDataURL(f);
 }
 
 // Modal edição
-function abrirModal(idx){
-  const termo = document.getElementById('inputBusca').value.toLowerCase();
-  const ordem = document.getElementById('ordem').value;
-  let copia = [...db];
-  if(ordem==='nome') copia.sort((a,b)=>a.nome.localeCompare(b.nome));
-  else if(ordem==='qtd-desc') copia.sort((a,b)=>b.qtd-a.qtd);
-  else if(ordem==='qtd-asc') copia.sort((a,b)=>a.qtd-b.qtd);
-
-  const p = copia[idx];
-  editIdx = db.indexOf(p); // Encontra o índice real no db
+function abrirModal(productId){ // Agora recebe o ID do produto
+  const p = db.find(prod => prod.id == productId); // Encontra o produto pelo ID
+  if (!p) {
+    alert("Produto não encontrado para edição.");
+    return;
+  }
+  editIdx = db.indexOf(p); // Encontra o índice real no array 'db'
   document.getElementById('mNomeEdit').value=p.nome;
   document.getElementById('mQtd').innerText=p.qtd;
   document.getElementById('mNota').value='';
@@ -337,8 +361,10 @@ function fecharModal(){
     const r=new FileReader();
     r.onload=e=>{p.foto=e.target.result; salvarProdutos(); render();}
     r.readAsDataURL(f);
+  } else {
+    salvarProdutos(); render(); 
   }
-  salvarProdutos(); render(); document.getElementById('modal').style.display='none';
+  document.getElementById('modal').style.display='none';
 }
 
 // Movimentação
@@ -357,8 +383,18 @@ function movimentar(tipo){
 }
 
 // Deletar produto
-function deletarProduto(idx){
-  if(confirm('Deseja deletar este produto?')){db.splice(idx,1); salvarProdutos(); render();}
+function deletarProduto(productId){ // Agora recebe o ID do produto
+  if(confirm('Deseja deletar este produto?')){
+    // Encontrar o índice do produto pelo ID
+    const indexToDelete = db.findIndex(p => p.id == productId);
+    if (indexToDelete > -1) {
+      db.splice(indexToDelete, 1);
+      salvarProdutos(); 
+      render();
+    } else {
+      alert("Produto não encontrado para exclusão.");
+    }
+  }
 }
 
 // Histórico
@@ -562,4 +598,3 @@ initDB();
 </script>
 </body>
 </html>
-
