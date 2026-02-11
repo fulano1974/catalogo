@@ -7,9 +7,6 @@
 <meta name="theme-color" content="#2563eb">
 <link rel="icon" href="https://cdn-icons-png.flaticon.com/512/3238/3238058.png"> <!-- Ícone de caixa -->
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet"> <!-- Fonte Poppins -->
-<!-- CDN Font Awesome para Ícones -->
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" integrity="sha512-Fo3rlrZj/k7ujTnHg4CGR2D7kSs0V4LLanw2qksYuGWYNDfCP3bNMg8QtOgMOcooWlyFYo3/tS99Y+k/IqJ/hA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
-
 <style>
 :root{
   --primary:#1f2a40; /* Azul escuro quase preto */
@@ -147,10 +144,6 @@ body{
   font-weight:600;
   transition:all 0.3s ease;
   box-shadow:0 2px 8px rgba(59, 130, 246, 0.3);
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  gap:5px;
 }
 .btn-primary:hover{
   background:#2c67d3;
@@ -167,10 +160,6 @@ body{
   font-weight:600;
   transition:all 0.3s ease;
   box-shadow:0 2px 5px rgba(0,0,0,0.03);
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  gap:5px;
 }
 .btn-secondary:hover{
   background:#f0f2f5;
@@ -369,6 +358,7 @@ input:focus,select:focus,textarea:focus{
 /* Vitrine Grid */
 .grid{
   display:grid;
+  /* MODIFICADO: Min-width dos cards para 150px e até 6 colunas */
   grid-template-columns:repeat(auto-fill, minmax(150px, 1fr)); 
   gap:20px;
 }
@@ -389,11 +379,11 @@ input:focus,select:focus,textarea:focus{
 }
 .card img{
   width:100%;
-  height:120px; 
+  height:120px; /* Altura da imagem um pouco menor */
   object-fit:contain;
   background:#fefefe;
   border-radius:8px;
-  margin-bottom:8px; 
+  margin-bottom:8px; /* Margem menor */
 }
 .card-info{
   padding:8px 0;
@@ -402,30 +392,30 @@ input:focus,select:focus,textarea:focus{
   align-items:center;
 }
 .card h3{
-  margin:4px 0; 
-  font-size:0.9rem; 
-  line-height:1.2; 
+  margin:4px 0; /* Margem menor */
+  font-size:0.9rem; /* FONTE DO NOME DO PRODUTO REDUZIDA */
+  line-height:1.2; /* Linha um pouco mais justa */
   color:var(--primary);
   font-weight:600;
 }
 .badge-cat{
-  font-size:0.6rem; 
-  padding:3px 8px; 
+  font-size:0.6rem; /* FONTE DA CATEGORIA REDUZIDA */
+  padding:3px 8px; /* Padding menor */
   border-radius:15px;
   color:white;
   font-weight:600;
   text-transform:uppercase;
-  margin-top:4px; 
-  margin-bottom:8px; 
-  display:inline-block; 
+  margin-top:4px; /* Margem menor */
+  margin-bottom:8px; /* Margem menor */
+  display:inline-block; /* Para padding funcionar bem */
 }
 .card p{
   margin:0;
-  font-size:0.75rem; 
+  font-size:0.75rem; /* FONTE DO TEXTO 'ESTOQUE' REDUZIDA */
   color:var(--subtle-text);
 }
 .card p b{
-  font-size:1rem; 
+  font-size:1rem; /* FONTE DO NÚMERO DO ESTOQUE REDUZIDA */
   color:var(--primary);
 }
 .admin-actions{
@@ -439,15 +429,11 @@ input:focus,select:focus,textarea:focus{
   font-size:0.75rem;
   padding:6px 10px;
   background:#f0f4f8;
-  border:1px solid var(--border-color); 
+  border:1px solid var(--border-color); /* Usando variável */
   border-radius:6px;
   cursor:pointer;
   color:var(--primary);
   transition:all 0.2s ease;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  gap:3px; /* Espaço entre ícone e texto */
 }
 .btn-edit-card:hover{background:#e0e7ee;}
 .btn-delete-card{
@@ -460,7 +446,7 @@ input:focus,select:focus,textarea:focus{
   color:white;
 }
 
-/* Modal Styling */
+/* Modal Styling - REVISADO */
 #modal{
   display:none;
   position:fixed;
@@ -473,32 +459,24 @@ input:focus,select:focus,textarea:focus{
   align-items:center;
   justify-content:center;
   backdrop-filter:blur(5px);
-  /* Adicionado para animação de fade */
-  opacity: 0; 
-  transition: opacity 0.3s ease;
 }
-#modal.show {
-  opacity: 1;
-}
-
 .modal-content{
   background:var(--card-bg);
   padding:30px;
   border-radius:20px;
-  width:400px; 
+  width:400px; /* Aumentado para melhor layout */
   text-align:center;
   box-shadow:0 10px 30px rgba(0,0,0,0.2);
   transform:scale(0.95);
   animation:modalOpen 0.3s forwards ease-out;
   display:flex;
   flex-direction:column;
-  gap:15px; 
+  gap:15px; /* Espaçamento entre os elementos do modal */
 }
 @keyframes modalOpen {
-  from { transform:scale(0.95); opacity:0; } /* Ajustado para começar invisível */
   to { transform:scale(1); opacity:1; }
 }
-.modal-content h2.modal-title{ 
+.modal-content h2.modal-title{ /* Novo título para o modal */
   font-size:1.4rem;
   color:var(--primary);
   margin:0 0 10px 0;
@@ -533,7 +511,7 @@ input:focus,select:focus,textarea:focus{
   background-color:white;
 }
 
-#mNomeEdit{ 
+#mNomeEdit{ /* Estilo específico para o nome do produto */
   font-weight:600;
   text-align:center;
   font-size:1.1rem;
@@ -558,7 +536,7 @@ input:focus,select:focus,textarea:focus{
 }
 #valMov{
   text-align:center;
-  width:100px; 
+  width:100px; /* Ajustado para caber no layout */
   margin:auto;
   background:var(--bg);
   border-color:var(--border-color);
@@ -603,10 +581,6 @@ input:focus,select:focus,textarea:focus{
   box-shadow:0 2px 10px rgba(0,0,0,0.05);
   cursor:pointer;
   transition:all 0.3s ease;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  gap:5px;
 }
 .btn-entry{ /* Botão Entrada */
   background:var(--success);
@@ -836,8 +810,8 @@ input:focus,select:focus,textarea:focus{
       </div>
 
       <div style="margin-top: auto; display:flex; flex-direction:column; gap:10px;">
-        <button class="btn-secondary" id="btnAdmin" onclick="toggleAdmin()"> <i class="fas fa-key"></i> Admin</button>
-        <button class="btn-primary" style="background:#1c74d0;" onclick="imprimirProdutos()"><i class="fas fa-file-pdf"></i> Gerar PDF Produtos</button>
+        <button class="btn-secondary" id="btnAdmin" onclick="toggleAdmin()">🔑 Admin</button>
+        <button class="btn-primary" style="background:#1c74d0;" onclick="imprimirProdutos()">📄 Gerar PDF Produtos</button>
       </div>
     </div>
 
@@ -849,9 +823,9 @@ input:focus,select:focus,textarea:focus{
           <div>Total em Estoque: <b id="totalEstoque">0</b></div>
         </div>
         <div class="backup-group" id="backupGroup">
-          <button class="btn-secondary" onclick="toggleHistory()"><i class="fas fa-history"></i> Histórico</button>
-          <button class="btn-primary" style="background:#1c74d0;" onclick="exportarBackup()"><i class="fas fa-download"></i> Exportar Backup</button>
-          <button class="btn-secondary" onclick="document.getElementById('importInput').click()"><i class="fas fa-upload"></i> Importar Backup</button>
+          <button class="btn-secondary" onclick="toggleHistory()">📋 Histórico</button>
+          <button class="btn-primary" style="background:#1c74d0;" onclick="exportarBackup()">📥 Exportar Backup</button>
+          <button class="btn-secondary" onclick="document.getElementById('importInput').click()">📤 Importar Backup</button>
           <input type="file" id="importInput" style="display:none" onchange="importarBackup(event)">
         </div>
       </div>
@@ -865,17 +839,17 @@ input:focus,select:focus,textarea:focus{
         </div>
         <div class="input-group"><label>Quantidade Inicial</label><input type="number" id="qtd" value="0"></div>
         <div class="input-group"><label>Foto do Produto</label><input type="file" id="foto" accept="image/*"></div>
-        <button class="btn-primary" style="align-self: flex-end;" onclick="cadastrar()"><i class="fas fa-plus-circle"></i> ADICIONAR PRODUTO</button>
+        <button class="btn-primary" style="align-self: flex-end;" onclick="cadastrar()">ADICIONAR PRODUTO</button>
 
         <!-- REMOVIDO: O campo de upload da imagem da sidebar foi movido para a sidebar principal -->
       </div>
 
       <div id="historyPanel" class="no-print">
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; flex-wrap:wrap; gap:10px;">
-          <h2><i class="fas fa-clipboard-list"></i> Histórico de Movimentações</h2>
+          <h2>📋 Histórico de Movimentações</h2>
           <div style="display:flex; gap:10px; flex-wrap:wrap;">
-            <button class="btn-primary" onclick="imprimirHistorico()"><i class="fas fa-file-pdf"></i> PDF Histórico</button>
-            <button class="btn-secondary" onclick="limparHistorico()"><i class="fas fa-broom"></i> Limpar Histórico</button>
+            <button class="btn-primary" onclick="imprimirHistorico()">📄 PDF Histórico</button>
+            <button class="btn-secondary" onclick="limparHistorico()">Limpar Histórico</button>
           </div>
         </div>
         <div style="display:flex; gap:10px; margin-bottom:15px; flex-wrap:wrap;">
@@ -915,7 +889,7 @@ input:focus,select:focus,textarea:focus{
 
 <div id="modal" class="no-print">
   <div class="modal-content">
-    <h2 class="modal-title"><i class="fas fa-edit"></i> EDITAR PRODUTO</h2>
+    <h2 class="modal-title">EDITAR PRODUTO</h2>
     <div class="input-group">
         <label for="mNomeEdit">Nome do Produto</label>
         <input type="text" id="mNomeEdit">
@@ -949,10 +923,10 @@ input:focus,select:focus,textarea:focus{
     </div>
 
     <div class="modal-actions">
-      <button class="btn-entry" onclick="movimentar('add')"><i class="fas fa-arrow-alt-circle-up"></i> ENTRADA</button>
-      <button class="btn-exit" onclick="movimentar('sub')"><i class="fas fa-arrow-alt-circle-down"></i> SAÍDA</button>
+      <button class="btn-entry" onclick="movimentar('add')">ENTRADA</button>
+      <button class="btn-exit" onclick="movimentar('sub')">SAÍDA</button>
     </div>
-    <button class="close-modal-btn-bottom" onclick="fecharModal()"><i class="fas fa-save"></i> SALVAR E FECHAR</button>
+    <button class="close-modal-btn-bottom" onclick="fecharModal()">SALVAR E FECHAR</button>
   </div>
 </div>
 
@@ -1138,8 +1112,8 @@ function render(){
         <span class="badge-cat" style="background:${getCorCat(p.cat)}">${p.cat||'Outros'}</span>
         <p>Estoque: <b>${p.qtd}</b></p>
         ${isAdmin?`<div class="admin-actions">
-         <button class="btn-edit-card" onclick="abrirModal('${p.id}')"><i class="fas fa-pencil-alt"></i></button>
-          <button class="btn-delete-card" onclick="deletarProduto('${p.id}')"><i class="fas fa-trash-alt"></i></button>
+         <button class="btn-edit-card" onclick="abrirModal('${p.id}')">✏️</button>
+          <button class="btn-delete-card" onclick="deletarProduto('${p.id}')">🗑️</button>
         </div>`:''}
       </div>
       </div>`;
@@ -1219,10 +1193,7 @@ function abrirModal(productId){
   document.getElementById('valMov').value=0;
   document.getElementById('mCategoriaEdit').value=p.cat; 
   document.getElementById('mFoto').value = ''; 
-  
-  const modal = document.getElementById('modal');
-  modal.style.display='flex';
-  setTimeout(() => modal.classList.add('show'), 10); // Adiciona classe 'show' após pequeno delay
+  document.getElementById('modal').style.display='flex';
 }
 function fecharModal(){
   const p=db[editIdx];
@@ -1236,13 +1207,7 @@ function fecharModal(){
   } else {
     salvarProdutos(); render();
   }
-  
-  const modal = document.getElementById('modal');
-  modal.classList.remove('show');
-  modal.addEventListener('transitionend', function handler() {
-    modal.style.display = 'none';
-    modal.removeEventListener('transitionend', handler);
-  });
+  document.getElementById('modal').style.display='none';
   document.getElementById('mFoto').value = ''; 
 }
 
@@ -1312,7 +1277,7 @@ function renderHistory(){
         <td>${tipoDisplay}</td>
         <td>${h.qtd}</td>
         <td>${h.motivo}</td>
-        <td><button class="lixeira" onclick="deletarHist(${historico.length - 1 - i})"><i class="fas fa-trash-alt"></i></button></td>
+        <td><button class="lixeira" onclick="deletarHist(${historico.length - 1 - i})">🗑️</button></td>
       </tr>`;
     }
   });
@@ -1489,3 +1454,4 @@ initDB();
 </script>
 </body>
 </html>
+
