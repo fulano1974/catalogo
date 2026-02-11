@@ -931,10 +931,10 @@ input:focus,select:focus,textarea:focus{
 </div>
 
 <script>
-let isAdmin=false,editIdx=null;
-let db=[], historico=[];
-let catAtiva='Todos';
-let listaCategorias=["Componente B", "Filtros", "Jotamastic A", "Jotamastic B", "Manilhas", "Solvente", "Tinta Hardtop", "Tinta Pilot", "Outros"];
+let isAdmin = false, editIdx = null;
+let db = [], historico = [];
+let categoriasAtivas = []; // AGORA É UM ARRAY DE CATEGORIAS SELECIONADAS!
+let listaCategorias = ["Componente B", "Filtros", "Jotamastic A", "Jotamastic B", "Manilhas", "Solvente", "Tinta Hardtop", "Tinta Pilot", "Outros"];
 
 let sidebarImageUrl = ''; // Nova variável para guardar a Data URL da imagem da sidebar
 
@@ -999,7 +999,7 @@ function carregarDados(){
 }
 function salvarProdutos(){
   const t=dbHaris.transaction('produtos','readwrite');
-  const store=t.objectStore('produtos');
+  const store = t.objectStore('produtos');
   store.clear().onsuccess=()=>{
     db.forEach(p=> {
         const addRequest = store.add(p);
@@ -1080,11 +1080,22 @@ function render(){
   const fBox=document.getElementById('catFiltros');
   const ordem=document.getElementById('ordem').value;
   v.innerHTML='';
-  fBox.innerHTML=['Todos',...listaCategorias].map(c=>`<button class="btn-cat ${catAtiva===c?'active':''}" onclick="setCat('${c}')">${c}</button>`).join('');
+  
+  // Renderiza os botões de filtro de categoria
+  // Inclui o botão "Todos" e define se ele está ativo
+  fBox.innerHTML = 
+    `<button class="btn-cat ${categoriasAtivas.length === 0? 'active' : ''}" onclick="toggleCat('Todos')">Todos</button>` +
+    listaCategorias.map(c => 
+    `<button class="btn-cat ${categoriasAtivas.includes(c)? 'active' : ''}" onclick="toggleCat('${c}')">${c}</button>`
+  ).join('');
+
   let cProd=0,cEst=0;
 
   let produtosExibidos = db.filter(p => {
-    return p.nome.toLowerCase().includes(termo) && (catAtiva === 'Todos' || p.cat === catAtiva);
+    const matchesSearchTerm = p.nome.toLowerCase().includes(termo);
+    // Se nenhuma categoria específica está ativa, mostra todos. Caso contrário, filtra pelas ativas.
+    const matchesCategory = categoriasAtivas.length === 0 || categoriasAtivas.includes(p.cat);
+    return matchesSearchTerm && matchesCategory;
   });
 
   if(ordem==='nome') produtosExibidos.sort((a,b)=>a.nome.localeCompare(b.nome));
@@ -1111,7 +1122,20 @@ function render(){
   document.getElementById('totalEstoque').innerText=cEst;
 }
 
-function setCat(c){catAtiva=c; render();}
+// FUNÇÃO ATUALIZADA PARA O COMPORTAMENTO DO FILTRO
+function toggleCat(categoria){
+  if (categoria === 'Todos') {
+    categoriasAtivas = []; // Limpa todas as categorias
+  } else {
+    const index = categoriasAtivas.indexOf(categoria);
+    if (index > -1) {
+      categoriasAtivas.splice(index, 1); // Remove a categoria se já estiver ativa
+    } else {
+      categoriasAtivas.push(categoria); // Adiciona a categoria se não estiver ativa
+    }
+  }
+  render(); // Re-renderiza para aplicar o novo filtro
+}
 
 function getCorCat(cat){
   const cores={
@@ -1273,14 +1297,14 @@ function exportarBackup(){
   };
   const jsonString = JSON.stringify(data, null, 2);
   const blob = new Blob([jsonString], { type: "application/json" });
-  const url = URL.createObjectURL(blob);
+  const url = URL.URL.createObjectURL(blob);
   const a = document.createElement("a");
   a.href = url;
   a.download = "haris_estoque_backup.json";
   document.body.appendChild(a);
   a.click();
   document.body.removeChild(a);
-  URL.revokeObjectURL(url);
+  URL.URL.revokeObjectURL(url);
 }
 
 function importarBackup(event){
@@ -1370,7 +1394,7 @@ function imprimirHistorico(){
         align-items: center;
         font-size: 10px;
         border-top: 1px solid #000;
-        padding: 5px 15mm;
+        padding: 5mm 15mm;
         background: white;
         box-sizing: border-box;
         page-break-before: avoid;
