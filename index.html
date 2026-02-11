@@ -5,188 +5,885 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Controle de Estoque Haris</title>
 <meta name="theme-color" content="#2563eb">
-<link rel="icon" href="https://cdn-icons-png.flaticon.com">
+<link rel="icon" href="https://cdn-icons-png.flaticon.com/512/3238/3238058.png"> <!-- Ícone de caixa -->
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet"> <!-- Fonte Poppins -->
 <style>
 :root{
-  --primary:#1e293b;
-  --accent:#2563eb;
+  --primary:#1f2a40; /* Azul escuro quase preto */
+  --accent:#3b82f6; /* Azul vibrante */
   --success:#10b981;
-  --danger:#e11d48;
-  --bg:#f1f5f9;
+  --danger:#ef4444;
+  --bg:#f8fafc; /* Fundo mais claro */
+  --card-bg:white;
+  --text-color:#334155;
+  --subtle-text:#64748b;
+  --border-color:#e2e8f0;
 }
-body{margin:0;padding:15px;font-family:sans-serif;background:var(--bg);color:var(--primary);}
-.container{max-width:1400px;margin:auto;}
-.header{display:flex;justify-content:space-between;align-items:center;background:white;padding:15px 20px;border-radius:12px;box-shadow:0 4px 12px rgba(0,0,0,0.03);}
-.search-container{flex:1;display:flex;gap:8px;align-items:center;}
-.search-input{flex:1;padding:10px;border-radius:8px;border:1px solid #e2e8f0;font-size:0.85rem;}
-.sort-select{width:110px;padding:9px;border-radius:8px;border:1px solid #e2e8f0;background:#fff;font-size:0.75rem;}
-.nav-btns{display:flex;gap:5px;}
-.btn-cat{padding:10px 18px;border-radius:30px;border:none;background:white;cursor:pointer;font-size:0.8rem;transition:0.3s;box-shadow:0 2px 5px rgba(0,0,0,0.05);}
-.btn-cat.active{background:var(--accent);color:white;}
-.cat-filter{display:flex;gap:5px;margin-bottom:15px;flex-wrap:wrap;}
-#adminPanel{display:none;background:white;padding:15px;border-radius:12px;grid-template-columns:2fr 1fr 1fr 1fr auto;gap:10px;margin-bottom:15px;align-items:end;border-left:5px solid var(--accent);}
-.input-group label{font-size:0.65rem;font-weight:700;color:#64748b;margin-bottom:3px;display:block;}
-input,select,textarea{padding:8px;border:1px solid #e2e8f0;border-radius:8px;width:100%;box-sizing:border-box;font-size:0.8rem;}
-.stats-bar{display:flex;justify-content:space-between;align-items:center;margin-bottom:15px;background:white;padding:10px 15px;border-radius:10px;border:1px solid #e2e8f0;font-size:0.8rem;}
-.backup-group{display:none;gap:5px;}
-#historyPanel{display:none;background:white;padding:25px;border-radius:16px;margin-bottom:30px;border-left:5px solid var(--primary);box-shadow:0 4px 12px rgba(0,0,0,0.05);}
-.hist-table{width:100%;border-collapse:collapse;margin-top:15px;font-size:0.85rem;}
-.hist-table th,.hist-table td{padding:12px;text-align:left;border-bottom:1px solid #eee;}
-.hist-table tr:nth-child(even){background:#f5f5f5;}
-.hist-table input{font-weight:bold;font-family:sans-serif;}
+body{
+  margin:0;
+  padding:0;
+  font-family:'Poppins', sans-serif;
+  background-color:var(--bg);
+  color:var(--text-color);
+  min-height:100vh;
+  display:flex;
+  flex-direction:column;
+  background-image:url('https://source.unsplash.com/random/1920x1080/?warehouse,logistics,abstract'); /* Imagem de fundo aleatória */
+  background-size:cover;
+  background-position:center;
+  background-attachment:fixed;
+}
+.overlay{
+  background-color:rgba(248, 250, 252, 0.85); /* Overlay para a imagem de fundo */
+  min-height:100vh;
+  display:flex;
+  flex-direction:column;
+}
+.container-wrapper{
+  display:flex;
+  flex:1;
+  max-width:1600px; /* Aumentado para acomodar sidebars */
+  margin:20px auto;
+  gap:20px;
+  padding:0 20px;
+}
+.sidebar{
+  width:280px;
+  background:var(--card-bg);
+  padding:20px;
+  border-radius:12px;
+  box-shadow:0 4px 12px rgba(0,0,0,0.05);
+  display:flex;
+  flex-direction:column;
+  gap:15px;
+  flex-shrink:0; /* Não encolher a sidebar */
+  /* NOVAS PROPRIEDADES PARA FIXAR */
+  position: sticky;
+  top: 20px; /* Alinha com a margem superior do container-wrapper */
+  max-height: calc(100vh - 40px); /* Altura máxima da viewport menos as margens */
+  overflow-y: auto; /* Adiciona scroll se o conteúdo for maior que a tela */
+}
+.sidebar.left{
+  order:1; /* Ordem para layout */
+}
+.sidebar.right{
+  order:3; /* Ordem para layout */
+}
+.main-content{
+  flex:1;
+  display:flex;
+  flex-direction:column;
+  gap:20px;
+  order:2; /* Ordem para layout */
+}
+.header{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  background:var(--card-bg);
+  padding:15px 25px;
+  border-radius:12px;
+  box-shadow:0 4px 12px rgba(0,0,0,0.05);
+}
+.header h1{
+  font-size:1.8rem;
+  margin:0;
+  color:var(--primary);
+  display:flex;
+  align-items:center;
+  gap:8px;
+}
+.header h1 span{
+  color:var(--accent);
+}
+.search-container{
+  flex:1;
+  display:flex;
+  gap:10px;
+  align-items:center;
+  max-width:500px;
+}
+.search-input{
+  flex:1;
+  padding:10px 15px;
+  border-radius:8px;
+  border:1px solid var(--border-color);
+  font-size:0.9rem;
+  transition:all 0.3s ease;
+}
+.search-input:focus{
+  border-color:var(--accent);
+  box-shadow:0 0 0 3px rgba(59, 130, 246, 0.2);
+  outline:none;
+}
+.sort-select{
+  width:120px;
+  padding:10px;
+  border-radius:8px;
+  border:1px solid var(--border-color);
+  background:var(--card-bg);
+  font-size:0.85rem;
+  appearance:none; /* Remover estilo padrão do select */
+  background-image:url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%23666%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13.6-6.4H18.9c-5%200-9.3%201.8-12.9%205.4s-5.4%207.9-5.4%2012.8c0%204.8%201.8%209.1%205.4%2012.7L128.5%20287c3.6%203.5%207.8%205.3%2012.8%205.3s9.2-1.8%2012.8-5.3L287%2095.8a17.5%2017.5%200%200%200%205.3-12.7c0-5-1.8-9.2-5.3-12.7z%22%2F%3E%3C%2Fsvg%3E');
+  background-repeat:no-repeat;
+  background-position:right 0.7em top 50%, 0 0;
+  background-size:0.65em auto, 100%;
+}
+.nav-btns{
+  display:flex;
+  gap:10px;
+}
+.btn-primary{
+  padding:10px 18px;
+  border-radius:30px;
+  border:none;
+  background:var(--accent);
+  color:white;
+  cursor:pointer;
+  font-size:0.85rem;
+  font-weight:600;
+  transition:all 0.3s ease;
+  box-shadow:0 2px 8px rgba(59, 130, 246, 0.3);
+}
+.btn-primary:hover{
+  background:#2c67d3;
+  box-shadow:0 4px 12px rgba(59, 130, 246, 0.4);
+}
+.btn-secondary{
+  padding:10px 18px;
+  border-radius:30px;
+  border:1px solid var(--border-color);
+  background:var(--card-bg);
+  color:var(--primary);
+  cursor:pointer;
+  font-size:0.85rem;
+  font-weight:600;
+  transition:all 0.3s ease;
+  box-shadow:0 2px 5px rgba(0,0,0,0.03);
+}
+.btn-secondary:hover{
+  background:#f0f2f5;
+  border-color:#d0d7e0;
+}
+
+/* Categoria Filters */
+.cat-filter-wrapper{
+  background:var(--card-bg);
+  padding:15px;
+  border-radius:12px;
+  box-shadow:0 4px 12px rgba(0,0,0,0.05);
+}
+.cat-filter-wrapper h3{
+  font-size:1rem;
+  margin-top:0;
+  margin-bottom:10px;
+  color:var(--primary);
+}
+.cat-filter{
+  display:flex;
+  flex-wrap:wrap;
+  gap:8px;
+}
+.btn-cat{
+  padding:8px 15px;
+  border-radius:20px;
+  border:1px solid var(--border-color);
+  background:var(--card-bg);
+  cursor:pointer;
+  font-size:0.8rem;
+  transition:all 0.3s ease;
+  white-space:nowrap;
+  color:var(--subtle-text);
+  font-weight:500;
+}
+.btn-cat.active{
+  background:var(--accent);
+  color:white;
+  border-color:var(--accent);
+  box-shadow:0 2px 8px rgba(59, 130, 246, 0.2);
+}
+.btn-cat:hover:not(.active){
+  background:#f0f2f5;
+  border-color:#d0d7e0;
+}
+
+/* Imagem na sidebar */
+.sidebar-image {
+  width: 100%;
+  padding: 0;
+  margin: 0; /* Remove margens padrão */
+  border-radius: 12px; /* Mantém o arredondamento da sidebar */
+  overflow: hidden; /* Garante que a imagem não vaze do border-radius */
+  box-shadow: 0 4px 12px rgba(0,0,0,0.05); /* Adiciona sombra consistente */
+  display: flex; /* Para centralizar a imagem dentro do contêiner */
+  justify-content: center; /* Centraliza horizontalmente */
+  align-items: center; /* Centraliza verticalmente */
+}
+
+.sidebar-image img {
+  max-width: 100%; /* Garante que a imagem não ultrapasse a largura do pai */
+  max-height: 100%; /* Garante que a imagem não ultrapasse a altura do pai */
+  height: auto; /* Mantém a proporção da imagem */
+  object-fit: contain; /* Ajusta a imagem dentro do contêiner sem cortar, mostrando o máximo possível */
+  display: block; /* Remove espaço extra abaixo da imagem */
+  border-radius: 12px; /* Garante o arredondamento da imagem */
+}
+
+/* Admin Panel */
+#adminPanel{
+  display:none;
+  background:var(--card-bg);
+  padding:20px;
+  border-radius:12px;
+  grid-template-columns:repeat(auto-fit, minmax(150px, 1fr));
+  gap:15px;
+  align-items:end;
+  border-left:5px solid var(--accent);
+  box-shadow:0 4px 12px rgba(0,0,0,0.05);
+}
+.input-group label{
+  font-size:0.7rem;
+  font-weight:600;
+  color:var(--subtle-text);
+  margin-bottom:5px;
+  display:block;
+}
+input,select,textarea{
+  padding:10px 12px;
+  border:1px solid var(--border-color);
+  border-radius:8px;
+  width:100%;
+  box-sizing:border-box;
+  font-size:0.9rem;
+  background-color:var(--bg);
+  color:var(--text-color);
+  transition:all 0.3s ease;
+}
+input:focus,select:focus,textarea:focus{
+  border-color:var(--accent);
+  box-shadow:0 0 0 3px rgba(59, 130, 246, 0.2);
+  outline:none;
+  background-color:white;
+}
+#adminPanel button{
+  height:40px;
+  font-size:0.9rem;
+  padding:0 20px;
+}
+
+/* Stats Bar */
+.stats-bar{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  background:var(--card-bg);
+  padding:15px 25px;
+  border-radius:12px;
+  border:1px solid var(--border-color);
+  font-size:0.9rem;
+  box-shadow:0 2px 8px rgba(0,0,0,0.03);
+}
+.stats-bar > div{
+  display:flex;
+  gap:20px;
+}
+.stats-bar b{
+  font-weight:700;
+  color:var(--primary);
+  font-size:1rem;
+}
+.backup-group{
+  display:none;
+  gap:10px;
+}
+.backup-group button{
+  padding:8px 15px;
+  border-radius:20px;
+  font-size:0.8rem;
+}
+
+/* History Panel */
+#historyPanel{
+  display:none;
+  background:var(--card-bg);
+  padding:25px;
+  border-radius:16px;
+  margin-bottom:20px;
+  border-left:5px solid var(--primary);
+  box-shadow:0 4px 12px rgba(0,0,0,0.05);
+}
+#historyPanel h2{
+  font-size:1.3rem;
+  margin:0;
+  color:var(--primary);
+}
+.hist-table{
+  width:100%;
+  border-collapse:collapse;
+  margin-top:15px;
+  font-size:0.85rem;
+}
+.hist-table th,.hist-table td{
+  padding:12px;
+  text-align:left;
+  border-bottom:1px solid #e0e7ee;
+}
+.hist-table th{
+  background-color:#f0f4f8;
+  font-weight:600;
+  color:var(--primary);
+}
+.hist-table tr:nth-child(even){background:#f9fbfc;}
+.hist-table input{font-weight:bold;font-family:inherit;}
 .tag-add{color:var(--success);font-weight:bold;}
 .tag-sub{color:var(--danger);font-weight:bold;}
-.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:15px;}
-.card{background:white;border-radius:12px;overflow:hidden;border:1px solid #e2e8f0;text-align:center;transition:0.3s;padding:10px;break-inside:avoid;position:relative;}
-.card img{width:100%;height:130px;object-fit:contain;background:#f9faf9;border-radius:8px;}
-.card-info{padding:8px 0;display:flex;flex-direction:column;align-items:center;}
-.badge-cat{font-size:0.55rem;padding:3px 8px;border-radius:5px;color:white;font-weight:bold;text-transform:uppercase;margin-top:4px;}
-.admin-actions{display:flex;flex-direction:row;justify-content:center;gap:6px;margin-top:6px;}
-.btn-edit-card,.btn-delete-card{font-size:0.65rem;padding:4px 6px;background:#f8fafc;border:1px solid #ddd;border-radius:5px;cursor:pointer;}
-.btn-delete-card{background:#fef2f2;border-color:#fca5a5;color:#b91c1c;}
-#modal{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background: rgba(15,23,42,0.8);z-index:1000;align-items:center;justify-content:center;backdrop-filter:blur(3px);}
-.modal-content{background:white;padding:25px;border-radius:20px;width:320px;text-align:center;}
-.lixeira{background:#fef2f2;border:none;border-radius:5px;color:#b91c1c;font-size:1rem;cursor:pointer;padding:3px 6px;transition:0.2s;}
-.lixeira:hover{background:#b91c1c;color:white;}
+.lixeira{
+  background:#fef2f2;
+  border:none;
+  border-radius:5px;
+  color:var(--danger);
+  font-size:1rem;
+  cursor:pointer;
+  padding:5px 8px;
+  transition:all 0.2s ease;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+}
+.lixeira:hover{
+  background:var(--danger);
+  color:white;
+}
+
+/* Vitrine Grid */
+.grid{
+  display:grid;
+  /* MODIFICADO: Aumenta o número de colunas para melhor visualização */
+  grid-template-columns:repeat(auto-fill, minmax(180px, 1fr));
+  gap:20px;
+}
+.card{
+  background:var(--card-bg);
+  border-radius:12px;
+  overflow:hidden;
+  border:1px solid var(--border-color);
+  text-align:center;
+  transition:all 0.3s ease;
+  padding:15px;
+  box-shadow:0 4px 15px rgba(0,0,0,0.05);
+  position:relative;
+}
+.card:hover{
+  transform:translateY(-5px);
+  box-shadow:0 8px 25px rgba(0,0,0,0.1);
+}
+.card img{
+  width:100%;
+  height:140px; /* Altura da imagem */
+  object-fit:contain;
+  background:#fefefe;
+  border-radius:8px;
+  margin-bottom:10px;
+}
+.card-info{
+  padding:8px 0;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+}
+.card h3{
+  margin:5px 0;
+  font-size:1rem;
+  line-height:1.3;
+  color:var(--primary);
+  font-weight:600;
+}
+.badge-cat{
+  font-size:0.65rem;
+  padding:4px 10px;
+  border-radius:15px;
+  color:white;
+  font-weight:600;
+  text-transform:uppercase;
+  margin-top:5px;
+  margin-bottom:10px;
+  display:inline-block; /* Para padding funcionar bem */
+}
+.card p{
+  margin:0;
+  font-size:0.8rem;
+  color:var(--subtle-text);
+}
+.card p b{
+  font-size:1.1rem;
+  color:var(--primary);
+}
+.admin-actions{
+  display:flex;
+  flex-direction:row;
+  justify-content:center;
+  gap:8px;
+  margin-top:10px;
+}
+.btn-edit-card,.btn-delete-card{
+  font-size:0.75rem;
+  padding:6px 10px;
+  background:#f0f4f8;
+  border:1px solid #dbe6f0;
+  border-radius:6px;
+  cursor:pointer;
+  color:var(--primary);
+  transition:all 0.2s ease;
+}
+.btn-edit-card:hover{background:#e0e7ee;}
+.btn-delete-card{
+  background:#fef2f2;
+  border-color:#fca5a5;
+  color:#b91c1c;
+}
+.btn-delete-card:hover{
+  background:#b91c1c;
+  color:white;
+}
+
+/* Modal Styling - REVISADO */
+#modal{
+  display:none;
+  position:fixed;
+  top:0;
+  left:0;
+  width:100%;
+  height:100%;
+  background: rgba(15,23,42,0.7);
+  z-index:1000;
+  align-items:center;
+  justify-content:center;
+  backdrop-filter:blur(5px);
+}
+.modal-content{
+  background:var(--card-bg);
+  padding:30px;
+  border-radius:20px;
+  width:400px; /* Aumentado para melhor layout */
+  text-align:center;
+  box-shadow:0 10px 30px rgba(0,0,0,0.2);
+  transform:scale(0.95);
+  animation:modalOpen 0.3s forwards ease-out;
+  display:flex;
+  flex-direction:column;
+  gap:15px; /* Espaçamento entre os elementos do modal */
+}
+@keyframes modalOpen {
+  to { transform:scale(1); opacity:1; }
+}
+.modal-content h2.modal-title{ /* Novo título para o modal */
+  font-size:1.4rem;
+  color:var(--primary);
+  margin:0 0 10px 0;
+  font-weight:700;
+}
+.modal-content.input-group{ /* Reutilizando estilo de input-group */
+  text-align:left;
+  margin-bottom:5px;
+}
+.modal-content.input-group label{
+  font-size:0.85rem;
+  font-weight:600;
+  color:var(--subtle-text);
+  margin-bottom:5px;
+  display:block;
+}
+.modal-content input,.modal-content select,.modal-content textarea{
+  width:100%;
+  padding:10px 12px;
+  border:1px solid var(--border-color);
+  border-radius:8px;
+  box-sizing:border-box;
+  font-size:0.9rem;
+  background-color:var(--bg);
+  color:var(--text-color);
+  transition:all 0.3s ease;
+}
+input:focus,select:focus,textarea:focus{
+  border-color:var(--accent);
+  box-shadow:0 0 0 3px rgba(59, 130, 246, 0.2);
+  outline:none;
+  background-color:white;
+}
+
+#mNomeEdit{ /* Estilo específico para o nome do produto */
+  font-weight:600;
+  text-align:center;
+  font-size:1.1rem;
+  color:var(--primary);
+  background:var(--bg);
+  border-color:var(--border-color);
+}
+.current-stock-display{
+  background:#f0f4f8;
+  padding:10px;
+  border-radius:10px;
+  margin-bottom:5px;
+}
+.current-stock-display p{
+  margin:0;
+  font-size:0.7rem;
+  color:var(--subtle-text);
+}
+.current-stock-display b{
+  font-size:1.8rem;
+  color:var(--primary);
+}
+#valMov{
+  text-align:center;
+  width:100px; /* Ajustado para caber no layout */
+  margin:auto;
+  background:var(--bg);
+  border-color:var(--border-color);
+}
+#mNota{
+  height:60px;
+  font-size:0.8rem;
+  resize:vertical;
+  background:var(--bg);
+  border-color:var(--border-color);
+}
+.file-upload-group{
+  margin-top:5px;
+  text-align:left;
+}
+.file-upload-group label{
+  display:block;
+  margin-bottom:5px;
+  font-weight:500;
+  color:var(--subtle-text);
+  font-size:0.85rem;
+}
+.file-upload-group input[type="file"]{
+  padding:8px;
+  border:1px solid var(--border-color);
+  border-radius:8px;
+  background-color:var(--bg);
+  font-size:0.8rem;
+  cursor:pointer;
+}
+.modal-actions{
+  display:flex;
+  gap:10px;
+  margin-top:10px;
+}
+.modal-actions button{
+  flex:1;
+  padding:12px;
+  border-radius:10px;
+  font-size:0.9rem;
+  font-weight:600;
+  box-shadow:0 2px 10px rgba(0,0,0,0.05);
+  cursor:pointer;
+  transition:all 0.3s ease;
+}
+.btn-entry{ /* Botão Entrada */
+  background:var(--success);
+  color:white;
+  border:none;
+}
+.btn-entry:hover{
+  background:#0d9488;
+}
+.btn-exit{ /* Botão Saída */
+  background:var(--danger);
+  color:white;
+  border:none;
+}
+.btn-exit:hover{
+  background:#b91c1c;
+}
+.close-modal-btn-bottom{ /* Botão Salvar e Fechar */
+  margin-top:15px;
+  padding:12px;
+  border-radius:10px;
+  font-size:0.9rem;
+  font-weight:600;
+  background:var(--primary); /* Cor mais neutra para salvar */
+  color:white;
+  border:none;
+  box-shadow:0 2px 10px rgba(0,0,0,0.05);
+  cursor:pointer;
+  transition:all 0.3s ease;
+}
+.close-modal-btn-bottom:hover{
+  background:#1e293b;
+}
+
 .print-only{display:none;}
 @media print{
   body{background:white;padding:0;}
+.overlay{background:white;padding:0;}
 .no-print{display:none!important;}
 .print-only{display:block;}
 .print-header{text-align:center;font-size:28px;font-weight:bold;border-bottom:2px solid #000;padding-bottom:10px;margin-bottom:20px;}
-  /* Ajustes para o grid no PDF de produtos */
-.grid{display:grid!important;grid-template-columns:repeat(6,1fr)!important;gap:5px!important;}
-.card{border:1px solid #eee!important;box-shadow:none!important;padding:5px!important;page-break-inside:avoid;}
-.card img{height:80px!important;}
-.card h3{font-size:0.6rem!important;}
+.grid{
+    display:grid!important;
+    grid-template-columns:repeat(6,1fr)!important; /* Mais colunas para PDF */
+    gap:5px!important;
+  }
+.card{
+    border:1px solid #eee!important;
+    box-shadow:none!important;
+    padding:5px!important;
+    page-break-inside:avoid;
+  }
+.card img{height:70px!important; margin-bottom:5px!important;}
+.card h3{font-size:0.55rem!important; line-height:1.1!important;}
+.card p{font-size:0.6rem!important;}
+.card p b{font-size:0.8rem!important;}
+.badge-cat{font-size:0.5rem!important; padding:2px 6px!important; margin-top:2px!important;}
 .admin-actions{display:none!important;}
 
-/* Rodapé para PDF de produtos (imprimirProdutos) e histórico (imprimirHistorico) */
 .report-footer{
-    position: fixed;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    display: flex;
-    justify-content: space-between; /* Itens espaçados */
-    align-items: center;
-    font-size: 10px;
-    border-top: 1px solid #ddd; /* Linha do rodapé */
-    padding: 5px 15mm; /* Adiciona padding para margens */
-    background: white;
-    box-sizing: border-box;
-    page-break-before: avoid; /* Evita que o rodapé crie uma nova página sozinho */
-  }
-
-.report-footer.datetime-info { /* Corrigido para.report-footer.datetime-info */
-    flex-grow: 1; /* Permite que ocupe o espaço */
-    text-align: center; /* Centraliza a data e hora */
-    order: 2; /* Faz a data/hora ir para o centro */
-  }
-.report-footer.count-info { /* Corrigido para.report-footer.count-info */
-    flex-grow: 1; /* Permite que ocupe o espaço */
-    text-align: right; /* Numeração de página alinhada à direita */
-    order: 3; /* Faz a numeração ir para a direita */
-  }
-.report-footer.flex-spacer-left { /* Corrigido para.report-footer.flex-spacer-left */
-    flex-grow: 1; /* Empurra a data/hora para o centro */
-    order: 1;
-  }
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 10px;
+      border-top: 1px solid #000;
+      padding: 5px 15mm;
+      background: white;
+      box-sizing: border-box;
+      page-break-inside: avoid; /* Evita que o footer seja quebrado entre páginas */
+      page-break-before: avoid;
+    }
+.report-footer.datetime-info {
+      flex-grow: 1;
+      text-align: center;
+      order: 2;
+    }
+.report-footer.count-info {
+      flex-grow: 1;
+      text-align: right;
+      order: 3;
+    }
+.report-footer.flex-spacer-left {
+      flex-grow: 1;
+      order: 1;
+    }
 
 .hist-table th{font-weight:bold;}
+}
+
+/* Responsive adjustments */
+@media (max-width: 1200px) {
+.container-wrapper{
+    flex-direction:column;
+    gap:20px;
+    margin:15px auto;
+    padding:0 15px;
+  }
+.sidebar{
+    width:100%;
+    order:unset; /* Remover ordem para mobile */
+    position: static; /* Remove o sticky em telas pequenas */
+    max-height: none;
+    overflow-y: visible;
+  }
+.main-content{
+    order:unset;
+  }
+.header{
+    flex-wrap:wrap;
+    gap:15px;
+    justify-content:center;
+  }
+.header h1{
+    width:100%;
+    text-align:center;
+    justify-content:center;
+  }
+.search-container{
+    order:3;
+    width:100%;
+    max-width:none;
+  }
+.nav-btns{
+    order:2;
+  }
+  #adminPanel{
+    grid-template-columns:1fr;
+  }
+.grid{
+    grid-template-columns:repeat(auto-fill, minmax(160px, 1fr));
+  }
+}
+
+@media (max-width: 768px) {
+.header{
+    padding:10px 15px;
+  }
+.header h1{
+    font-size:1.5rem;
+  }
+.btn-primary,.btn-secondary{
+    padding:8px 12px;
+    font-size:0.8rem;
+  }
+.stats-bar{
+    flex-direction:column;
+    align-items:flex-start;
+    gap:10px;
+    padding:10px 15px;
+  }
+.stats-bar > div{
+    flex-wrap:wrap;
+    gap:15px;
+  }
+.backup-group{
+    flex-wrap:wrap;
+  }
+.sidebar,.cat-filter-wrapper, #adminPanel, #historyPanel{
+    padding:15px;
+  }
+.cat-filter{
+    justify-content:center;
+  }
+.card{
+    padding:10px;
+    border-radius:10px;
+  }
+.card img{
+    height:120px;
+  }
+.card h3{
+    font-size:0.9rem;
+  }
+.badge-cat{
+    font-size:0.6rem;
+  }
+.modal-content{
+    width:90%;
+    padding:20px;
+  }
 }
 </style>
 </head>
 <body>
-<div class="container">
+<div class="overlay">
   <div class="print-only print-header">📦 Relatório de Estoque Haris</div>
-  <div class="no-print">
-    <div class="header">
-      <h1>📦 Haris</h1>
-      <div class="search-container">
-        <input type="text" id="inputBusca" class="search-input" placeholder="Pesquisar..." oninput="render()">
-        <select id="ordem" class="sort-select" onchange="render()">
-          <option value="nome">A-Z</option>
-          <option value="qtd-desc">Estoque ↑</option>
-          <option value="qtd-asc">Estoque ↓</option>
-        </select>
+  <div class="container-wrapper">
+    <!-- Left Sidebar -->
+    <div class="sidebar left no-print">
+      <div class="header" style="box-shadow:none; padding:0;">
+        <h1><img src="https://cdn-icons-png.flaticon.com/512/3238/3238058.png" alt="Logo" style="height:30px;"> Haris <span>Estoque</span></h1>
       </div>
-      <div class="nav-btns">
-        <button class="btn-cat" id="btnAdmin" onclick="toggleAdmin()">🔑 Admin</button>
-        <button class="btn-cat" onclick="imprimirProdutos()" style="background:var(--primary);color:white;">📄 PDF</button>
-      </div>
-    </div>
 
-    <div class="stats-bar">
-      <div style="display:flex; gap:15px;">
-        <div>Produtos: <b id="totalProdutos">0</b></div>
-        <div>Total Unid: <b id="totalEstoque">0</b></div>
+      <div class="cat-filter-wrapper">
+        <h3>Filtrar por Categoria</h3>
+        <div class="cat-filter" id="catFiltros"></div>
       </div>
-      <div class="backup-group" id="backupGroup" style="display:none; gap:5px;">
-        <button class="btn-cat" style="background:#2563eb;color:white;" onclick="toggleHistory()">📋 Histórico</button>
-        <button class="btn-cat" onclick="exportarBackup()">📥 Exportar</button>
-        <button class="btn-cat" onclick="document.getElementById('importInput').click()">📤 Importar</button>
-        <input type="file" id="importInput" style="display:none" onchange="importarBackup(event)"> <!-- ALTERADO AQUI: passando 'event' -->
-      </div>
-    </div>
 
-    <div id="historyPanel">
-      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
-        <h2 style="margin:0; font-size:1.1rem;">📋 Histórico</h2>
-        <div style="display:flex; gap:5px;">
-          <button class="btn-cat" style="background:#2563eb;color:white;" onclick="imprimirHistorico()">📄 PDF Histórico</button>
-          <button class="btn-cat" onclick="limparHistorico()">Limpar Tudo</button>
+      <!-- Imagem do rebocador adicionada aqui -->
+      <div class="sidebar-image">
+        <img id="sidebarImage" src="animao-de-um-rebocador-com-haris-escrito-na-inscri.jpeg" alt="Rebocador Haris"> 
+      </div>
+
+      <div class="input-group">
+        <label for="inputBusca">Pesquisar Produto</label>
+        <input type="text" id="inputBusca" class="search-input" placeholder="Nome do produto..." oninput="render()">
+      </div>
+
+      <!-- NOVO: Container para o select de ordenação e o botão de mudar imagem -->
+      <div class="input-group" style="display:flex; flex-direction:column; gap:5px;">
+        <label for="ordem">Ordenar Por</label>
+        <div style="display:flex; align-items:center; gap:10px;">
+          <select id="ordem" class="sort-select" style="flex:1;" onchange="render()">
+            <option value="nome">A-Z</option>
+            <option value="qtd-desc">Estoque ↑</option>
+            <option value="qtd-asc">Estoque ↓</option>
+          </select>
+          <!-- Botão para mudar imagem da sidebar -->
+          <button class="btn-secondary" style="padding:8px 12px; font-size:0.75rem; white-space:nowrap;" onclick="document.getElementById('sidebarImageUploadHidden').click()">Mudar Imagem</button>
+          <!-- Input type="file" escondido -->
+          <input type="file" id="sidebarImageUploadHidden" accept="image/*" style="display:none;" onchange="uploadSidebarImage(event)">
         </div>
       </div>
-      <div style="display:flex; gap:8px; margin-bottom:15px;">
-        <input type="text" id="inputBuscaHist" class="search-input" placeholder="Pesquisar produto ou motivo..." oninput="renderHistory()">
-        <select id="filtroCatHist" class="sort-select" onchange="renderHistory()">
-          <option value="Todos">Todas as Categorias</option>
-          <option value="Tinta Hardtop">Tinta Hardtop</option>
-          <option value="Tinta Pilot">Tinta Pilot</option>
-          <option value="Componente B">Componente B</option>
-          <option value="Jotamastic A">Jotamastic A</option>
-          <option value="Jotamastic B">Jotamastic B</option>
-          <option value="Solvente">Solvente</option>
-          <option value="Outros">Outros</option>
-        </select>
+
+      <div style="margin-top: auto; display:flex; flex-direction:column; gap:10px;">
+        <button class="btn-secondary" id="btnAdmin" onclick="toggleAdmin()">🔑 Admin</button>
+        <button class="btn-primary" style="background:#1c74d0;" onclick="imprimirProdutos()">📄 Gerar PDF Produtos</button>
       </div>
-      <table class="hist-table">
-        <thead>
-          <tr>
-            <th>Data</th>
-            <th>Produto</th>
-            <th>Tipo</th>
-            <th>Qtd</th>
-            <th>Motivo</th>
-            <th>Ação</th>
-          </tr>
-        </thead>
-        <tbody id="listaHist"></tbody>
-      </table>
     </div>
 
-    <div class="cat-filter" id="catFiltros"></div>
-    <div id="adminPanel">
-      <div class="input-group"><label>Nome</label><input type="text" id="nome"></div>
-      <div class="input-group"><label>Categoria</label>
-        <select id="categoria">
-          <option value="Tinta Hardtop">Tinta Hardtop</option>
-          <option value="Tinta Pilot">Tinta Pilot</option>
-          <option value="Componente B">Componente B</option>
-          <option value="Jotamastic A">Jotamastic A</option>
-          <option value="Jotamastic B">Jotamastic B</option>
-          <option value="Solvente">Solvente</option>
-          <option value="Outros">Outros</option>
-        </select>
+    <!-- Main Content Area -->
+    <div class="main-content">
+      <div class="stats-bar no-print">
+        <div>
+          <div>Produtos Cadastrados: <b id="totalProdutos">0</b></div>
+          <div>Total em Estoque: <b id="totalEstoque">0</b></div>
+        </div>
+        <div class="backup-group" id="backupGroup">
+          <button class="btn-secondary" onclick="toggleHistory()">📋 Histórico</button>
+          <button class="btn-primary" style="background:#1c74d0;" onclick="exportarBackup()">📥 Exportar Backup</button>
+          <button class="btn-secondary" onclick="document.getElementById('importInput').click()">📤 Importar Backup</button>
+          <input type="file" id="importInput" style="display:none" onchange="importarBackup(event)">
+        </div>
       </div>
-      <div class="input-group"><label>Qtd</label><input type="number" id="qtd"></div>
-      <div class="input-group"><label>Foto</label><input type="file" id="foto" accept="image/*"></div>
-      <button class="btn-cat" style="background:var(--accent);color:white;height:35px;" onclick="cadastrar()">CADASTRAR</button>
+
+      <div id="adminPanel" class="no-print">
+        <div class="input-group"><label>Nome do Produto</label><input type="text" id="nome" placeholder="Ex: Tinta Branca 5L"></div>
+        <div class="input-group"><label>Categoria</label>
+          <select id="categoria">
+            <!-- Categorias são geradas via JS em initDB() -->
+          </select>
+        </div>
+        <div class="input-group"><label>Quantidade Inicial</label><input type="number" id="qtd" value="0"></div>
+        <div class="input-group"><label>Foto do Produto</label><input type="file" id="foto" accept="image/*"></div>
+        <button class="btn-primary" style="align-self: flex-end;" onclick="cadastrar()">ADICIONAR PRODUTO</button>
+
+        <!-- REMOVIDO: O campo de upload da imagem da sidebar foi movido para a sidebar principal -->
+        <!-- <div class="input-group" style="grid-column: 1 / -1; margin-top: 15px; border-top: 1px solid var(--border-color); padding-top: 15px;">
+          <label>Alterar Imagem da Sidebar</label>
+          <input type="file" id="sidebarImageUpload" accept="image/*" onchange="uploadSidebarImage(event)">
+          <small style="color:var(--subtle-text); font-size:0.75rem;">A imagem será salva e incluída no backup.</small>
+        </div> -->
+      </div>
+
+      <div id="historyPanel" class="no-print">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; flex-wrap:wrap; gap:10px;">
+          <h2>📋 Histórico de Movimentações</h2>
+          <div style="display:flex; gap:10px; flex-wrap:wrap;">
+            <button class="btn-primary" onclick="imprimirHistorico()">📄 PDF Histórico</button>
+            <button class="btn-secondary" onclick="limparHistorico()">Limpar Histórico</button>
+          </div>
+        </div>
+        <div style="display:flex; gap:10px; margin-bottom:15px; flex-wrap:wrap;">
+          <input type="text" id="inputBuscaHist" class="search-input" placeholder="Pesquisar produto ou motivo..." oninput="renderHistory()">
+          <select id="filtroCatHist" class="sort-select" onchange="renderHistory()">
+            <!-- Categorias são geradas via JS em initDB() -->
+          </select>
+        </div>
+        <div style="overflow-x:auto;">
+          <table class="hist-table">
+            <thead>
+              <tr>
+                <th>Data</th>
+                <th>Produto</th>
+                <th>Tipo</th>
+                <th>Qtd</th>
+                <th>Motivo</th>
+                <th>Ação</th>
+              </tr>
+            </thead>
+            <tbody id="listaHist"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="grid" id="vitrine"></div>
     </div>
   </div>
 
-  <div class="grid" id="vitrine"></div>
   <!-- Rodapé do PDF de produtos. Será preenchido com JS -->
   <div class="print-only report-footer" id="productPrintFooter">
     <span class="flex-spacer-left"></span>
@@ -197,23 +894,44 @@ input,select,textarea{padding:8px;border:1px solid #e2e8f0;border-radius:8px;wid
 
 <div id="modal" class="no-print">
   <div class="modal-content">
-    <p style="font-size:0.7rem; font-weight:bold; margin-bottom:5px;">EDITAR PRODUTO</p>
-    <input type="text" id="mNomeEdit" style="margin-bottom:10px; font-weight:bold; text-align:center;">
-    <div style="background:#f8fafc; padding:8px; border-radius:8px; margin-bottom:10px;">
-      <p style="margin:0; font-size:0.6rem;">Estoque Atual</p>
-      <b id="mQtd" style="font-size:1.5rem;">0</b>
+    <h2 class="modal-title">EDITAR PRODUTO</h2>
+    <div class="input-group">
+        <label for="mNomeEdit">Nome do Produto</label>
+        <input type="text" id="mNomeEdit">
     </div>
-    <input type="number" id="valMov" value="0" style="text-align:center; width:60px; margin:auto;">
-    <textarea id="mNota" placeholder="Motivo..." style="margin-top:8px; height:40px; font-size:0.7rem;"></textarea>
-    <div style="margin-top:8px;">
-      <label>Alterar Foto:</label>
+
+    <div class="input-group">
+        <label for="mCategoriaEdit">Categoria</label>
+        <select id="mCategoriaEdit">
+          <!-- Categorias serão preenchidas via JS -->
+        </select>
+    </div>
+
+    <div class="current-stock-display">
+      <p>Estoque Atual</p>
+      <b id="mQtd">0</b>
+    </div>
+
+    <div class="input-group">
+        <label for="valMov">Quantidade de Movimentação</label>
+        <input type="number" id="valMov" value="0">
+    </div>
+
+    <div class="input-group">
+        <label for="mNota">Motivo da movimentação</label>
+        <textarea id="mNota" placeholder="Motivo da movimentação..."></textarea>
+    </div>
+
+    <div class="file-upload-group">
+      <label for="mFoto">Alterar Foto:</label>
       <input type="file" id="mFoto" accept="image/*">
     </div>
-    <div style="display:flex; gap:8px; margin-top:12px;">
-      <button class="btn-cat" style="background:var(--success); color:white; flex:1;" onclick="movimentar('add')">ENTRADA</button>
-      <button class="btn-cat" style="background:var(--danger); color:white; flex:1;" onclick="movimentar('sub')">SAÍDA</button>
+
+    <div class="modal-actions">
+      <button class="btn-entry" onclick="movimentar('add')">ENTRADA</button>
+      <button class="btn-exit" onclick="movimentar('sub')">SAÍDA</button>
     </div>
-    <button onclick="fecharModal()" style="margin-top:15px; cursor:pointer; background:none; border:none; text-decoration:underline; font-size:0.7rem;">SALVAR E FECHAR</button>
+    <button class="close-modal-btn-bottom" onclick="fecharModal()">SALVAR E FECHAR</button>
   </div>
 </div>
 
@@ -221,20 +939,57 @@ input,select,textarea{padding:8px;border:1px solid #e2e8f0;border-radius:8px;wid
 let isAdmin=false,editIdx=null;
 let db=[], historico=[];
 let catAtiva='Todos';
-let listaCategorias=["Tinta Hardtop","Tinta Pilot","Componente B","Jotamastic A","Jotamastic B","Solvente","Outros"];
+let listaCategorias=["Componente B", "Filtros", "Jotamastic A", "Jotamastic B", "Manilhas", "Solvente", "Tinta Hardtop", "Tinta Pilot", "Outros"];
 
-// IndexedDB
+// Nova variável para guardar a Data URL da imagem da sidebar
+let sidebarImageUrl = '';
+
+// Preenche os selects de categoria
+function preencherSelectsDeCategoria() {
+    const selects = document.querySelectorAll('#categoria, #filtroCatHist, #mCategoriaEdit');
+    selects.forEach(select => {
+        if (select.id === 'filtroCatHist') {
+            select.innerHTML = '<option value="Todos">Todas as Categorias</option>';
+        } else {
+            select.innerHTML = '';
+        }
+        listaCategorias.forEach(cat => {
+            const option = document.createElement('option');
+            option.value = cat;
+            option.textContent = cat;
+            select.appendChild(option);
+        });
+    });
+}
+
+// IndexedDB - FUNÇÕES ATUALIZADAS
 let dbHaris;
 function initDB(){
-  const request=indexedDB.open('db_haris',1);
-  request.onsuccess=e=>{dbHaris=e.target.result; carregarDados();}
-  request.onerror=e=>console.log(e);
+  // Versão 2 do IndexedDB para adicionar um novo objectStore.
+  // Se você já tem dados, o navegador fará a atualização do esquema.
+  const request=indexedDB.open('db_haris',2); 
+  request.onsuccess=e=>{
+    dbHaris=e.target.result; 
+    carregarDados();
+    carregarSidebarImage(); // Carrega a imagem da sidebar
+  }
+  request.onerror=e=>console.log("Erro IndexedDB:", e);
   request.onupgradeneeded=e=>{
     let dbe=e.target.result;
-    if(!dbe.objectStoreNames.contains('produtos')) dbe.createObjectStore('produtos',{keyPath:'id',autoIncrement:true});
-    if(!dbe.objectStoreNames.contains('historico')) dbe.createObjectStore('historico',{keyPath:'id',autoIncrement:true});
+    if(!dbe.objectStoreNames.contains('produtos')) {
+      dbe.createObjectStore('produtos',{keyPath:'id',autoIncrement:true});
+    }
+    if(!dbe.objectStoreNames.contains('historico')) {
+      dbe.createObjectStore('historico',{keyPath:'id',autoIncrement:true});
+    }
+    // NOVO: Adiciona um objectStore para configurações (se não existir)
+    if(!dbe.objectStoreNames.contains('config')) {
+      dbe.createObjectStore('config', {keyPath: 'id'});
+    }
   }
+  preencherSelectsDeCategoria();
 }
+
 function carregarDados(){
   const t=dbHaris.transaction(['produtos','historico'],'readonly');
   t.objectStore('produtos').getAll().onsuccess=e=>{db=e.target.result; render();}
@@ -242,8 +997,7 @@ function carregarDados(){
 }
 function salvarProdutos(){
   const t=dbHaris.transaction('produtos','readwrite');
-  const store=t.objectStore('produtos'); 
-  // Limpar e adicionar novamente para garantir que os IDs sejam consistentes
+  const store=t.objectStore('produtos');
   store.clear().onsuccess=()=>{
     db.forEach(p=> {
         const addRequest = store.add(p);
@@ -256,8 +1010,71 @@ function salvarHistorico(){
   const store=t.objectStore('historico'); store.clear().onsuccess=()=>{historico.forEach(h=>store.add(h));}
 }
 
+// NOVAS FUNÇÕES PARA IMAGEM DA SIDEBAR
+function carregarSidebarImage() {
+  const t = dbHaris.transaction('config', 'readonly');
+  const store = t.objectStore('config');
+  const request = store.get('sidebar_image'); // Pega o item com id 'sidebar_image'
+
+  request.onsuccess = (e) => {
+    const config = e.target.result;
+    const imgElement = document.getElementById('sidebarImage');
+
+    if (config && config.imageUrl) {
+      // Se a imagem estiver no IndexedDB, usa ela
+      sidebarImageUrl = config.imageUrl;
+      imgElement.src = sidebarImageUrl;
+      console.log("Imagem da sidebar carregada do IndexedDB.");
+    } else {
+      // Se não estiver no IndexedDB, usa o SRC inicial do HTML como fallback temporário.
+      // O usuário precisará fazer o upload para que ela seja salva no IndexedDB.
+      const initialSrc = imgElement.getAttribute('src'); // Pega o src que está no HTML
+      if (initialSrc &&!initialSrc.startsWith('data:') &&!initialSrc.startsWith('http')) {
+          imgElement.src = initialSrc; // Usa o SRC do HTML temporariamente
+          console.log("Imagem da sidebar exibida via SRC do HTML (não encontrada no IndexedDB). Clique em 'Mudar Imagem' para salvá-la permanentemente.");
+      } else {
+          // Se não tem src inicial no HTML, ou se ele for Data URL/URL http inválida
+          imgElement.src = 'https://via.placeholder.com/280x150?text=Imagem+Nao+Encontrada'; // Placeholder
+          console.warn("Imagem da sidebar não encontrada no IndexedDB e SRC inicial inválido ou ausente.");
+      }
+    }
+  };
+  request.onerror = (e) => console.error("Erro ao carregar imagem da sidebar do IndexedDB:", e);
+}
+
+function salvarSidebarImage(imageUrl) {
+  const t = dbHaris.transaction('config', 'readwrite');
+  const store = t.objectStore('config');
+  const request = store.put({ id: 'sidebar_image', imageUrl: imageUrl }); // Salva com id 'sidebar_image'
+
+  request.onsuccess = () => console.log("Imagem da sidebar salva no IndexedDB.");
+  request.onerror = (e) => console.error("Erro ao salvar imagem da sidebar no IndexedDB:", e);
+}
+
+// NOVA FUNÇÃO: Faz o upload da imagem da sidebar (chamada pelo botão)
+function uploadSidebarImage(event) {
+  const file = event.target.files[0];
+  if (file) {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      sidebarImageUrl = e.target.result;
+      document.getElementById('sidebarImage').src = sidebarImageUrl;
+      salvarSidebarImage(sidebarImageUrl); // Salva a nova imagem no IndexedDB
+      alert("Imagem da sidebar atualizada e salva!");
+      // Limpa o input file para permitir novo upload do mesmo arquivo se necessário
+      event.target.value = null; 
+    };
+    reader.onerror = (e) => {
+      console.error("Erro ao ler o arquivo de imagem para a sidebar:", e.target.error);
+      alert("Erro ao ler o arquivo de imagem.");
+    };
+    reader.readAsDataURL(file);
+  }
+}
+
 // Layout e funções
 function toggleAdmin(){
+  // A senha "RebocadorHaris"
   if(!isAdmin){if(prompt("Senha:")==="RebocadorHaris"){isAdmin=true;document.getElementById('adminPanel').style.display='grid';document.getElementById('backupGroup').style.display='flex';render();}}
   else{isAdmin=false;document.getElementById('adminPanel').style.display='none';document.getElementById('backupGroup').style.display='none';document.getElementById('historyPanel').style.display='none';render();}
 }
@@ -267,10 +1084,11 @@ function render(){
   const termo=document.getElementById('inputBusca').value.toLowerCase();
   const fBox=document.getElementById('catFiltros');
   const ordem=document.getElementById('ordem').value;
-  v.innerHTML=''; fBox.innerHTML=['Todos',...listaCategorias].map(c=>`<button class="btn-cat ${catAtiva===c?'active':''}" onclick="setCat('${c}')">${c}</button>`).join('');
+  v.innerHTML='';
+  // Refaz a lista de filtros de categoria, incluindo a nova listaCategorias
+  fBox.innerHTML=['Todos',...listaCategorias].map(c=>`<button class="btn-cat ${catAtiva===c?'active':''}" onclick="setCat('${c}')">${c}</button>`).join('');
   let cProd=0,cEst=0;
-  
-  // Criar uma cópia filtrada e ordenada para exibição
+
   let produtosExibidos = db.filter(p => {
     return p.nome.toLowerCase().includes(termo) && (catAtiva === 'Todos' || p.cat === catAtiva);
   });
@@ -285,9 +1103,9 @@ function render(){
       <div class="card">
       <img src="${p.foto}">
       <div class="card-info">
-        <h3 style="margin:2px 0; font-size:0.75rem; line-height:1.1;">${p.nome}</h3>
+        <h3>${p.nome}</h3>
         <span class="badge-cat" style="background:${getCorCat(p.cat)}">${p.cat||'Outros'}</span>
-        <p style="margin:0; font-size:0.7rem; color:gray;">Estoque: <b style="font-size:0.9rem;">${p.qtd}</b></p>
+        <p>Estoque: <b>${p.qtd}</b></p>
         ${isAdmin?`<div class="admin-actions">
          <button class="btn-edit-card" onclick="abrirModal('${p.id}')">✏️</button>
           <button class="btn-delete-card" onclick="deletarProduto('${p.id}')">🗑️</button>
@@ -302,7 +1120,17 @@ function render(){
 function setCat(c){catAtiva=c; render();}
 
 function getCorCat(cat){
-  const cores={'Tinta Hardtop':'#f97316','Tinta Pilot':'#3b82f6','Componente B':'#14b8a6','Jotamastic A':'#facc15','Jotamastic B':'#8b5cf6','Solvente':'#ef4444','Outros':'#6b7280'};
+  const cores={
+    'Tinta Hardtop':'#f97316',
+    'Tinta Pilot':'#3b82f6',
+    'Componente B':'#14b8a6',
+    'Jotamastic A':'#facc15',
+    'Jotamastic B':'#8b5cf6',
+    'Solvente':'#ef4444',
+    'Filtros': '#a3e635', // Nova cor
+    'Manilhas': '#ec4899', // Nova cor
+    'Outros':'#6b7280'
+  };
   return cores[cat]||'#6b7280';
 }
 
@@ -310,26 +1138,22 @@ function getCorCat(cat){
 function cadastrar(){
   const n=document.getElementById('nome').value;
   const c=document.getElementById('categoria').value;
-  const q=document.getElementById('qtd').value;
+  const q=parseInt(document.getElementById('qtd').value); // Parse para int
   const f=document.getElementById('foto').files[0];
-  if(!n||!q||!f)return alert('Preencha todos os campos!');
+  if(!n||isNaN(q)||!f)return alert('Preencha todos os campos e informe uma quantidade válida!'); // Verificar se q é um número
   const reader=new FileReader();
   reader.onload=e=>{
-    // Adicionar um ID ao produto. O IndexedDB vai gerar um se autoIncrement for true, mas é bom ter no objeto
-    const novoProduto = {nome:n,cat:c,qtd:parseInt(q),foto:e.target.result};
-    db.push(novoProduto); // Adiciona ao array local
-    
-    // Adicionar ao IndexedDB
+    const novoProduto = {nome:n,cat:c,qtd:q,foto:e.target.result};
     const transaction = dbHaris.transaction('produtos', 'readwrite');
     const store = transaction.objectStore('produtos');
-    const addRequest = store.add(novoProduto); // Adiciona o objeto com ID gerado
+    const addRequest = store.add(novoProduto);
 
     addRequest.onsuccess = (event) => {
-        // Atualiza o ID do objeto no array local com o ID gerado pelo IndexedDB
-        novoProduto.id = event.target.result; 
-        salvarProdutos(); // Salva o array atualizado de volta no IndexedDB (se for para sobrescrever)
+        novoProduto.id = event.target.result;
+        db.push(novoProduto); // Adiciona ao array local APÓS ter o ID do IndexedDB
+        salvarProdutos();
         render();
-        document.getElementById('nome').value='';document.getElementById('qtd').value='';document.getElementById('foto').value='';
+        document.getElementById('nome').value='';document.getElementById('qtd').value='0';document.getElementById('foto').value=''; // Resetar qtd para 0
     };
     addRequest.onerror = (event) => {
         console.error("Erro ao cadastrar produto no IndexedDB:", event.target.error);
@@ -340,31 +1164,35 @@ function cadastrar(){
 }
 
 // Modal edição
-function abrirModal(productId){ // Agora recebe o ID do produto
-  const p = db.find(prod => prod.id == productId); // Encontra o produto pelo ID
+function abrirModal(productId){
+  const p = db.find(prod => prod.id == productId);
   if (!p) {
     alert("Produto não encontrado para edição.");
     return;
   }
-  editIdx = db.indexOf(p); // Encontra o índice real no array 'db'
+  editIdx = db.indexOf(p);
   document.getElementById('mNomeEdit').value=p.nome;
   document.getElementById('mQtd').innerText=p.qtd;
   document.getElementById('mNota').value='';
   document.getElementById('valMov').value=0;
+  document.getElementById('mCategoriaEdit').value=p.cat; // Preenche a categoria no modal
+  document.getElementById('mFoto').value = ''; // CORREÇÃO: Limpa o campo de arquivo ao abrir o modal
   document.getElementById('modal').style.display='flex';
 }
 function fecharModal(){
   const p=db[editIdx];
   p.nome=document.getElementById('mNomeEdit').value;
+  p.cat=document.getElementById('mCategoriaEdit').value; // Salva a nova categoria
   const f=document.getElementById('mFoto').files[0];
   if(f){
     const r=new FileReader();
     r.onload=e=>{p.foto=e.target.result; salvarProdutos(); render();}
     r.readAsDataURL(f);
   } else {
-    salvarProdutos(); render(); 
+    salvarProdutos(); render();
   }
   document.getElementById('modal').style.display='none';
+  document.getElementById('mFoto').value = ''; // CORREÇÃO: Limpa o campo de arquivo ao fechar o modal
 }
 
 // Movimentação
@@ -373,23 +1201,34 @@ function movimentar(tipo){
   if(val<=0) return alert('Informe uma quantidade válida!');
   const nota=document.getElementById('mNota').value||'-';
   const p=db[editIdx];
-  if(tipo==='add') p.qtd+=val;
-  else if(tipo==='sub') p.qtd-=val;
-  if(p.qtd<0)p.qtd=0;
-  historico.push({data:new Date().toLocaleString(),produto:p.nome,cat:p.cat,tipo:tipo==='add'?'Entrada':'Saída',qtd:val,motivo:nota});
+  let tipoMov = '';
+
+  if(tipo==='add') {
+    p.qtd+=val;
+    tipoMov = 'Entrada';
+  }
+  else if(tipo==='sub') {
+    if(p.qtd < val){ // Prevenção de estoque negativo
+        alert("Não é possível remover mais itens do que o estoque atual.");
+        return;
+    }
+    p.qtd-=val;
+    tipoMov = 'Saída';
+  }
+
+  historico.push({data:new Date().toLocaleString(),produto:p.nome,cat:p.cat,tipo:tipoMov,qtd:val,motivo:nota});
   salvarProdutos(); salvarHistorico(); render(); renderHistory();
   document.getElementById('mQtd').innerText=p.qtd;
   document.getElementById('valMov').value=0;document.getElementById('mNota').value='';
 }
 
 // Deletar produto
-function deletarProduto(productId){ // Agora recebe o ID do produto
+function deletarProduto(productId){
   if(confirm('Deseja deletar este produto?')){
-    // Encontrar o índice do produto pelo ID
     const indexToDelete = db.findIndex(p => p.id == productId);
     if (indexToDelete > -1) {
       db.splice(indexToDelete, 1);
-      salvarProdutos(); 
+      salvarProdutos();
       render();
     } else {
       alert("Produto não encontrado para exclusão.");
@@ -398,7 +1237,11 @@ function deletarProduto(productId){ // Agora recebe o ID do produto
 }
 
 // Histórico
-function toggleHistory(){document.getElementById('historyPanel').style.display=document.getElementById('historyPanel').style.display==='none'?'block':'none'; renderHistory();}
+function toggleHistory(){
+  const historyPanel = document.getElementById('historyPanel');
+  historyPanel.style.display = historyPanel.style.display === 'none' || historyPanel.style.display === ''? 'block' : 'none';
+  renderHistory();
+}
 function limparHistorico(){if(confirm('Deseja limpar todo o histórico?')){historico=[]; salvarHistorico(); renderHistory();}}
 
 function renderHistory(){
@@ -408,33 +1251,39 @@ function renderHistory(){
   tbody.innerHTML='';
   let totalMovimentacoes = 0;
 
-  historico.forEach((h,i)=>{
+  // Renderiza em ordem decrescente de data
+  const historicoOrdenado = [...historico].reverse();
+
+  historicoOrdenado.forEach((h,i)=>{
     if((h.produto.toLowerCase().includes(termo)||h.motivo.toLowerCase().includes(termo))&&(filtro==='Todos'||h.cat===filtro)){
       totalMovimentacoes++;
+      let tipoDisplay = h.tipo === 'Entrada'? `<span class="tag-add">${h.tipo}</span>` : `<span class="tag-sub">${h.tipo}</span>`;
       tbody.innerHTML+=`
       <tr>
         <td>${h.data}</td>
         <td>${h.produto}</td>
-        <td>${h.tipo}</td>
+        <td>${tipoDisplay}</td>
         <td>${h.qtd}</td>
         <td>${h.motivo}</td>
-        <td><button class="lixeira" onclick="deletarHist(${i})">🗑️</button></td>
+        <td><button class="lixeira" onclick="deletarHist(${historico.length - 1 - i})">🗑️</button></td>
       </tr>`;
     }
   });
 
   if (totalMovimentacoes === 0) {
-      tbody.innerHTML += `<tr><td colspan="6" style="text-align:center;">Nenhuma movimentação encontrada.</td></tr>`;
+      tbody.innerHTML += `<tr><td colspan="6" style="text-align:center; color:var(--subtle-text);">Nenhuma movimentação encontrada.</td></tr>`;
   }
 }
 
 function deletarHist(idx){historico.splice(idx,1); salvarHistorico(); renderHistory();}
 
-// Backup
+// Backup - FUNÇÃO ATUALIZADA
 function exportarBackup(){
   const data = {
     produtos: db,
-    historico: historico
+    historico: historico,
+    // NOVO: Inclui a imagem da sidebar no backup
+    sidebarImage: sidebarImageUrl
   };
   const jsonString = JSON.stringify(data, null, 2);
   const blob = new Blob([jsonString], { type: "application/json" });
@@ -445,11 +1294,12 @@ function exportarBackup(){
   document.body.appendChild(a);
   a.click();
   document.body.removeChild(a);
-  URL.revokeObjectURL(url); // Libera o URL do objeto
+  URL.revokeObjectURL(url);
 }
 
-function importarBackup(event){ // AGORA RECEBE O OBJETO 'event'
-  const file = event.target.files[0]; // ACESSO CORRETO AO ARQUIVO
+// Importar Backup - FUNÇÃO ATUALIZADA
+function importarBackup(event){
+  const file = event.target.files[0];
   if (file) {
     const reader = new FileReader();
     reader.onload = function(e) {
@@ -459,8 +1309,15 @@ function importarBackup(event){ // AGORA RECEBE O OBJETO 'event'
           if (confirm("Importar backup? Isso substituirá os dados atuais.")) {
             db = importedData.produtos;
             historico = importedData.historico;
-            salvarProdutos(); 
-            salvarHistorico(); 
+            // NOVO: Importa e salva a imagem da sidebar
+            if (importedData.sidebarImage) {
+              sidebarImageUrl = importedData.sidebarImage;
+              document.getElementById('sidebarImage').src = sidebarImageUrl;
+              salvarSidebarImage(sidebarImageUrl); // Salva no IndexedDB
+            }
+
+            salvarProdutos();
+            salvarHistorico();
             render();
             renderHistory();
             alert("Backup importado com sucesso!");
@@ -481,18 +1338,15 @@ function imprimirProdutos(){
   window.onbeforeprint = () => {
     const printFooter = document.getElementById('productPrintFooter');
     const currentDateTime = new Date().toLocaleString();
-    const totalProductsCount = db.length; // Conta todos os produtos no DB
-    
-    // Preenche a data e hora no span central
+    const totalProductsCount = db.length;
+
     printFooter.querySelector('.datetime-info').textContent = `Data de Emissão: ${currentDateTime}`;
-    // Preenche o contador de produtos no span direito
-    printFooter.querySelector('.count-info').textContent = `QTD Produtos: ${totalProductsCount}`; 
+    printFooter.querySelector('.count-info').textContent = `QTD Produtos: ${totalProductsCount}`;
   };
 
   window.print();
 
   window.onafterprint = () => {
-    // Limpa o conteúdo do rodapé após a impressão
     const printFooter = document.getElementById('productPrintFooter');
     printFooter.querySelector('.datetime-info').textContent = '';
     printFooter.querySelector('.count-info').textContent = '';
@@ -505,92 +1359,82 @@ function imprimirHistorico(){
   let currentDateTime = new Date().toLocaleString();
 
   let html=`<html><head><title>Histórico de Movimentações</title><style>
-    body{font-family:sans-serif;padding:0; margin: 0; min-height: 100vh; display: flex; flex-direction: column;}
+    body{font-family:'Poppins', sans-serif;padding:0; margin: 0; min-height: 100vh; display: flex; flex-direction: column;}
 .content-wrapper { flex-grow: 1; padding: 15mm; }
-    h1{text-align:center;font-size:24px;font-weight:bold;margin-bottom:20px;}
+    h1{text-align:center;font-size:24px;font-weight:bold;margin-bottom:20px; color:#1f2a40;}
     table{width:100%;border-collapse:collapse;font-size:12px; margin-top: 15px;}
-    th,td{padding:8px;border:1px solid #ccc;text-align:left; page-break-inside: avoid;}
-    th{font-weight:bold; background-color: #f0f0f0;}
-    tr:nth-child(even){background-color:#f5f5f5!important;}
+    th,td{padding:8px;border:1px solid #e0e7ee;text-align:left; page-break-inside: avoid;}
+    th{font-weight:600; background-color: #f0f4f8; color:#334155;}
+    tr:nth-child(even){background-color:#f9fbfc!important;}
     tr:nth-child(odd){background-color:#ffffff!important;}
     table tbody tr { page-break-inside: avoid; page-break-after: auto;}
+.tag-add{color:#10b8a6;font-weight:bold;} /* Cor ajustada para Entrada */
+.tag-sub{color:#ef4444;font-weight:bold;}
 
-.report-footer{ /* Renomeado para consistência */
-    position: fixed;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    font-size: 10px;
-    border-top: 1px solid #ddd;
-    padding: 5px 15mm;
-    background: white;
-    box-sizing: border-box;
-    page-break-before: avoid;
-  }
-.report-footer.datetime-info { /* Corrigido para.report-footer.datetime-info */
-    flex-grow: 1;
-    text-align: center;
-    order: 2;
-  }
-.report-footer.count-info { /* Corrigido para.report-footer.count-info */
-    flex-grow: 1;
-    text-align: right;
-    order: 3;
-  }
-.report-footer.flex-spacer-left { /* Corrigido para.report-footer.flex-spacer-left */
-    flex-grow: 1;
-    order: 1;
-  }
-    
-    @page {
-      margin: 15mm;
-    }
-    /* AJUSTES NAS LARGURAS DAS COLUNAS PARA O PDF DO HISTÓRICO */
-    table th:nth-child(1), table td:nth-child(1) { width: 18%; } /* Data */
-    table th:nth-child(2), table td:nth-child(2) { width: 30%; } /* Produto (mais espaço) */
-    table th:nth-child(3), table td:nth-child(3) { width: 12%; } /* Tipo */
-    table th:nth-child(4) { width: 8%; } /* Cabeçalho Qtd (mantém alinhamento padrão/esquerda) */
-    table td:nth-child(4) { width: 8%; text-align: center; } /* Conteúdo Qtd (centralizado) */
-    table th:nth-child(5), table td:nth-child(5) { width: 32%; } /* Motivo (mais espaço) */
+.report-footer{
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        font-size: 10px;
+        border-top: 1px solid #000;
+        padding: 5px 15mm;
+        background: white;
+        box-sizing: border-box;
+        page-break-before: avoid;
+      }
+.report-footer.datetime-info { flex-grow: 1; text-align: center; order: 2; }
+.report-footer.count-info { flex-grow: 1; text-align: right; order: 3; }
+.report-footer.flex-spacer-left { flex-grow: 1; order: 1; }
+
+    @page { margin: 15mm; }
+    table th:nth-child(1), table td:nth-child(1) { width: 18%; }
+    table th:nth-child(2), table td:nth-child(2) { width: 30%; }
+    table th:nth-child(3), table td:nth-child(3) { width: 12%; }
+    table th:nth-child(4) { width: 8%; }
+    table td:nth-child(4) { width: 8%; text-align: center; }
+    table th:nth-child(5), table td:nth-child(5) { width: 32%; }
   </style></head><body>`;
-  
+
   html+=`<div class="content-wrapper"><h1>Histórico de Movimentações Haris</h1><table><thead><tr><th>Data</th><th>Produto</th><th>Tipo</th><th>Qtd</th><th>Motivo</th></tr></thead><tbody>`;
 
   let totalMovimentacoesImpressao = 0;
   // Filtrar o histórico para contar apenas o que será impresso
-  historico.forEach(h=>{
-      const termo=document.getElementById('inputBuscaHist').value.toLowerCase();
-      const filtro=document.getElementById('filtroCatHist').value;
-      if((h.produto.toLowerCase().includes(termo)||h.motivo.toLowerCase().includes(termo))&&(filtro==='Todos'||h.cat===filtro)){
-          totalMovimentacoesImpressao++;
-          let tipoDisplay = h.tipo === 'Entrada'? `<span style="color: #10b981;">${h.tipo}</span>` : `<span style="color: #e11d48;">${h.tipo}</span>`;
-          html+=`<tr><td>${h.data}</td><td>${h.produto}</td><td>${tipoDisplay}</td><td>${h.qtd}</td><td>${h.motivo}</td></tr>`;
-      }
+  const termo=document.getElementById('inputBuscaHist').value.toLowerCase();
+  const filtro=document.getElementById('filtroCatHist').value;
+  const historicoParaImprimir = historico.filter(h =>
+      (h.produto.toLowerCase().includes(termo)||h.motivo.toLowerCase().includes(termo)) &&
+      (filtro==='Todos'||h.cat===filtro)
+  ).reverse(); // Inverte para imprimir do mais recente ao mais antigo
+
+  historicoParaImprimir.forEach(h=>{
+    totalMovimentacoesImpressao++;
+    let tipoDisplay = h.tipo === 'Entrada'? `<span class="tag-add">${h.tipo}</span>` : `<span class="tag-sub">${h.tipo}</span>`;
+    html+=`<tr><td>${h.data}</td><td>${h.produto}</td><td>${tipoDisplay}</td><td>${h.qtd}</td><td>${h.motivo}</td></tr>`;
   });
 
   if (totalMovimentacoesImpressao === 0) {
-      html += `<tr><td colspan="5" style="text-align:center;">Nenhuma movimentação encontrada para o filtro atual.</td></tr>`;
+      html += `<tr><td colspan="5" style="text-align:center; color:#64748b;">Nenhuma movimentação encontrada para o filtro atual.</td></tr>`;
   }
 
   html+=`</tbody></table></div>`;
-  // Rodapé HTML para o PDF do histórico
   html+=`<div class="report-footer">
     <span class="flex-spacer-left"></span>
     <span class="datetime-info">Data de Emissão: ${currentDateTime}</span>
     <span class="count-info">QTD Movimentações: ${totalMovimentacoesImpressao}</span>
   </div></body></html>`;
-  
+
   novaJan.document.write(html);
   novaJan.document.close();
 
   novaJan.print();
-  
+
   setTimeout(() => {
     novaJan.close();
-  }, 100); 
+  }, 100);
 }
 
 // Inicialização
