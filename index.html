@@ -842,11 +842,6 @@ input:focus,select:focus,textarea:focus{
         <button class="btn-primary" style="align-self: flex-end;" onclick="cadastrar()">ADICIONAR PRODUTO</button>
 
         <!-- REMOVIDO: O campo de upload da imagem da sidebar foi movido para a sidebar principal -->
-        <!-- <div class="input-group" style="grid-column: 1 / -1; margin-top: 15px; border-top: 1px solid var(--border-color); padding-top: 15px;">
-          <label>Alterar Imagem da Sidebar</label>
-          <input type="file" id="sidebarImageUpload" accept="image/*" onchange="uploadSidebarImage(event)">
-          <small style="color:var(--subtle-text); font-size:0.75rem;">A imagem será salva e incluída no backup.</small>
-        </div> -->
       </div>
 
       <div id="historyPanel" class="no-print">
@@ -941,8 +936,7 @@ let db=[], historico=[];
 let catAtiva='Todos';
 let listaCategorias=["Componente B", "Filtros", "Jotamastic A", "Jotamastic B", "Manilhas", "Solvente", "Tinta Hardtop", "Tinta Pilot", "Outros"];
 
-// Nova variável para guardar a Data URL da imagem da sidebar
-let sidebarImageUrl = '';
+let sidebarImageUrl = ''; // Nova variável para guardar a Data URL da imagem da sidebar
 
 // Preenche os selects de categoria
 function preencherSelectsDeCategoria() {
@@ -964,30 +958,38 @@ function preencherSelectsDeCategoria() {
 
 // IndexedDB - FUNÇÕES ATUALIZADAS
 let dbHaris;
+let dbReadyPromise; // NOVO: Uma Promise para controlar quando o DB está pronto
+
 function initDB(){
-  // Versão 2 do IndexedDB para adicionar um novo objectStore.
-  // Se você já tem dados, o navegador fará a atualização do esquema.
-  const request=indexedDB.open('db_haris',2); 
-  request.onsuccess=e=>{
-    dbHaris=e.target.result; 
-    carregarDados();
-    carregarSidebarImage(); // Carrega a imagem da sidebar
-  }
-  request.onerror=e=>console.log("Erro IndexedDB:", e);
-  request.onupgradeneeded=e=>{
-    let dbe=e.target.result;
-    if(!dbe.objectStoreNames.contains('produtos')) {
-      dbe.createObjectStore('produtos',{keyPath:'id',autoIncrement:true});
+  if (dbReadyPromise) return dbReadyPromise; // Se a Promise já existe, retorna ela
+
+  dbReadyPromise = new Promise((resolve, reject) => {
+    const request=indexedDB.open('db_haris',2); 
+    request.onsuccess=e=>{
+      dbHaris=e.target.result; 
+      carregarDados();
+      carregarSidebarImage(); 
+      resolve(); // Resolve a Promise quando o DB está pronto
     }
-    if(!dbe.objectStoreNames.contains('historico')) {
-      dbe.createObjectStore('historico',{keyPath:'id',autoIncrement:true});
+    request.onerror=e=>{
+      console.log("Erro IndexedDB:", e);
+      reject(e); // Rejeita a Promise em caso de erro
     }
-    // NOVO: Adiciona um objectStore para configurações (se não existir)
-    if(!dbe.objectStoreNames.contains('config')) {
-      dbe.createObjectStore('config', {keyPath: 'id'});
+    request.onupgradeneeded=e=>{
+      let dbe=e.target.result;
+      if(!dbe.objectStoreNames.contains('produtos')) {
+        dbe.createObjectStore('produtos',{keyPath:'id',autoIncrement:true});
+      }
+      if(!dbe.objectStoreNames.contains('historico')) {
+        dbe.createObjectStore('historico',{keyPath:'id',autoIncrement:true});
+      }
+      if(!dbe.objectStoreNames.contains('config')) {
+        dbe.createObjectStore('config', {keyPath: 'id'});
+      }
     }
-  }
+  });
   preencherSelectsDeCategoria();
+  return dbReadyPromise; // Retorna a Promise
 }
 
 function carregarDados(){
@@ -1010,31 +1012,26 @@ function salvarHistorico(){
   const store=t.objectStore('historico'); store.clear().onsuccess=()=>{historico.forEach(h=>store.add(h));}
 }
 
-// NOVAS FUNÇÕES PARA IMAGEM DA SIDEBAR
 function carregarSidebarImage() {
   const t = dbHaris.transaction('config', 'readonly');
   const store = t.objectStore('config');
-  const request = store.get('sidebar_image'); // Pega o item com id 'sidebar_image'
+  const request = store.get('sidebar_image');
 
   request.onsuccess = (e) => {
     const config = e.target.result;
     const imgElement = document.getElementById('sidebarImage');
 
     if (config && config.imageUrl) {
-      // Se a imagem estiver no IndexedDB, usa ela
       sidebarImageUrl = config.imageUrl;
       imgElement.src = sidebarImageUrl;
       console.log("Imagem da sidebar carregada do IndexedDB.");
     } else {
-      // Se não estiver no IndexedDB, usa o SRC inicial do HTML como fallback temporário.
-      // O usuário precisará fazer o upload para que ela seja salva no IndexedDB.
-      const initialSrc = imgElement.getAttribute('src'); // Pega o src que está no HTML
+      const initialSrc = imgElement.getAttribute('src'); 
       if (initialSrc &&!initialSrc.startsWith('data:') &&!initialSrc.startsWith('http')) {
-          imgElement.src = initialSrc; // Usa o SRC do HTML temporariamente
+          imgElement.src = initialSrc; 
           console.log("Imagem da sidebar exibida via SRC do HTML (não encontrada no IndexedDB). Clique em 'Mudar Imagem' para salvá-la permanentemente.");
       } else {
-          // Se não tem src inicial no HTML, ou se ele for Data URL/URL http inválida
-          imgElement.src = 'https://via.placeholder.com/280x150?text=Imagem+Nao+Encontrada'; // Placeholder
+          imgElement.src = 'https://via.placeholder.com/280x150?text=Imagem+Nao+Encontrada'; 
           console.warn("Imagem da sidebar não encontrada no IndexedDB e SRC inicial inválido ou ausente.");
       }
     }
@@ -1045,13 +1042,12 @@ function carregarSidebarImage() {
 function salvarSidebarImage(imageUrl) {
   const t = dbHaris.transaction('config', 'readwrite');
   const store = t.objectStore('config');
-  const request = store.put({ id: 'sidebar_image', imageUrl: imageUrl }); // Salva com id 'sidebar_image'
+  const request = store.put({ id: 'sidebar_image', imageUrl: imageUrl });
 
   request.onsuccess = () => console.log("Imagem da sidebar salva no IndexedDB.");
   request.onerror = (e) => console.error("Erro ao salvar imagem da sidebar no IndexedDB:", e);
 }
 
-// NOVA FUNÇÃO: Faz o upload da imagem da sidebar (chamada pelo botão)
 function uploadSidebarImage(event) {
   const file = event.target.files[0];
   if (file) {
@@ -1059,9 +1055,8 @@ function uploadSidebarImage(event) {
     reader.onload = (e) => {
       sidebarImageUrl = e.target.result;
       document.getElementById('sidebarImage').src = sidebarImageUrl;
-      salvarSidebarImage(sidebarImageUrl); // Salva a nova imagem no IndexedDB
+      salvarSidebarImage(sidebarImageUrl); 
       alert("Imagem da sidebar atualizada e salva!");
-      // Limpa o input file para permitir novo upload do mesmo arquivo se necessário
       event.target.value = null; 
     };
     reader.onerror = (e) => {
@@ -1085,7 +1080,6 @@ function render(){
   const fBox=document.getElementById('catFiltros');
   const ordem=document.getElementById('ordem').value;
   v.innerHTML='';
-  // Refaz a lista de filtros de categoria, incluindo a nova listaCategorias
   fBox.innerHTML=['Todos',...listaCategorias].map(c=>`<button class="btn-cat ${catAtiva===c?'active':''}" onclick="setCat('${c}')">${c}</button>`).join('');
   let cProd=0,cEst=0;
 
@@ -1127,20 +1121,19 @@ function getCorCat(cat){
     'Jotamastic A':'#facc15',
     'Jotamastic B':'#8b5cf6',
     'Solvente':'#ef4444',
-    'Filtros': '#a3e635', // Nova cor
-    'Manilhas': '#ec4899', // Nova cor
+    'Filtros': '#a3e635', 
+    'Manilhas': '#ec4899', 
     'Outros':'#6b7280'
   };
   return cores[cat]||'#6b7280';
 }
 
-// Cadastro
 function cadastrar(){
   const n=document.getElementById('nome').value;
   const c=document.getElementById('categoria').value;
-  const q=parseInt(document.getElementById('qtd').value); // Parse para int
+  const q=parseInt(document.getElementById('qtd').value); 
   const f=document.getElementById('foto').files[0];
-  if(!n||isNaN(q)||!f)return alert('Preencha todos os campos e informe uma quantidade válida!'); // Verificar se q é um número
+  if(!n||isNaN(q)||!f)return alert('Preencha todos os campos e informe uma quantidade válida!'); 
   const reader=new FileReader();
   reader.onload=e=>{
     const novoProduto = {nome:n,cat:c,qtd:q,foto:e.target.result};
@@ -1150,10 +1143,10 @@ function cadastrar(){
 
     addRequest.onsuccess = (event) => {
         novoProduto.id = event.target.result;
-        db.push(novoProduto); // Adiciona ao array local APÓS ter o ID do IndexedDB
+        db.push(novoProduto); 
         salvarProdutos();
         render();
-        document.getElementById('nome').value='';document.getElementById('qtd').value='0';document.getElementById('foto').value=''; // Resetar qtd para 0
+        document.getElementById('nome').value='';document.getElementById('qtd').value='0';document.getElementById('foto').value=''; 
     };
     addRequest.onerror = (event) => {
         console.error("Erro ao cadastrar produto no IndexedDB:", event.target.error);
@@ -1163,7 +1156,6 @@ function cadastrar(){
   reader.readAsDataURL(f);
 }
 
-// Modal edição
 function abrirModal(productId){
   const p = db.find(prod => prod.id == productId);
   if (!p) {
@@ -1175,14 +1167,14 @@ function abrirModal(productId){
   document.getElementById('mQtd').innerText=p.qtd;
   document.getElementById('mNota').value='';
   document.getElementById('valMov').value=0;
-  document.getElementById('mCategoriaEdit').value=p.cat; // Preenche a categoria no modal
-  document.getElementById('mFoto').value = ''; // CORREÇÃO: Limpa o campo de arquivo ao abrir o modal
+  document.getElementById('mCategoriaEdit').value=p.cat; 
+  document.getElementById('mFoto').value = ''; 
   document.getElementById('modal').style.display='flex';
 }
 function fecharModal(){
   const p=db[editIdx];
   p.nome=document.getElementById('mNomeEdit').value;
-  p.cat=document.getElementById('mCategoriaEdit').value; // Salva a nova categoria
+  p.cat=document.getElementById('mCategoriaEdit').value; 
   const f=document.getElementById('mFoto').files[0];
   if(f){
     const r=new FileReader();
@@ -1192,10 +1184,9 @@ function fecharModal(){
     salvarProdutos(); render();
   }
   document.getElementById('modal').style.display='none';
-  document.getElementById('mFoto').value = ''; // CORREÇÃO: Limpa o campo de arquivo ao fechar o modal
+  document.getElementById('mFoto').value = ''; 
 }
 
-// Movimentação
 function movimentar(tipo){
   const val=parseInt(document.getElementById('valMov').value)||0;
   if(val<=0) return alert('Informe uma quantidade válida!');
@@ -1208,7 +1199,7 @@ function movimentar(tipo){
     tipoMov = 'Entrada';
   }
   else if(tipo==='sub') {
-    if(p.qtd < val){ // Prevenção de estoque negativo
+    if(p.qtd < val){ 
         alert("Não é possível remover mais itens do que o estoque atual.");
         return;
     }
@@ -1222,7 +1213,6 @@ function movimentar(tipo){
   document.getElementById('valMov').value=0;document.getElementById('mNota').value='';
 }
 
-// Deletar produto
 function deletarProduto(productId){
   if(confirm('Deseja deletar este produto?')){
     const indexToDelete = db.findIndex(p => p.id == productId);
@@ -1236,7 +1226,6 @@ function deletarProduto(productId){
   }
 }
 
-// Histórico
 function toggleHistory(){
   const historyPanel = document.getElementById('historyPanel');
   historyPanel.style.display = historyPanel.style.display === 'none' || historyPanel.style.display === ''? 'block' : 'none';
@@ -1251,7 +1240,6 @@ function renderHistory(){
   tbody.innerHTML='';
   let totalMovimentacoes = 0;
 
-  // Renderiza em ordem decrescente de data
   const historicoOrdenado = [...historico].reverse();
 
   historicoOrdenado.forEach((h,i)=>{
@@ -1277,12 +1265,10 @@ function renderHistory(){
 
 function deletarHist(idx){historico.splice(idx,1); salvarHistorico(); renderHistory();}
 
-// Backup - FUNÇÃO ATUALIZADA
 function exportarBackup(){
   const data = {
     produtos: db,
     historico: historico,
-    // NOVO: Inclui a imagem da sidebar no backup
     sidebarImage: sidebarImageUrl
   };
   const jsonString = JSON.stringify(data, null, 2);
@@ -1297,7 +1283,6 @@ function exportarBackup(){
   URL.revokeObjectURL(url);
 }
 
-// Importar Backup - FUNÇÃO ATUALIZADA
 function importarBackup(event){
   const file = event.target.files[0];
   if (file) {
@@ -1306,22 +1291,28 @@ function importarBackup(event){
       try {
         const importedData = JSON.parse(e.target.result);
         if (importedData.produtos && importedData.historico) {
-          if (confirm("Importar backup? Isso substituirá os dados atuais.")) {
-            db = importedData.produtos;
-            historico = importedData.historico;
-            // NOVO: Importa e salva a imagem da sidebar
-            if (importedData.sidebarImage) {
-              sidebarImageUrl = importedData.sidebarImage;
-              document.getElementById('sidebarImage').src = sidebarImageUrl;
-              salvarSidebarImage(sidebarImageUrl); // Salva no IndexedDB
-            }
+          // Garante que o IndexedDB está pronto antes de tentar usar 'dbHaris'
+          initDB().then(() => { // Espera o DB estar pronto
+            if (confirm("Importar backup? Isso substituirá os dados atuais.")) {
+              db = importedData.produtos;
+              historico = importedData.historico;
+              
+              if (importedData.sidebarImage) {
+                sidebarImageUrl = importedData.sidebarImage;
+                document.getElementById('sidebarImage').src = sidebarImageUrl;
+                salvarSidebarImage(sidebarImageUrl); // Salva no IndexedDB
+              }
 
-            salvarProdutos();
-            salvarHistorico();
-            render();
-            renderHistory();
-            alert("Backup importado com sucesso!");
-          }
+              salvarProdutos();
+              salvarHistorico();
+              render();
+              renderHistory();
+              alert("Backup importado com sucesso!");
+            }
+          }).catch(error => {
+            console.error("Erro ao inicializar o IndexedDB para importar backup:", error);
+            alert("Erro ao inicializar o banco de dados para importar o backup.");
+          });
         } else {
           alert("Arquivo de backup inválido. Estrutura incorreta.");
         }
@@ -1333,7 +1324,6 @@ function importarBackup(event){
   }
 }
 
-// PDF Produtos
 function imprimirProdutos(){
   window.onbeforeprint = () => {
     const printFooter = document.getElementById('productPrintFooter');
@@ -1353,7 +1343,6 @@ function imprimirProdutos(){
   };
 }
 
-// PDF Histórico
 function imprimirHistorico(){
   let novaJan=window.open('','_blank');
   let currentDateTime = new Date().toLocaleString();
@@ -1368,7 +1357,7 @@ function imprimirHistorico(){
     tr:nth-child(even){background-color:#f9fbfc!important;}
     tr:nth-child(odd){background-color:#ffffff!important;}
     table tbody tr { page-break-inside: avoid; page-break-after: auto;}
-.tag-add{color:#10b8a6;font-weight:bold;} /* Cor ajustada para Entrada */
+.tag-add{color:#10b8a6;font-weight:bold;} 
 .tag-sub{color:#ef4444;font-weight:bold;}
 
 .report-footer{
@@ -1402,13 +1391,12 @@ function imprimirHistorico(){
   html+=`<div class="content-wrapper"><h1>Histórico de Movimentações Haris</h1><table><thead><tr><th>Data</th><th>Produto</th><th>Tipo</th><th>Qtd</th><th>Motivo</th></tr></thead><tbody>`;
 
   let totalMovimentacoesImpressao = 0;
-  // Filtrar o histórico para contar apenas o que será impresso
   const termo=document.getElementById('inputBuscaHist').value.toLowerCase();
   const filtro=document.getElementById('filtroCatHist').value;
   const historicoParaImprimir = historico.filter(h =>
       (h.produto.toLowerCase().includes(termo)||h.motivo.toLowerCase().includes(termo)) &&
       (filtro==='Todos'||h.cat===filtro)
-  ).reverse(); // Inverte para imprimir do mais recente ao mais antigo
+  ).reverse();
 
   historicoParaImprimir.forEach(h=>{
     totalMovimentacoesImpressao++;
