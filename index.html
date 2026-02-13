@@ -674,165 +674,212 @@ input:focus,select:focus,textarea:focus{
 }
 
 /* Responsive adjustments */
-/* Ajustes para telas maiores que 768px mas menores que 1200px */
+/* Ajustes para telas maiores que 768px mas menores que 1200px (tablets e telas médias) */
 @media (max-width: 1200px) {
- .container-wrapper{
+.container-wrapper{
     flex-direction:column;
     gap:20px;
     margin:15px auto;
     padding:0 15px;
   }
- .sidebar{
+.sidebar{
     width:100%;
     order:unset; /* Remover ordem para mobile */
     position: static; /* Remove o sticky em telas pequenas */
     max-height: none;
     overflow-y: visible;
   }
- .main-content{
+.main-content{
     order:unset;
   }
- .header{
+.header{
     flex-wrap:wrap;
     gap:15px;
     justify-content:center;
   }
- .header h1{
+.header h1{
     width:100%;
     text-align:center;
     justify-content:center;
     font-size:1.6rem; /* Levemente menor para tablets */
   }
- .search-container{
+.search-container{
     order:3;
     width:100%;
     max-width:none;
   }
- .nav-btns{
+.nav-btns{
     order:2;
   }
   #adminPanel{
     grid-template-columns:1fr;
   }
- .grid{
+.grid{
     grid-template-columns:repeat(auto-fill, minmax(140px, 1fr)); /* Ajuste para tablets */
   }
- .modal-content{
+.modal-content{
     width:90%;
     max-width:450px; /* Limita um pouco o tamanho em tablets */
   }
- .stats-bar{
+.stats-bar{
     flex-direction: column;
     align-items: flex-start;
     gap: 10px;
     padding: 10px 15px;
   }
- .stats-bar > div{
+.stats-bar > div{
     flex-wrap: wrap;
     gap: 15px;
   }
- .backup-group{
+.backup-group{
     flex-wrap: wrap;
   }
 }
 
 /* NOVO PONTO DE RUPTURA: Celulares e telas pequenas (menor que 768px) */
 @media (max-width: 768px) {
+  /* Container Wrapper: Garante que as sidebars e o conteúdo principal se empilhem */
+ .container-wrapper{
+    flex-direction:column; /* Empilha tudo verticalmente */
+    gap:15px; /* Reduz o espaçamento geral */
+    margin:10px auto; /* Margem menor nas laterais */
+    padding:0 10px; /* Padding menor */
+  }
+
+  /* Sidebar: Vira um bloco comum, sem ser sticky */
+ .sidebar{
+    width:100%; /* Ocupa a largura total */
+    position: static; /* Remove o sticky */
+    max-height: none; /* Remove limite de altura */
+    overflow-y: visible; /* Não precisa de scroll próprio */
+    padding:15px; /* Padding um pouco menor */
+  }
+
+  /* Cabeçalho: Ajustes para centralizar e diminuir */
  .header{
+    flex-wrap:wrap; /* Permite que os itens quebrem linha */
+    gap:10px; /* Espaçamento menor */
+    justify-content:center; /* Centraliza itens */
     padding:10px 15px;
   }
  .header h1{
-    font-size:1.4rem; /* Ainda menor para celulares */
+    font-size:1.3rem; /* Título menor */
+    width:100%; /* Ocupa a largura toda */
+    text-align:center;
+    justify-content:center;
   }
  .header h1 img{
-    height:24px; /* Diminui o logo */
+    height:22px; /* Logo menor */
   }
- .btn-primary,.btn-secondary{
-    padding:8px 12px;
-    font-size:0.8rem;
+  /* Pesquisa: Ocupa a largura total */
+ .search-container{
+    width:100%;
+    max-width:none;
+    order:3; /* Coloca a pesquisa por último no cabeçalho */
   }
  .search-input{
     padding:8px 12px;
     font-size:0.8rem;
   }
- .sort-select{
-    padding:8px;
+  /* Botões de navegação: Podem ficar menores ou ser reestruturados */
+ .nav-btns{
+    order:2; /* Coloca os botões antes da pesquisa */
+    gap:8px;
+  }
+ .btn-primary,.btn-secondary{
+    padding:8px 12px;
     font-size:0.8rem;
+    border-radius:20px; /* Botões mais arredondados */
   }
 
- .sidebar,.cat-filter-wrapper, #adminPanel, #historyPanel{
-    padding:15px;
-  }
+  /* Filtros de Categoria: Garante bom espaçamento e quebra de linha */
  .cat-filter{
-    justify-content:center;
+    justify-content:flex-start; /* Alinha à esquerda, mais comum em mobile */
+    gap:6px; /* Espaçamento menor entre filtros */
+  }
+ .btn-cat{
+    padding:6px 12px;
+    font-size:0.75rem;
+    border-radius:15px;
   }
   
-  /* Ajuste específico para o botão "Mudar Imagem" na sidebar */
- .sidebar.input-group > div {
+  /* Ajuste específico para o input-group que contém o select de ordenação e o botão "Mudar Imagem" na sidebar */
+ .sidebar.input-group:nth-of-type(2) > div { /* Seleciona o div dentro do segundo input-group da sidebar */
     flex-direction: column; /* Botão e select um embaixo do outro */
     align-items: stretch; /* Ocupam a largura total */
   }
- .sidebar.input-group > div.sort-select,
- .sidebar.input-group > div.btn-secondary {
+ .sidebar.input-group:nth-of-type(2).sort-select {
     width: 100%; /* Ocupa a largura total */
   }
- .sidebar.input-group > div.btn-secondary {
+ .sidebar.input-group:nth-of-type(2).btn-secondary {
+    width: 100%; /* Ocupa a largura total */
     margin-top: 5px; /* Espaçamento entre o select e o botão */
   }
 
+  /* Grid de Produtos: Mais colunas para aproveitar o espaço */
  .grid{
-    grid-template-columns:repeat(auto-fill, minmax(130px, 1fr)); /* 2 a 3 colunas em celulares */
-    gap:10px; /* Reduz o espaçamento entre cards */
+    grid-template-columns:repeat(auto-fill, minmax(110px, 1fr)); /* 2 ou 3 cards por linha */
+    gap:8px; /* Espaçamento menor entre cards */
   }
  .card{
-    padding:8px; /* Reduz o padding do card */
-    border-radius:8px;
+    padding:10px; /* Padding ajustado */
+    border-radius:10px;
   }
  .card img{
-    height:90px; /* Altura da imagem menor em mobile */
+    height:80px; /* Imagens menores */
     margin-bottom:6px;
   }
  .card h3{
-    font-size:0.8rem; /* Fonte ainda menor em mobile */
+    font-size:0.75rem; /* Título menor no card */
+    line-height:1.1;
   }
  .badge-cat{
-    font-size:0.55rem; /* Fonte menor em mobile */
-    padding:2px 6px;
-    margin-top:2px;
+    font-size:0.5rem; /* Fonte minúscula para badge */
+    padding:2px 5px;
+    margin-top:3px;
     margin-bottom:6px;
   }
  .card p{
-    font-size:0.7rem;
+    font-size:0.65rem;
   }
  .card p b{
     font-size:0.9rem;
   }
 
-  /* Modal */
+  /* Modal: Ocupa quase toda a tela, com padding adequado */
   #modal{
-    padding:10px; /* Garante que o modal não encoste nas bordas da tela */
+    padding:0px; /* Remove padding externo para modal cobrir tudo */
+    background: rgba(15,23,42,0.9); /* Fundo mais escuro para focar */
   }
  .modal-content{
     width:95%; /* Ocupa quase toda a largura */
-    max-width:95%; /* Garante que não estique demais em tablets/paisagem */
+    height:auto; /* Altura flexível */
+    max-height:90vh; /* Máx 90% da viewport */
+    overflow-y:auto; /* Scroll se o conteúdo for muito grande */
     padding:20px;
     border-radius:15px;
+    margin: auto; /* Centraliza */
+    box-shadow:0 10px 40px rgba(0,0,0,0.4);
+    animation:modalSlideUp 0.3s forwards ease-out; /* Nova animação de deslizar */
   }
- .modal-content h2.modal-title{
-    font-size:1.2rem;
+  @keyframes modalSlideUp {
+    from { transform:translateY(100%); opacity:0; }
+    to { transform:translateY(0); opacity:1; }
   }
- .modal-content input,.modal-content select,.modal-content textarea,.modal-actions button,.close-modal-btn-bottom{
-    font-size:0.85rem;
-    padding:10px;
+ .modal-actions{
+    flex-direction:column; /* Botões de ação do modal um embaixo do outro */
+    gap:8px;
   }
- .current-stock-display b{
-    font-size:1.5rem;
-  }
-  #valMov{
-    width:80px; /* Ajusta o tamanho do input de movimentação */
+ .close-modal-btn-bottom{
+    margin-top:10px;
   }
 
-  /* Histórico */
+  /* Painel de Histórico e Admin: Ajustes */
+  #historyPanel, #adminPanel{
+    padding:15px;
+    border-left:none; /* Remove a borda lateral */
+    border-top:5px solid var(--accent); /* Adiciona uma borda superior */
+  }
   #historyPanel h2{
     font-size:1.1rem;
   }
@@ -840,9 +887,27 @@ input:focus,select:focus,textarea:focus{
     padding:8px;
     font-size:0.75rem;
   }
- .hist-table.lixeira{
-    font-size:0.9rem;
-    padding:3px 6px;
+  /* Esconde a coluna de ação da lixeira na tabela para economizar espaço */
+ .hist-table th:last-child,.hist-table td:last-child {
+    display: none;
+  }
+}
+
+/* Ajustes para telas bem pequenas, como iPhones SE (320px de largura) */
+@media (max-width: 380px) {
+ .grid{
+    grid-template-columns:repeat(auto-fill, minmax(95px, 1fr)); /* Mais cards em telas muito pequenas */
+    gap:6px;
+  }
+ .card h3{
+    font-size:0.7rem; /* Fonte ainda menor */
+  }
+ .card img{
+    height:70px;
+  }
+ .modal-content{
+    width:98%; /* Quase a largura toda */
+    padding:15px;
   }
 }
 </style>
@@ -1511,7 +1576,7 @@ function imprimirHistorico(){
   });
 
   if (totalMovimentacoesImpressao === 0) {
-      html += `<tr><td colspan="5" style="text-align:center; color:var(--subtle-text);">Nenhuma movimentação encontrada para o filtro atual.</td></tr>`;
+      html += `<tr><td colspan="5" style="text-align:center; color:#64748b;">Nenhuma movimentação encontrada para o filtro atual.</td></tr>`;
   }
 
   html+=`</tbody></table></div>`;
