@@ -7,6 +7,10 @@
 <meta name="theme-color" content="#2563eb">
 <link rel="icon" href="https://cdn-icons-png.flaticon.com/512/3238/3238058.png"> <!-- Ícone de caixa -->
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet"> <!-- Fonte Poppins -->
+
+<!-- PWA: Link para o manifest.json -->
+<link rel="manifest" href="/manifest.json">
+
 <style>
 :root{
   --primary:#1f2a40; /* Azul escuro quase preto */
@@ -166,7 +170,7 @@ body{
   border-color:#d0d7e0;
 }
 
-/* Categoria Filters - INÍCIO DA OTIMIZAÇÃO */
+/* Categoria Filters - OTIMIZAÇÃO */
 .cat-filter-wrapper{
   background:var(--card-bg);
   padding:15px;
@@ -214,7 +218,6 @@ body{
   background:#f0f2f5;
   border-color:#d0d7e0;
 }
-/* Categoria Filters - FIM DA OTIMIZAÇÃO */
 
 /* Imagem na sidebar */
 .sidebar-image {
@@ -1622,6 +1625,19 @@ function imprimirHistorico(){
 
 // Inicialização
 initDB();
+
+// PWA: Registra o Service Worker
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/service-worker.js')
+     .then(registration => {
+        console.log('Service Worker registrado com sucesso:', registration);
+      })
+     .catch(error => {
+        console.error('Falha ao registrar Service Worker:', error);
+      });
+  });
+}
 </script>
 </body>
 </html>
