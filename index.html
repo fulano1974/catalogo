@@ -231,7 +231,7 @@ body{
 
 /* Admin Panel */
 #adminPanel{
-  display:none;
+  display:none; /* É 'none' por padrão e JS muda para 'grid' */
   background:var(--card-bg);
   padding:20px;
   border-radius:12px;
@@ -293,7 +293,7 @@ input:focus,select:focus,textarea:focus{
   font-size:1rem;
 }
 .backup-group{
-  display:none;
+  display:none; /* É 'none' por padrão e JS muda para 'flex' */
   gap:10px;
 }
 .backup-group button{
@@ -304,7 +304,7 @@ input:focus,select:focus,textarea:focus{
 
 /* History Panel */
 #historyPanel{
-  display:none;
+  display:none; /* É 'none' por padrão e JS muda para 'block' */
   background:var(--card-bg);
   padding:25px;
   border-radius:16px;
@@ -739,7 +739,7 @@ input:focus,select:focus,textarea:focus{
 /* NOVO PONTO DE RUPTURA: Celulares e telas pequenas (menor que 768px) */
 @media (max-width: 768px) {
   /* Container Wrapper: Garante que as sidebars e o conteúdo principal se empilhem */
- .container-wrapper{
+.container-wrapper{
     flex-direction:column; /* Empilha tudo verticalmente */
     gap:15px; /* Reduz o espaçamento geral */
     margin:10px auto; /* Margem menor nas laterais */
@@ -747,7 +747,7 @@ input:focus,select:focus,textarea:focus{
   }
 
   /* Sidebar: Vira um bloco comum, sem ser sticky */
- .sidebar{
+.sidebar{
     width:100%; /* Ocupa a largura total */
     position: static; /* Remove o sticky */
     max-height: none; /* Remove limite de altura */
@@ -756,93 +756,93 @@ input:focus,select:focus,textarea:focus{
   }
 
   /* Cabeçalho: Ajustes para centralizar e diminuir */
- .header{
+.header{
     flex-wrap:wrap; /* Permite que os itens quebrem linha */
     gap:10px; /* Espaçamento menor */
     justify-content:center; /* Centraliza itens */
     padding:10px 15px;
   }
- .header h1{
+.header h1{
     font-size:1.3rem; /* Título menor */
     width:100%; /* Ocupa a largura toda */
     text-align:center;
     justify-content:center;
   }
- .header h1 img{
+.header h1 img{
     height:22px; /* Logo menor */
   }
   /* Pesquisa: Ocupa a largura total */
- .search-container{
+.search-container{
     width:100%;
     max-width:none;
     order:3; /* Coloca a pesquisa por último no cabeçalho */
   }
- .search-input{
+.search-input{
     padding:8px 12px;
     font-size:0.8rem;
   }
   /* Botões de navegação: Podem ficar menores ou ser reestruturados */
- .nav-btns{
+.nav-btns{
     order:2; /* Coloca os botões antes da pesquisa */
     gap:8px;
   }
- .btn-primary,.btn-secondary{
+.btn-primary,.btn-secondary{
     padding:8px 12px;
     font-size:0.8rem;
     border-radius:20px; /* Botões mais arredondados */
   }
 
   /* Filtros de Categoria: Garante bom espaçamento e quebra de linha */
- .cat-filter{
+.cat-filter{
     justify-content:flex-start; /* Alinha à esquerda, mais comum em mobile */
     gap:6px; /* Espaçamento menor entre filtros */
   }
- .btn-cat{
+.btn-cat{
     padding:6px 12px;
     font-size:0.75rem;
     border-radius:15px;
   }
   
   /* Ajuste específico para o input-group que contém o select de ordenação e o botão "Mudar Imagem" na sidebar */
- .sidebar.input-group:nth-of-type(2) > div { /* Seleciona o div dentro do segundo input-group da sidebar */
+.sidebar.input-group:nth-of-type(2) > div { /* Seleciona o div dentro do segundo input-group da sidebar */
     flex-direction: column; /* Botão e select um embaixo do outro */
     align-items: stretch; /* Ocupam a largura total */
   }
- .sidebar.input-group:nth-of-type(2).sort-select {
+.sidebar.input-group:nth-of-type(2) select.sort-select,
+.sidebar.input-group:nth-of-type(2) button.btn-secondary {
     width: 100%; /* Ocupa a largura total */
   }
- .sidebar.input-group:nth-of-type(2).btn-secondary {
-    width: 100%; /* Ocupa a largura total */
+.sidebar.input-group:nth-of-type(2) button.btn-secondary {
     margin-top: 5px; /* Espaçamento entre o select e o botão */
   }
 
   /* Grid de Produtos: Mais colunas para aproveitar o espaço */
- .grid{
+.grid{
     grid-template-columns:repeat(auto-fill, minmax(110px, 1fr)); /* 2 ou 3 cards por linha */
     gap:8px; /* Espaçamento menor entre cards */
   }
- .card{
+.card{
     padding:10px; /* Padding ajustado */
     border-radius:10px;
   }
- .card img{
+.card img{
     height:80px; /* Imagens menores */
     margin-bottom:6px;
   }
- .card h3{
+.card h3{
     font-size:0.75rem; /* Título menor no card */
     line-height:1.1;
   }
- .badge-cat{
+.badge-cat{
     font-size:0.5rem; /* Fonte minúscula para badge */
     padding:2px 5px;
     margin-top:3px;
     margin-bottom:6px;
   }
- .card p{
+.card p{
     font-size:0.65rem;
   }
- .card p b{
+.card p b{
     font-size:0.9rem;
   }
 
@@ -851,7 +851,7 @@ input:focus,select:focus,textarea:focus{
     padding:0px; /* Remove padding externo para modal cobrir tudo */
     background: rgba(15,23,42,0.9); /* Fundo mais escuro para focar */
   }
- .modal-content{
+.modal-content{
     width:95%; /* Ocupa quase toda a largura */
     height:auto; /* Altura flexível */
     max-height:90vh; /* Máx 90% da viewport */
@@ -866,11 +866,11 @@ input:focus,select:focus,textarea:focus{
     from { transform:translateY(100%); opacity:0; }
     to { transform:translateY(0); opacity:1; }
   }
- .modal-actions{
+.modal-actions{
     flex-direction:column; /* Botões de ação do modal um embaixo do outro */
     gap:8px;
   }
- .close-modal-btn-bottom{
+.close-modal-btn-bottom{
     margin-top:10px;
   }
 
@@ -883,29 +883,29 @@ input:focus,select:focus,textarea:focus{
   #historyPanel h2{
     font-size:1.1rem;
   }
- .hist-table th,.hist-table td{
+.hist-table th,.hist-table td{
     padding:8px;
     font-size:0.75rem;
   }
   /* Esconde a coluna de ação da lixeira na tabela para economizar espaço */
- .hist-table th:last-child,.hist-table td:last-child {
+.hist-table th:last-child,.hist-table td:last-child {
     display: none;
   }
 }
 
 /* Ajustes para telas bem pequenas, como iPhones SE (320px de largura) */
 @media (max-width: 380px) {
- .grid{
+.grid{
     grid-template-columns:repeat(auto-fill, minmax(95px, 1fr)); /* Mais cards em telas muito pequenas */
     gap:6px;
   }
- .card h3{
+.card h3{
     font-size:0.7rem; /* Fonte ainda menor */
   }
- .card img{
+.card img{
     height:70px;
   }
- .modal-content{
+.modal-content{
     width:98%; /* Quase a largura toda */
     padding:15px;
   }
@@ -1214,8 +1214,21 @@ function uploadSidebarImage(event) {
 // Layout e funções
 function toggleAdmin(){
   // A senha "RebocadorHaris"
-  if(!isAdmin){if(prompt("Senha:")==="RebocadorHaris"){isAdmin=true;document.getElementById('adminPanel').style.display='grid';document.getElementById('backupGroup').style.display='flex';render();}}
-  else{isAdmin=false;document.getElementById('adminPanel').style.display='none';document.getElementById('backupGroup').style.display='none';document.getElementById('historyPanel').style.display='none';render();}
+  if(!isAdmin){
+    if(prompt("Senha:")==="RebocadorHaris"){
+      isAdmin=true;
+      document.getElementById('adminPanel').style.display='grid';
+      document.getElementById('backupGroup').style.display='flex';
+      render();
+    }
+  }
+  else{
+    isAdmin=false;
+    document.getElementById('adminPanel').style.display='none';
+    document.getElementById('backupGroup').style.display='none';
+    document.getElementById('historyPanel').style.display='none';
+    render();
+  }
 }
 
 function render(){
