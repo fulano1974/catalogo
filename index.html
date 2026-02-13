@@ -5,13 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Controle de Estoque Haris</title>
 <meta name="theme-color" content="#2563eb">
-<!-- CORREÇÃO AQUI: Favicon agora é o rebocador -->
-<link rel="icon" href="/icon-192x192.png"> <!-- Usando o ícone PWA como favicon -->
+<link rel="icon" href="https://cdn-icons-png.flaticon.com/512/3238/3238058.png"> <!-- Ícone de caixa -->
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet"> <!-- Fonte Poppins -->
-
-<!-- PWA: Link para o manifest.json -->
-<link rel="manifest" href="/manifest.json">
-
 <style>
 :root{
   --primary:#1f2a40; /* Azul escuro quase preto */
@@ -171,7 +166,7 @@ body{
   border-color:#d0d7e0;
 }
 
-/* Categoria Filters - OTIMIZAÇÃO */
+/* Categoria Filters */
 .cat-filter-wrapper{
   background:var(--card-bg);
   padding:15px;
@@ -185,29 +180,21 @@ body{
   color:var(--primary);
 }
 .cat-filter{
-  display:grid; /* Usando grid para um layout mais controlado */
-  grid-template-columns:repeat(auto-fit, minmax(100px, 1fr)); /* 2 ou mais colunas, flexível */
-  gap:8px; /* Espaçamento entre os botões */
-  justify-items:center; /* Centraliza os itens dentro de cada célula da grade */
+  display:flex;
+  flex-wrap:wrap;
+  gap:8px;
 }
 .btn-cat{
-  padding:6px 12px; /* Padding um pouco menor */
-  border-radius:20px; /* Mais arredondado, como um chip */
+  padding:8px 15px;
+  border-radius:20px;
   border:1px solid var(--border-color);
   background:var(--card-bg);
   cursor:pointer;
-  font-size:0.75rem; /* Fonte menor */
+  font-size:0.8rem;
   transition:all 0.3s ease;
-  white-space:nowrap; /* Evita quebra de linha no nome da categoria */
+  white-space:nowrap;
   color:var(--subtle-text);
   font-weight:500;
-  width:100%; /* Ocupa a largura total da célula da grade */
-  box-sizing:border-box; /* Garante que padding não estoure a largura */
-  text-align:center;
-  display:flex; /* Para centralizar o texto verticalmente também */
-  align-items:center;
-  justify-content:center;
-  min-height:30px; /* Altura mínima para o chip */
 }
 .btn-cat.active{
   background:var(--accent);
@@ -817,15 +804,15 @@ input:focus,select:focus,textarea:focus{
   }
   
   /* Ajuste específico para o input-group que contém o select de ordenação e o botão "Mudar Imagem" na sidebar */
-.sidebar >.input-group:nth-of-type(2) > div { /* Seleciona o div dentro do segundo input-group da sidebar */
+.sidebar.input-group:nth-of-type(2) > div { /* Seleciona o div dentro do segundo input-group da sidebar */
     flex-direction: column; /* Botão e select um embaixo do outro */
     align-items: stretch; /* Ocupam a largura total */
   }
-.sidebar >.input-group:nth-of-type(2) select.sort-select {
+.sidebar.input-group:nth-of-type(2) select.sort-select,
+.sidebar.input-group:nth-of-type(2) button.btn-secondary {
     width: 100%; /* Ocupa a largura total */
   }
-.sidebar >.input-group:nth-of-type(2) button.btn-secondary {
-    width: 100%; /* Ocupa a largura total */
+.sidebar.input-group:nth-of-type(2) button.btn-secondary {
     margin-top: 5px; /* Espaçamento entre o select e o botão */
   }
 
@@ -932,7 +919,7 @@ input:focus,select:focus,textarea:focus{
     <!-- Left Sidebar -->
     <div class="sidebar left no-print">
       <div class="header" style="box-shadow:none; padding:0;">
-        <h1><img src="/icon-192x192.png" alt="Logo Haris" style="height:30px;"> Haris <span>Estoque</span></h1>
+        <h1><img src="https://cdn-icons-png.flaticon.com/512/3238/3238058.png" alt="Logo" style="height:30px;"> Haris <span>Estoque</span></h1>
       </div>
 
       <div class="cat-filter-wrapper">
@@ -1615,30 +1602,16 @@ function imprimirHistorico(){
   novaJan.document.write(html);
   novaJan.document.close();
 
-  setTimeout(() => {
-    novaJan.print();
-  }, 100);
+  novaJan.print();
 
   setTimeout(() => {
     novaJan.close();
-  }, 500);
+  }, 100);
 }
 
 // Inicialização
 initDB();
-
-// PWA: Registra o Service Worker
-if ('serviceWorker' in navigator) {
-  window.addEventListener('load', () => {
-    navigator.serviceWorker.register('/service-worker.js', { scope: '/' }) // Adicionado { scope: '/' } para garantir o escopo
-    .then(registration => {
-        console.log('Service Worker registrado com sucesso:', registration);
-      })
-    .catch(error => {
-        console.error('Falha ao registrar Service Worker:', error);
-      });
-  });
-}
 </script>
 </body>
 </html>
+
