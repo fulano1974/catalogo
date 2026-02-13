@@ -224,7 +224,7 @@ body{
   max-width: 100%; /* Garante que a imagem não ultrapasse a largura do pai */
   max-height: 100%; /* Garante que a imagem não ultrapasse a altura do pai */
   height: auto; /* Mantém a proporção da imagem */
-  object-fit: contain; /* Ajusta a imagem dentro do contêiner sem cortar, mostrando o máximo possível */
+  object-fit: contain;
   display: block; /* Remove espaço extra abaixo da imagem */
   border-radius: 12px; /* Garante o arredondamento da imagem */
 }
@@ -265,6 +265,23 @@ input:focus,select:focus,textarea:focus{
   outline:none;
   background-color:white;
 }
+/* INÍCIO DA MELHORIA 5: Validação Visual */
+.input-group.error input,
+.input-group.error select,
+.input-group.error textarea {
+  border-color: var(--danger)!important;
+  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.2)!important;
+}
+.error-message {
+  color: var(--danger);
+  font-size: 0.75rem;
+  margin-top: 5px;
+  display: none; /* Escondido por padrão */
+}
+.input-group.error.error-message {
+  display: block; /* Mostra a mensagem de erro */
+}
+/* FIM DA MELHORIA 5 */
 #adminPanel button{
   height:40px;
   font-size:0.9rem;
@@ -493,7 +510,9 @@ input:focus,select:focus,textarea:focus{
   margin-bottom:5px;
   display:block;
 }
-.modal-content input,.modal-content select,.modal-content textarea{
+.modal-content input,
+.modal-content select,
+.modal-content textarea {
   width:100%;
   padding:10px 12px;
   border:1px solid var(--border-color);
@@ -831,14 +850,28 @@ input:focus,select:focus,textarea:focus{
       </div>
 
       <div id="adminPanel" class="no-print">
-        <div class="input-group"><label>Nome do Produto</label><input type="text" id="nome" placeholder="Ex: Tinta Branca 5L"></div>
-        <div class="input-group"><label>Categoria</label>
-          <select id="categoria">
-            <!-- Categorias são geradas via JS em initDB() -->
-          </select>
+        <!-- INÍCIO DA MELHORIA 5: Validação Visual - Adicionando div de erro -->
+        <div class="input-group">
+          <label>Nome do Produto</label>
+          <input type="text" id="nome" placeholder="Ex: Tinta Branca 5L" required>
+          <span class="error-message" id="error-nome">Este campo é obrigatório.</span>
         </div>
-        <div class="input-group"><label>Quantidade Inicial</label><input type="number" id="qtd" value="0"></div>
-        <div class="input-group"><label>Foto do Produto</label><input type="file" id="foto" accept="image/*"></div>
+        <div class="input-group">
+          <label>Categoria</label>
+          <select id="categoria"></select>
+          <span class="error-message" id="error-categoria">Selecione uma categoria válida.</span>
+        </div>
+        <div class="input-group">
+          <label>Quantidade Inicial</label>
+          <input type="number" id="qtd" value="0" min="0" required>
+          <span class="error-message" id="error-qtd">A quantidade deve ser um número maior ou igual a zero.</span>
+        </div>
+        <div class="input-group">
+          <label>Foto do Produto</label>
+          <input type="file" id="foto" accept="image/*" required>
+          <span class="error-message" id="error-foto">Selecione uma imagem para o produto.</span>
+        </div>
+        <!-- FIM DA MELHORIA 5 -->
         <button class="btn-primary" style="align-self: flex-end;" onclick="cadastrar()">ADICIONAR PRODUTO</button>
 
         <!-- REMOVIDO: O campo de upload da imagem da sidebar foi movido para a sidebar principal -->
@@ -892,14 +925,12 @@ input:focus,select:focus,textarea:focus{
     <h2 class="modal-title">EDITAR PRODUTO</h2>
     <div class="input-group">
         <label for="mNomeEdit">Nome do Produto</label>
-        <input type="text" id="mNomeEdit">
+        <input type="text" id="mNomeEdit" disabled>
     </div>
 
     <div class="input-group">
         <label for="mCategoriaEdit">Categoria</label>
-        <select id="mCategoriaEdit">
-          <!-- Categorias serão preenchidas via JS -->
-        </select>
+        <select id="mCategoriaEdit" disabled></select>
     </div>
 
     <div class="current-stock-display">
@@ -907,15 +938,19 @@ input:focus,select:focus,textarea:focus{
       <b id="mQtd">0</b>
     </div>
 
+    <!-- INÍCIO DA MELHORIA 5: Validação Visual - Adicionando div de erro no modal -->
     <div class="input-group">
         <label for="valMov">Quantidade de Movimentação</label>
-        <input type="number" id="valMov" value="0">
+        <input type="number" id="valMov" value="0" min="0" required>
+        <span class="error-message" id="error-valMov">A quantidade deve ser um número maior ou igual a zero.</span>
     </div>
 
     <div class="input-group">
         <label for="mNota">Motivo da movimentação</label>
-        <textarea id="mNota" placeholder="Motivo da movimentação..."></textarea>
+        <textarea id="mNota" placeholder="Motivo da movimentação..." required></textarea>
+        <span class="error-message" id="error-mNota">O motivo da movimentação é obrigatório.</span>
     </div>
+    <!-- FIM DA MELHORIA 5 -->
 
     <div class="file-upload-group">
       <label for="mFoto">Alterar Foto:</label>
@@ -938,6 +973,66 @@ let listaCategorias = ["Componente B", "Escova Rotativa", "Filtros", "Jotamastic
 
 let sidebarImageUrl = ''; // Nova variável para guardar a Data URL da imagem da sidebar
 
+// INÍCIO DA MELHORIA 4: Cores de Categoria Dinâmicas
+// Este objeto simularia as cores carregadas do IndexedDB.
+// Em um sistema real, você teria uma interface para gerenciar isso e salvar no DB.
+// As cores padrão estão aqui, mas seriam sobrescritas pelo que viesse do DB.
+let coresCategoriasDb = new Map([
+    ['Tinta Hardtop', '#f97316'],
+    ['Tinta Pilot', '#3b82f6'],
+    ['Componente B', '#14b8a6'],
+    ['Jotamastic A', '#facc15'],
+    ['Jotamastic B', '#8b5cf6'],
+    ['Solvente', '#ef4444'],
+    ['Filtros', '#a3e635'], 
+    ['Manilhas', '#ec4899'],
+    ['Escova Rotativa', '#FF8C00'], // Cor para a nova categoria
+    ['Pincel', '#8A2BE2'], // Cor para a nova categoria
+    ['Rolo de Pintura', '#00CED1'], // Cor para a nova categoria
+    ['Outros', '#6b7280']
+]);
+
+// Função para carregar as cores do IndexedDB
+async function carregarCoresCategorias() {
+    return new Promise((resolve, reject) => {
+        const t = dbHaris.transaction('config', 'readonly');
+        const store = t.objectStore('config');
+        const request = store.get('category_colors');
+
+        request.onsuccess = (e) => {
+            const config = e.target.result;
+            if (config && config.colors) {
+                // Sobrescreve as cores padrão com as do DB
+                for (const [key, value] of Object.entries(config.colors)) {
+                    coresCategoriasDb.set(key, value);
+                }
+                console.log("Cores de categoria carregadas do IndexedDB.");
+            } else {
+                console.log("Nenhuma cor de categoria customizada encontrada no IndexedDB.");
+            }
+            resolve();
+        };
+        request.onerror = (e) => {
+            console.error("Erro ao carregar cores de categoria do IndexedDB:", e);
+            reject(e);
+        };
+    });
+}
+
+// Função para salvar as cores no IndexedDB (seria chamada da sua interface de admin)
+function salvarCoresCategorias() {
+    const t = dbHaris.transaction('config', 'readwrite');
+    const store = t.objectStore('config');
+    const colorsObj = {};
+    coresCategoriasDb.forEach((value, key) => { colorsObj[key] = value; });
+    const request = store.put({ id: 'category_colors', colors: colorsObj });
+
+    request.onsuccess = () => console.log("Cores de categoria salvas no IndexedDB.");
+    request.onerror = (e) => console.error("Erro ao salvar cores de categoria no IndexedDB:", e);
+}
+
+// FIM DA MELHORIA 4
+
 // Preenche os selects de categoria
 function preencherSelectsDeCategoria() {
     const selects = document.querySelectorAll('#categoria, #filtroCatHist, #mCategoriaEdit');
@@ -945,7 +1040,7 @@ function preencherSelectsDeCategoria() {
         if (select.id === 'filtroCatHist') {
             select.innerHTML = '<option value="Todos">Todas as Categorias</option>';
         } else {
-            select.innerHTML = '';
+            select.innerHTML = ''; // Limpa antes de preencher
         }
         listaCategorias.forEach(cat => {
             const option = document.createElement('option');
@@ -965,8 +1060,9 @@ function initDB(){
 
   dbReadyPromise = new Promise((resolve, reject) => {
     const request=indexedDB.open('db_haris',2); 
-    request.onsuccess=e=>{
+    request.onsuccess=async e=>{ // Adicionado 'async' aqui
       dbHaris=e.target.result; 
+      await carregarCoresCategorias(); // INÍCIO DA MELHORIA 4: Carrega cores antes de renderizar
       carregarDados();
       carregarSidebarImage(); 
       resolve(); // Resolve a Promise quando o DB está pronto
@@ -1137,27 +1233,80 @@ function toggleCat(categoria){
   render(); // Re-renderiza para aplicar o novo filtro
 }
 
+// INÍCIO DA MELHORIA 4: Cores de Categoria Dinâmicas (usando o Map)
 function getCorCat(cat){
-  const cores={
-    'Tinta Hardtop':'#f97316',
-    'Tinta Pilot':'#3b82f6',
-    'Componente B':'#14b8a6',
-    'Jotamastic A':'#facc15',
-    'Jotamastic B':'#8b5cf6',
-    'Solvente':'#ef4444',
-    'Filtros': '#a3e635', 
-    'Manilhas': '#ec4899', 
-    'Outros':'#6b7280'
-  };
-  return cores[cat]||'#6b7280';
+  return coresCategoriasDb.get(cat) || '#6b7280'; // Retorna a cor do Map ou uma cor padrão
+}
+// FIM DA MELHORIA 4
+
+// INÍCIO DA MELHORIA 5: Validação Visual de Formulários
+function validateField(inputElement, errorMessageElement, validationFn) {
+  const inputGroup = inputElement.closest('.input-group');
+  if (validationFn(inputElement.value, inputElement.files)) {
+    inputGroup.classList.remove('error');
+    return true;
+  } else {
+    inputGroup.classList.add('error');
+    errorMessageElement.textContent = inputElement.validationMessage || errorMessageElement.getAttribute('data-default-message') || 'Campo inválido.';
+    return false;
+  }
 }
 
+function resetValidation(inputElement) {
+  const inputGroup = inputElement.closest('.input-group');
+  inputGroup.classList.remove('error');
+}
+
+// Adiciona listeners para resetar validação ao digitar/mudar
+document.addEventListener('DOMContentLoaded', () => {
+  const inputsToValidate = [
+    {id: 'nome', msgId: 'error-nome', validate: val => val.trim()!== ''},
+    {id: 'qtd', msgId: 'error-qtd', validate: val =>!isNaN(parseInt(val)) && parseInt(val) >= 0},
+    {id: 'foto', msgId: 'error-foto', validate: (val, files) => files && files.length > 0},
+    {id: 'valMov', msgId: 'error-valMov', validate: val =>!isNaN(parseInt(val)) && parseInt(val) > 0},
+    {id: 'mNota', msgId: 'error-mNota', validate: val => val.trim()!== ''},
+  ];
+
+  inputsToValidate.forEach(item => {
+    const input = document.getElementById(item.id);
+    const errorMsg = document.getElementById(item.msgId);
+    if (input && errorMsg) {
+      // Guarda a mensagem padrão para o caso de não ter validationMessage
+      errorMsg.setAttribute('data-default-message', errorMsg.textContent);
+      input.addEventListener('input', () => resetValidation(input));
+      input.addEventListener('change', () => resetValidation(input)); // Para inputs type="file"
+    }
+  });
+});
+
+// FIM DA MELHORIA 5
+
 function cadastrar(){
-  const n=document.getElementById('nome').value;
-  const c=document.getElementById('categoria').value;
-  const q=parseInt(document.getElementById('qtd').value); 
-  const f=document.getElementById('foto').files[0];
-  if(!n||isNaN(q)||!f)return alert('Preencha todos os campos e informe uma quantidade válida!'); 
+  const nInput = document.getElementById('nome');
+  const cSelect = document.getElementById('categoria');
+  const qInput = document.getElementById('qtd');
+  const fInput = document.getElementById('foto');
+
+  // INÍCIO DA MELHORIA 5: Validação Visual
+  let isValid = true;
+  isValid = validateField(nInput, document.getElementById('error-nome'), val => val.trim()!== '') && isValid;
+  // Para select, podemos considerar que qualquer opção que não seja vazia (se houver) é válida.
+  // Por simplicidade, vamos considerar que sempre terá uma categoria selecionada após initDB.
+  // Se quiser validar para que não seja 'Selecione uma categoria...', precisa de uma opção default.
+  // isValid = validateField(cSelect, document.getElementById('error-categoria'), val => val.trim()!== '') && isValid;
+  isValid = validateField(qInput, document.getElementById('error-qtd'), val =>!isNaN(parseInt(val)) && parseInt(val) >= 0) && isValid;
+  isValid = validateField(fInput, document.getElementById('error-foto'), (val, files) => files && files.length > 0) && isValid;
+
+  if (!isValid) {
+    return; // Impede o cadastro se a validação falhar
+  }
+  // FIM DA MELHORIA 5
+
+  const n=nInput.value;
+  const c=cSelect.value;
+  const q=parseInt(qInput.value); 
+  const f=fInput.files[0];
+  
   const reader=new FileReader();
   reader.onload=e=>{
     const novoProduto = {nome:n,cat:c,qtd:q,foto:e.target.result};
@@ -1170,7 +1319,10 @@ function cadastrar(){
         db.push(novoProduto); 
         salvarProdutos();
         render();
-        document.getElementById('nome').value='';document.getElementById('qtd').value='0';document.getElementById('foto').value=''; 
+        // Limpa campos e resetta validação
+        nInput.value=''; resetValidation(nInput);
+        qInput.value='0'; resetValidation(qInput);
+        fInput.value=''; resetValidation(fInput);
     };
     addRequest.onerror = (event) => {
         console.error("Erro ao cadastrar produto no IndexedDB:", event.target.error);
@@ -1190,15 +1342,23 @@ function abrirModal(productId){
   document.getElementById('mNomeEdit').value=p.nome;
   document.getElementById('mQtd').innerText=p.qtd;
   document.getElementById('mNota').value='';
-  document.getElementById('valMov').value=0;
+  document.getElementById('valMov').value='0'; // Reset para 0
   document.getElementById('mCategoriaEdit').value=p.cat; 
-  document.getElementById('mFoto').value = ''; 
+  document.getElementById('mFoto').value = '';
+
+  // INÍCIO DA MELHORIA 5: Reseta validação ao abrir modal
+  resetValidation(document.getElementById('valMov'));
+  resetValidation(document.getElementById('mNota'));
+  // FIM DA MELHORIA 5
+
   document.getElementById('modal').style.display='flex';
 }
 function fecharModal(){
   const p=db[editIdx];
-  p.nome=document.getElementById('mNomeEdit').value;
-  p.cat=document.getElementById('mCategoriaEdit').value; 
+  // O nome e a categoria no modal estão desabilitados, então não precisam ser lidos de volta.
+  // p.nome=document.getElementById('mNomeEdit').value;
+  // p.cat=document.getElementById('mCategoriaEdit').value; 
+  
   const f=document.getElementById('mFoto').files[0];
   if(f){
     const r=new FileReader();
@@ -1212,9 +1372,21 @@ function fecharModal(){
 }
 
 function movimentar(tipo){
-  const val=parseInt(document.getElementById('valMov').value)||0;
-  if(val<=0) return alert('Informe uma quantidade válida!');
-  const nota=document.getElementById('mNota').value||'-';
+  const valMovInput = document.getElementById('valMov');
+  const mNotaInput = document.getElementById('mNota');
+
+  // INÍCIO DA MELHORIA 5: Validação Visual no modal
+  let isValid = true;
+  isValid = validateField(valMovInput, document.getElementById('error-valMov'), val =>!isNaN(parseInt(val)) && parseInt(val) > 0) && isValid;
+  isValid = validateField(mNotaInput, document.getElementById('error-mNota'), val => val.trim()!== '') && isValid;
+
+  if (!isValid) {
+    return; // Impede a movimentação se a validação falhar
+  }
+  // FIM DA MELHORIA 5
+
+  const val=parseInt(valMovInput.value);
+  const nota=mNotaInput.value;
   const p=db[editIdx];
   let tipoMov = '';
 
@@ -1224,8 +1396,11 @@ function movimentar(tipo){
   }
   else if(tipo==='sub') {
     if(p.qtd < val){ 
-        alert("Não é possível remover mais itens do que o estoque atual.");
+        // INÍCIO DA MELHORIA 5: Mensagem de erro específica para estoque insuficiente
+        valMovInput.closest('.input-group').classList.add('error');
+        document.getElementById('error-valMov').textContent = `Estoque insuficiente! Máximo ${p.qtd}.`;
         return;
+        // FIM DA MELHORIA 5
     }
     p.qtd-=val;
     tipoMov = 'Saída';
@@ -1234,7 +1409,8 @@ function movimentar(tipo){
   historico.push({data:new Date().toLocaleString(),produto:p.nome,cat:p.cat,tipo:tipoMov,qtd:val,motivo:nota});
   salvarProdutos(); salvarHistorico(); render(); renderHistory();
   document.getElementById('mQtd').innerText=p.qtd;
-  document.getElementById('valMov').value=0;document.getElementById('mNota').value='';
+  valMovInput.value='0'; resetValidation(valMovInput);
+  mNotaInput.value=''; resetValidation(mNotaInput);
 }
 
 function deletarProduto(productId){
@@ -1293,7 +1469,8 @@ function exportarBackup(){
   const data = {
     produtos: db,
     historico: historico,
-    sidebarImage: sidebarImageUrl
+    sidebarImage: sidebarImageUrl,
+    categoryColors: Object.fromEntries(coresCategoriasDb) // INÍCIO DA MELHORIA 4: Exporta cores também
   };
   const jsonString = JSON.stringify(data, null, 2);
   const blob = new Blob([jsonString], { type: "application/json" });
@@ -1326,6 +1503,16 @@ function importarBackup(event){
                 document.getElementById('sidebarImage').src = sidebarImageUrl;
                 salvarSidebarImage(sidebarImageUrl); // Salva no IndexedDB
               }
+
+              // INÍCIO DA MELHORIA 4: Importa e salva as cores das categorias
+              if (importedData.categoryColors) {
+                coresCategoriasDb.clear(); // Limpa as cores atuais
+                for (const [key, value] of Object.entries(importedData.categoryColors)) {
+                    coresCategoriasDb.set(key, value);
+                }
+                salvarCoresCategorias(); // Salva as cores importadas no IndexedDB
+              }
+              // FIM DA MELHORIA 4
 
               salvarProdutos();
               salvarHistorico();
@@ -1454,5 +1641,3 @@ initDB();
 </script>
 </body>
 </html>
-
-
