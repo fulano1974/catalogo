@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Controle de Estoque Haris</title>
 <meta name="theme-color" content="#2563eb">
-<link rel="manifest" href="manifest.json">
+<link rel="manifest" href="manifest.json"> <!-- ADICIONADO AQUI -->
 <link rel="icon" href="https://cdn-icons-png.flaticon.com/512/3238/3238058.png"> <!-- Ícone de caixa -->
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet"> <!-- Fonte Poppins -->
 <style>
@@ -1612,8 +1612,20 @@ function imprimirHistorico(){
 
 // Inicialização
 initDB();
+
+// >>>>>>>>>>> CÓDIGO DE REGISTRO DO SERVICE WORKER ADICIONADO AQUI <<<<<<<<<<<
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/service-worker.js')
+     .then(registration => {
+        console.log('Service Worker registered:', registration);
+      })
+     .catch(error => {
+        console.error('Service Worker registration failed:', error);
+      });
+  });
+}
+// >>>>>>>>>>> FIM DO CÓDIGO DO SERVICE WORKER <<<<<<<<<<<
 </script>
 </body>
 </html>
-
-
