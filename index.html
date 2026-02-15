@@ -180,23 +180,33 @@ body{
   margin-bottom:10px;
   color:var(--primary);
 }
-.cat-filter{
-  display:flex;
-  flex-wrap:wrap;
-  gap:8px;
+/* Estilo para a nova div de grid dos botões de categoria */
+.cat-buttons-grid {
+  display: grid;
+  /* 2 colunas de largura igual, com um pequeno espaço */
+  grid-template-columns: repeat(auto-fill, minmax(calc(50% - 4px), 1fr)); 
+  gap: 8px; /* Espaço entre os botões */
 }
-.btn-cat{
-  padding:8px 15px;
-  border-radius:20px;
-  border:1px solid var(--border-color);
+
+.btn-cat {
+  padding: 0 8px; /* Reduzi o padding para diminuir a altura */
+  height: 30px; /* Altura fixa para todos os botões */
+  border-radius: 15px; /* Deixei mais arredondado */
+  font-size: 0.75rem; /* Fonte um pouco menor */
+  display: flex; /* Para alinhar o texto verticalmente */
+  align-items: center; /* Alinha verticalmente */
+  justify-content: center; /* Centraliza o texto horizontalmente */
+  text-align: center; /* Garante que o texto fique centralizado */
+  box-sizing: border-box; /* Garante que padding e border sejam incluídos na altura/largura */
+  white-space: nowrap; /* Evita que o texto quebre */
+  border:1px solid var(--border-color); /* Mantido, mas ajustado */
   background:var(--card-bg);
   cursor:pointer;
-  font-size:0.8rem;
   transition:all 0.3s ease;
-  white-space:nowrap;
   color:var(--subtle-text);
   font-weight:500;
 }
+
 .btn-cat.active{
   background:var(--accent);
   color:white;
@@ -794,13 +804,15 @@ input:focus,select:focus,textarea:focus{
   }
 
   /* Filtros de Categoria: Garante bom espaçamento e quebra de linha */
-.cat-filter{
-    justify-content:flex-start; /* Alinha à esquerda, mais comum em mobile */
-    gap:6px; /* Espaçamento menor entre filtros */
+  /* NOVO: Ajuste para a nova classe cat-buttons-grid em telas menores */
+.cat-buttons-grid {
+    grid-template-columns: repeat(auto-fill, minmax(calc(50% - 4px), 1fr)); /* Continua 2 colunas */
+    gap: 6px; /* Espaçamento menor entre filtros */
   }
 .btn-cat{
-    padding:6px 12px;
-    font-size:0.75rem;
+    padding:4px 8px; /* Padding ainda menor */
+    font-size:0.7rem; /* Fonte menor */
+    height: 28px; /* Altura ajustada */
     border-radius:15px;
   }
   
@@ -925,7 +937,12 @@ input:focus,select:focus,textarea:focus{
 
       <div class="cat-filter-wrapper">
         <h3>Filtrar por Categoria</h3>
-        <div class="cat-filter" id="catFiltros"></div>
+        <!-- MUDANÇA AQUI: Nova div para organizar os botões em grid -->
+        <div class="cat-filter" id="catFiltros">
+          <div class="cat-buttons-grid">
+            <!-- Os botões serão gerados aqui pelo JS -->
+          </div>
+        </div>
       </div>
 
       <!-- Imagem do rebocador adicionada aqui -->
@@ -1239,9 +1256,9 @@ function render(){
   const ordem=document.getElementById('ordem').value;
   v.innerHTML='';
   
-  // Renderiza os botões de filtro de categoria
-  // Inclui o botão "Todos" e define se ele está ativo
-  fBox.innerHTML = 
+  // Renderiza os botões de filtro de categoria na nova div.cat-buttons-grid
+  // MUDANÇA AQUI: Altere `fBox.innerHTML` para `fBox.querySelector('.cat-buttons-grid').innerHTML`
+  fBox.querySelector('.cat-buttons-grid').innerHTML = 
     `<button class="btn-cat ${categoriasAtivas.length === 0? 'active' : ''}" onclick="toggleCat('Todos')">Todos</button>` +
     listaCategorias.map(c => 
     `<button class="btn-cat ${categoriasAtivas.includes(c)? 'active' : ''}" onclick="toggleCat('${c}')">${c}</button>`
@@ -1617,10 +1634,10 @@ initDB();
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
     navigator.serviceWorker.register('/service-worker.js')
-     .then(registration => {
+    .then(registration => {
         console.log('Service Worker registered:', registration);
       })
-     .catch(error => {
+    .catch(error => {
         console.error('Service Worker registration failed:', error);
       });
   });
