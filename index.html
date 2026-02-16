@@ -5,14 +5,14 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Controle de Estoque Haris</title>
 <meta name="theme-color" content="#2563eb">
-<link rel="manifest" href="manifest.json"> <!-- ADICIONADO AQUI -->
-<link rel="icon" href="https://cdn-icons-png.flaticon.com/512/3238/3238058.png"> <!-- Ícone de caixa -->
-<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet"> <!-- Fonte Poppins -->
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="https://cdn-icons-png.flaticon.com/512/3238/3238058.png">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <style>
 :root{
   --primary:#1f2a40; /* Azul escuro quase preto */
   --accent:#3b82f6; /* Azul vibrante */
-  --success:#10b981;
+  --success:#10b8a6;
   --danger:#ef4444;
   --bg:#f8fafc; /* Fundo mais claro */
   --card-bg:white;
@@ -56,7 +56,7 @@ body{
   box-shadow:0 4px 12px rgba(0,0,0,0.05);
   display:flex;
   flex-direction:column;
-  gap:15px;
+  gap:10px; /* Reduzindo o gap geral da sidebar */
   flex-shrink:0; /* Não encolher a sidebar */
   /* NOVAS PROPRIEDADES PARA FIXAR */
   position: sticky;
@@ -77,6 +77,8 @@ body{
   gap:20px;
   order:2; /* Ordem para layout */
 }
+/* MOBILE TOP SECTION - REMOVIDO */
+
 .header{
   display:flex;
   justify-content:space-between;
@@ -118,7 +120,8 @@ body{
   outline:none;
 }
 .sort-select{
-  width:120px;
+  /* Removendo largura fixa para permitir que o select se ajuste */
+  /* width:120px; */
   padding:10px;
   border-radius:8px;
   border:1px solid var(--border-color);
@@ -180,26 +183,26 @@ body{
   margin-bottom:10px;
   color:var(--primary);
 }
-/* Estilo para a nova div de grid dos botões de categoria */
+/* Estilo para a nova div de grid dos botões de categoria - AJUSTADO NOVAMENTE */
 .cat-buttons-grid {
   display: grid;
-  /* 2 colunas de largura igual, com um pequeno espaço */
-  grid-template-columns: repeat(auto-fill, minmax(calc(50% - 4px), 1fr)); 
+  /* Min-width maior para caber o texto */
+  grid-template-columns: repeat(auto-fit, minmax(90px, 1fr));
   gap: 8px; /* Espaço entre os botões */
 }
 
 .btn-cat {
-  padding: 0 8px; /* Reduzi o padding para diminuir a altura */
-  height: 30px; /* Altura fixa para todos os botões */
-  border-radius: 15px; /* Deixei mais arredondado */
-  font-size: 0.75rem; /* Fonte um pouco menor */
-  display: flex; /* Para alinhar o texto verticalmente */
-  align-items: center; /* Alinha verticalmente */
-  justify-content: center; /* Centraliza o texto horizontalmente */
-  text-align: center; /* Garante que o texto fique centralizado */
-  box-sizing: border-box; /* Garante que padding e border sejam incluídos na altura/largura */
-  white-space: nowrap; /* Evita que o texto quebre */
-  border:1px solid var(--border-color); /* Mantido, mas ajustado */
+  padding: 0 10px; /* Padding um pouco maior */
+  height: 32px; /* Altura ajustada para caber o texto */
+  border-radius: 16px; /* Mais arredondado */
+  font-size: 0.8rem; /* Fonte um pouco maior */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  box-sizing: border-box;
+  white-space: nowrap;
+  border:1px solid var(--border-color);
   background:var(--card-bg);
   cursor:pointer;
   transition:all 0.3s ease;
@@ -218,26 +221,33 @@ body{
   border-color:#d0d7e0;
 }
 
-/* Imagem na sidebar */
+/* Imagem na sidebar - AJUSTADA PARA MAIOR */
 .sidebar-image {
   width: 100%;
   padding: 0;
-  margin: 0; /* Remove margens padrão */
-  border-radius: 12px; /* Mantém o arredondamento da sidebar */
-  overflow: hidden; /* Garante que a imagem não vaze do border-radius */
-  box-shadow:0 4px 12px rgba(0,0,0,0.05); /* Adiciona sombra consistente */
-  display: flex; /* Para centralizar a imagem dentro do contêiner */
-  justify-content: center; /* Centraliza horizontalmente */
-  align-items: center; /* Centraliza verticalmente */
+  margin: 0;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow:0 4px 12px rgba(0,0,0,0.05);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 10px; /* Reduzindo margem inferior */
 }
 
 .sidebar-image img {
-  max-width: 100%; /* Garante que a imagem não ultrapasse a largura do pai */
-  max-height: 100%; /* Garante que a imagem não ultrapasse a altura do pai */
-  height: auto; /* Mantém a proporção da imagem */
-  object-fit: contain; /* Ajusta a imagem dentro do contêiner sem cortar, mostrando o máximo possível */
-  display: block; /* Remove espaço extra abaixo da imagem */
-  border-radius: 12px; /* Garante o arredondamento da imagem */
+  max-width: 100%;
+  max-height: 250px; /* ALTURA MÁXIMA AUMENTADA */
+  height: auto;
+  object-fit: contain;
+  display: block;
+  border-radius: 12px;
+  width: auto;
+}
+
+/* Ajuste para o grupo de input de busca */
+.input-group:not(.file-upload-group) { /* Exclui o file-upload-group para não afetar o modal */
+  flex: none; /* Remover o flex-grow */
 }
 
 /* Admin Panel */
@@ -276,6 +286,7 @@ input:focus,select:focus,textarea:focus{
   outline:none;
   background-color:white;
 }
+
 #adminPanel button{
   height:40px;
   font-size:0.9rem;
@@ -285,7 +296,7 @@ input:focus,select:focus,textarea:focus{
 /* Stats Bar */
 .stats-bar{
   display:flex;
-  justify-content:space-between;
+  justify-content:flex-end; /* Alinha os itens à direita */
   align-items:center;
   background:var(--card-bg);
   padding:15px 25px;
@@ -293,10 +304,14 @@ input:focus,select:focus,textarea:focus{
   border:1px solid var(--border-color);
   font-size:0.9rem;
   box-shadow:0 2px 8px rgba(0,0,0,0.03);
+  gap:10px; /* Adiciona espaçamento entre os grupos de botões */
+  flex-wrap: wrap; /* Permite quebrar linha em telas menores */
+  margin-bottom: 20px; /* Adicionado para afastar da vitrine */
 }
-.stats-bar > div{
+.stats-bar > div{ /* Ajuste para o.backup-group */
   display:flex;
-  gap:20px;
+  gap:10px; /* Reduz o gap para caber mais botões */
+  flex-wrap: wrap; /* Permite quebrar linha em telas menores */
 }
 .stats-bar b{
   font-weight:700;
@@ -306,6 +321,7 @@ input:focus,select:focus,textarea:focus{
 .backup-group{
   display:none; /* É 'none' por padrão e JS muda para 'flex' */
   gap:10px;
+  flex-wrap: wrap; /* Permite quebrar linha em telas menores */
 }
 .backup-group button{
   padding:8px 15px;
@@ -370,7 +386,7 @@ input:focus,select:focus,textarea:focus{
 .grid{
   display:grid;
   /* MODIFICADO: Min-width dos cards para 150px e até 6 colunas */
-  grid-template-columns:repeat(auto-fill, minmax(150px, 1fr)); 
+  grid-template-columns:repeat(auto-fill, minmax(150px, 1fr));
   gap:20px;
 }
 .card{
@@ -684,8 +700,108 @@ input:focus,select:focus,textarea:focus{
 .hist-table th{font-weight:bold;}
 }
 
+/* Estilos para a sidebar direita */
+.sidebar-section {
+    background: var(--card-bg);
+    padding: 15px;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    margin-bottom: 15px; /* Espaço entre as seções */
+}
+.sidebar-section h3 {
+    font-size: 1rem;
+    margin-top: 0;
+    margin-bottom: 10px;
+    color: var(--primary);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+.sidebar-section p {
+    font-size: 0.9rem;
+    margin-bottom: 5px;
+    color: var(--text-color);
+}
+.sidebar-highlight {
+    font-size: 1.5rem; /* Fonte maior para destaque */
+    font-weight: 700;
+    color: var(--accent); /* Cor de destaque */
+    display: block;
+    text-align: center;
+    margin: 10px 0;
+}
+/* Estilo para os itens de informação na sidebar direita */
+.sidebar-info-item {
+    display: flex;
+    align-items: baseline; /* Alinha pela base do texto para um look mais natural */
+    justify-content: flex-start; /* Alinha o conteúdo à esquerda */
+    gap: 8px; /* Espaçamento entre o label e o valor */
+    padding: 5px 0;
+    /* Removi a borda inferior daqui para ser mais seletivo */
+    font-size: 0.9rem; /* Tamanho base um pouco maior */
+}
+/* Estilo para a borda do relatório detalhado - para não afetar os itens de cima */
+.sidebar-section > #relatorioDetalhado >.sidebar-info-item {
+    border-bottom: 1px dashed var(--border-color);
+}
+
+.sidebar-info-item:last-of-type { /* O último item não precisa de borda inferior */
+    border-bottom: none;
+}
+.sidebar-info-item.label { /* Label dentro do item de informação */
+    font-weight: bold; /* Negrito para o label */
+    color: var(--primary); /* Cor principal */
+    white-space: nowrap; /* Evita quebra de linha do label */
+}
+.sidebar-info-item.value { /* Valor dentro do item de informação */
+    font-weight: bold; /* Negrito para o valor */
+    font-size: 1rem; /* Tamanho do valor um pouco maior */
+    color: var(--accent); /* Cor de destaque para o valor */
+    white-space: nowrap; /* Evita quebra de linha do valor */
+}
+
+.sidebar-stock-list ul {
+    list-style: none;
+    padding: 0;
+    margin: 10px 0 0 0;
+}
+.sidebar-stock-list li {
+    font-size: 0.85rem;
+    padding: 5px 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px dotted var(--border-color);
+}
+.sidebar-stock-list li:last-child {
+    border-bottom: none;
+}
+.sidebar-stock-list li.product-name { /* Adicionado a classe para o span */
+    flex: 1;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    margin-right: 10px;
+}
+.sidebar-stock-list li.stock-count { /* Adicionado a classe para o span */
+    font-weight: 600;
+    min-width: 30px; /* Para alinhar bem o número */
+    text-align: right;
+}
+.sidebar-action-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: auto; /* Empurra para o final da sidebar */
+}
+
 /* Responsive adjustments */
-/* Ajustes para telas maiores que 768px mas menores que 1200px (tablets e telas médias) */
+@media (min-width: 1201px) { /* Apenas para telas grandes */
+.sidebar-action-group {
+    margin-top: 15px; /* Adiciona um pouco de margem para afastar do conteúdo */
+  }
+}
+
 @media (max-width: 1200px) {
 .container-wrapper{
     flex-direction:column;
@@ -700,6 +816,10 @@ input:focus,select:focus,textarea:focus{
     max-height: none;
     overflow-y: visible;
   }
+/* Ações de admin no mobile (sem margin-top: auto) */
+.sidebar-action-group {
+    margin-top: 15px!important; /* Espaçamento padrão para mobile */
+}
 .main-content{
     order:unset;
   }
@@ -749,7 +869,7 @@ input:focus,select:focus,textarea:focus{
 
 /* NOVO PONTO DE RUPTURA: Celulares e telas pequenas (menor que 768px) */
 @media (max-width: 768px) {
-  /* Container Wrapper: Garante que as sidebars e o conteúdo principal se empilhem */
+  /* Empilhar itens do container-wrapper */
 .container-wrapper{
     flex-direction:column; /* Empilha tudo verticalmente */
     gap:15px; /* Reduz o espaçamento geral */
@@ -757,79 +877,113 @@ input:focus,select:focus,textarea:focus{
     padding:0 10px; /* Padding menor */
   }
 
-  /* Sidebar: Vira um bloco comum, sem ser sticky */
-.sidebar{
-    width:100%; /* Ocupa a largura total */
-    position: static; /* Remove o sticky */
-    max-height: none; /* Remove limite de altura */
-    overflow-y: visible; /* Não precisa de scroll próprio */
-    padding:15px; /* Padding um pouco menor */
+  /* ORDENAÇÃO NO SMARTPHONE */
+.main-content {
+    order: 1; /* Conteúdo principal aparece primeiro */
+    background: none; /* remove background para fluir com o resto */
+    padding: 0; /* remove padding para fluir */
+    box-shadow: none; /* remove sombra */
+  }
+.sidebar.left {
+    order: 2; /* Sidebar esquerda aparece depois do conteúdo principal */
+    box-shadow: none; /* Remove a sombra */
+    border-radius: 0; /* Remove o border-radius se não for uma seção separada visualmente */
+  }
+.sidebar.right {
+    display: none; /* Sidebar direita completamente oculta */
   }
 
-  /* Cabeçalho: Ajustes para centralizar e diminuir */
-.header{
-    flex-wrap:wrap; /* Permite que os itens quebrem linha */
-    gap:10px; /* Espaçamento menor */
-    justify-content:center; /* Centraliza itens */
-    padding:10px 15px;
+  /* HEADER DENTRO DO MAIN-CONTENT - MOBILE */
+.main-content.header { /* o header que agora está dentro do main-content */
+    padding: 10px 15px;
+    flex-wrap: wrap;
+    gap: 10px;
+    justify-content: center;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05); /* Mantém sombra no header superior */
+    margin-bottom: 15px; /* Espaço após o header */
   }
-.header h1{
-    font-size:1.3rem; /* Título menor */
-    width:100%; /* Ocupa a largura toda */
-    text-align:center;
-    justify-content:center;
+.main-content.header h1 {
+    font-size: 1.4rem;
+    width: 100%;
+    text-align: center;
+    justify-content: center;
   }
-.header h1 img{
-    height:22px; /* Logo menor */
-  }
-  /* Pesquisa: Ocupa a largura total */
-.search-container{
-    width:100%;
-    max-width:none;
-    order:3; /* Coloca a pesquisa por último no cabeçalho */
-  }
-.search-input{
-    padding:8px 12px;
-    font-size:0.8rem;
-  }
-  /* Botões de navegação: Podem ficar menores ou ser reestruturados */
-.nav-btns{
-    order:2; /* Coloca os botões antes da pesquisa */
-    gap:8px;
-  }
-.btn-primary,.btn-secondary{
-    padding:8px 12px;
-    font-size:0.8rem;
-    border-radius:20px; /* Botões mais arredondados */
+.main-content.header h1 img {
+    height: 25px;
   }
 
-  /* Filtros de Categoria: Garante bom espaçamento e quebra de linha */
-  /* NOVO: Ajuste para a nova classe cat-buttons-grid em telas menores */
+  /* STATS BAR DENTRO DO MAIN-CONTENT - MOBILE */
+.main-content.stats-bar { /* a stats-bar que agora está dentro do main-content */
+    padding: 10px 15px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05); /* Mantém sombra na stats bar */
+    border: none;
+    justify-content: center; /* Centraliza os botões */
+    margin-bottom: 15px; /* Espaço após a stats bar */
+  }
+.main-content.stats-bar.backup-group {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+.main-content.stats-bar.backup-group button {
+    font-size: 0.75rem;
+    padding: 6px 10px;
+    border-radius: 15px;
+  }
+
+  /* SIDEBAR ESQUERDA - AJUSTES PARA MOBILE */
+  /* Elementos da sidebar esquerda que devem ser escondidos no mobile */
+.sidebar-desktop-only {
+    display: none;
+  }
+  /* Filtros de Categoria */
+.sidebar.left.cat-filter-wrapper {
+    margin-top: 0; /* Ajusta a margem superior */
+    border-radius: 12px; /* Mantém o border-radius da seção */
+    margin-bottom: 15px; /* Espaço após a seção */
+  }
+  /* Input de Busca */
+.sidebar.left.input-group:has(#inputBusca) {
+    margin-top: 0; /* Ajusta a margem superior */
+    padding: 15px; /* Adiciona padding para parecer uma seção */
+    background: var(--card-bg); /* Adiciona background */
+    border-radius: 12px; /* Adiciona border-radius */
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05); /* Adiciona sombra */
+  }
+  /* Categoria buttons grid */
 .cat-buttons-grid {
-    grid-template-columns: repeat(auto-fill, minmax(calc(50% - 4px), 1fr)); /* Continua 2 colunas */
-    gap: 6px; /* Espaçamento menor entre filtros */
+    grid-template-columns: repeat(auto-fit, minmax(80px, 1fr)); /* Min-width menor para caber mais */
+    gap: 5px; /* Espaçamento menor entre filtros */
   }
 .btn-cat{
-    padding:4px 8px; /* Padding ainda menor */
-    font-size:0.7rem; /* Fonte menor */
-    height: 28px; /* Altura ajustada */
+    padding:4px 6px; /* Padding ainda menor */
+    font-size:0.75rem; /* Fonte menor */
+    height: 30px; /* Altura ajustada */
     border-radius:15px;
   }
-  
-  /* Ajuste específico para o input-group que contém o select de ordenação e o botão "Mudar Imagem" na sidebar */
-.sidebar.input-group:nth-of-type(2) > div { /* Seleciona o div dentro do segundo input-group da sidebar */
-    flex-direction: column; /* Botão e select um embaixo do outro */
-    align-items: stretch; /* Ocupam a largura total */
+
+  /* ADMIN PANEL / HISTORY PANEL */
+  #adminPanel, #historyPanel{
+    padding:15px;
+    border-left:none; /* Remove a borda lateral */
+    border-top:5px solid var(--accent); /* Adiciona uma borda superior */
+    box-shadow: none; /* Remove sombra aqui para não duplicar */
   }
-.sidebar.input-group:nth-of-type(2) select.sort-select,
-.sidebar.input-group:nth-of-type(2) button.btn-secondary {
-    width: 100%; /* Ocupa a largura total */
+  #historyPanel h2{
+    font-size:1.1rem;
   }
-.sidebar.input-group:nth-of-type(2) button.btn-secondary {
-    margin-top: 5px; /* Espaçamento entre o select e o botão */
+.hist-table th,.hist-table td{
+    padding:8px;
+    font-size:0.75rem;
+  }
+  /* Esconde a coluna de ação da lixeira na tabela para economizar espaço */
+.hist-table th:last-child,.hist-table td:last-child {
+    display: none;
   }
 
-  /* Grid de Produtos: Mais colunas para aproveitar o espaço */
+  /* GRID DE PRODUTOS */
 .grid{
     grid-template-columns:repeat(auto-fill, minmax(110px, 1fr)); /* 2 ou 3 cards por linha */
     gap:8px; /* Espaçamento menor entre cards */
@@ -859,7 +1013,7 @@ input:focus,select:focus,textarea:focus{
     font-size:0.9rem;
   }
 
-  /* Modal: Ocupa quase toda a tela, com padding adequado */
+  /* MODAL */
   #modal{
     padding:0px; /* Remove padding externo para modal cobrir tudo */
     background: rgba(15,23,42,0.9); /* Fundo mais escuro para focar */
@@ -886,24 +1040,6 @@ input:focus,select:focus,textarea:focus{
 .close-modal-btn-bottom{
     margin-top:10px;
   }
-
-  /* Painel de Histórico e Admin: Ajustes */
-  #historyPanel, #adminPanel{
-    padding:15px;
-    border-left:none; /* Remove a borda lateral */
-    border-top:5px solid var(--accent); /* Adiciona uma borda superior */
-  }
-  #historyPanel h2{
-    font-size:1.1rem;
-  }
-.hist-table th,.hist-table td{
-    padding:8px;
-    font-size:0.75rem;
-  }
-  /* Esconde a coluna de ação da lixeira na tabela para economizar espaço */
-.hist-table th:last-child,.hist-table td:last-child {
-    display: none;
-  }
 }
 
 /* Ajustes para telas bem pequenas, como iPhones SE (320px de largura) */
@@ -922,69 +1058,30 @@ input:focus,select:focus,textarea:focus{
     width:98%; /* Quase a largura toda */
     padding:15px;
   }
+  /* Ajuste responsivo para a imagem da sidebar em telas muito pequenas */
+.sidebar-image img {
+    max-height: 100px; /* Reduz ainda mais para telas muito pequenas */
+  }
 }
 </style>
 </head>
 <body>
 <div class="overlay">
   <div class="print-only print-header">📦 Relatório de Estoque Haris</div>
+
   <div class="container-wrapper">
-    <!-- Left Sidebar -->
-    <div class="sidebar left no-print">
-      <div class="header" style="box-shadow:none; padding:0;">
+    <!-- Main Content Area -->
+    <div class="main-content">
+      <!-- Header do App - Visível em desktop, e agora no TOPO do main-content no mobile -->
+      <div class="header no-print">
         <h1><img src="https://cdn-icons-png.flaticon.com/512/3238/3238058.png" alt="Logo" style="height:30px;"> Haris <span>Estoque</span></h1>
       </div>
 
-      <div class="cat-filter-wrapper">
-        <h3>Filtrar por Categoria</h3>
-        <!-- MUDANÇA AQUI: Nova div para organizar os botões em grid -->
-        <div class="cat-filter" id="catFiltros">
-          <div class="cat-buttons-grid">
-            <!-- Os botões serão gerados aqui pelo JS -->
-          </div>
-        </div>
-      </div>
-
-      <!-- Imagem do rebocador adicionada aqui -->
-      <div class="sidebar-image">
-        <img id="sidebarImage" src="animao-de-um-rebocador-com-haris-escrito-na-inscri.jpeg" alt="Rebocador Haris"> 
-      </div>
-
-      <div class="input-group">
-        <label for="inputBusca">Pesquisar Produto</label>
-        <input type="text" id="inputBusca" class="search-input" placeholder="Nome do produto..." oninput="render()">
-      </div>
-
-      <!-- NOVO: Container para o select de ordenação e o botão de mudar imagem -->
-      <div class="input-group" style="display:flex; flex-direction:column; gap:5px;">
-        <label for="ordem">Ordenar Por</label>
-        <div style="display:flex; align-items:center; gap:10px;">
-          <select id="ordem" class="sort-select" style="flex:1;" onchange="render()">
-            <option value="nome">A-Z</option>
-            <option value="qtd-desc">Estoque ↑</option>
-            <option value="qtd-asc">Estoque ↓</option>
-          </select>
-          <!-- Botão para mudar imagem da sidebar -->
-          <button class="btn-secondary" style="padding:8px 12px; font-size:0.75rem; white-space:nowrap;" onclick="document.getElementById('sidebarImageUploadHidden').click()">Mudar Imagem</button>
-          <!-- Input type="file" escondido -->
-          <input type="file" id="sidebarImageUploadHidden" accept="image/*" style="display:none;" onchange="uploadSidebarImage(event)">
-        </div>
-      </div>
-
-      <div style="margin-top: auto; display:flex; flex-direction:column; gap:10px;">
-        <button class="btn-secondary" id="btnAdmin" onclick="toggleAdmin()">🔑 Admin</button>
-        <button class="btn-primary" style="background:#1c74d0;" onclick="imprimirProdutos()">📄 Gerar PDF Produtos</button>
-      </div>
-    </div>
-
-    <!-- Main Content Area -->
-    <div class="main-content">
+      <!-- Stats Bar - Visível em desktop, e agora no main-content no mobile -->
       <div class="stats-bar no-print">
-        <div>
-          <div>Produtos Cadastrados: <b id="totalProdutos">0</b></div>
-          <div>Total em Estoque: <b id="totalEstoque">0</b></div>
-        </div>
         <div class="backup-group" id="backupGroup">
+          <button class="btn-secondary" id="btnAdmin" onclick="toggleAdmin()">🔑 Admin</button>
+          <button class="btn-primary" style="background:#1c74d0;" onclick="imprimirProdutos()">📄 Gerar PDF Produtos</button>
           <button class="btn-secondary" onclick="toggleHistory()">📋 Histórico</button>
           <button class="btn-primary" style="background:#1c74d0;" onclick="exportarBackup()">📥 Exportar Backup</button>
           <button class="btn-secondary" onclick="document.getElementById('importInput').click()">📤 Importar Backup</button>
@@ -1002,8 +1099,6 @@ input:focus,select:focus,textarea:focus{
         <div class="input-group"><label>Quantidade Inicial</label><input type="number" id="qtd" value="0"></div>
         <div class="input-group"><label>Foto do Produto</label><input type="file" id="foto" accept="image/*"></div>
         <button class="btn-primary" style="align-self: flex-end;" onclick="cadastrar()">ADICIONAR PRODUTO</button>
-
-        <!-- REMOVIDO: O campo de upload da imagem da sidebar foi movido para a sidebar principal -->
       </div>
 
       <div id="historyPanel" class="no-print">
@@ -1038,6 +1133,107 @@ input:focus,select:focus,textarea:focus{
       </div>
 
       <div class="grid" id="vitrine"></div>
+    </div>
+
+    <!-- Left Sidebar -->
+    <div class="sidebar left no-print">
+      <!-- Conteúdo Desktop Only (visível apenas em desktop) -->
+      <div class="sidebar-desktop-only">
+        <div class="header" style="box-shadow:none; padding:0;">
+            <h1><img src="https://cdn-icons-png.flaticon.com/512/3238/3238058.png" alt="Logo" style="height:30px;"> Haris <span>Estoque</span></h1>
+        </div>
+        <div class="sidebar-image">
+          <img id="sidebarImage" src="animao-de-um-rebocador-com-haris-escrito-na-inscri.jpeg" alt="Rebocador Haris">
+        </div>
+        <div class="input-group" style="display:flex; flex-direction:column; gap:5px;">
+          <label for="ordem">Ordenar Por</label>
+          <div style="display:flex; align-items:center; gap:10px;">
+            <select id="ordem" class="sort-select" style="flex:1;" onchange="render()">
+              <option value="nome">A-Z</option>
+              <option value="qtd-desc">Estoque ↑</option>
+              <option value="qtd-asc">Estoque ↓</option>
+            </select>
+            <button class="btn-secondary" style="padding:8px 12px; font-size:0.75rem; white-space:nowrap;" onclick="document.getElementById('sidebarImageUploadHidden').click()">Mudar Imagem</button>
+            <input type="file" id="sidebarImageUploadHidden" accept="image/*" style="display:none;" onchange="uploadSidebarImage(event)">
+          </div>
+        </div>
+        <div class="sidebar-action-group" style="display:flex; flex-direction:column; gap:10px; margin-top: 15px;">
+        </div>
+      </div>
+
+      <!-- Conteúdo da Sidebar Esquerda visível no Mobile -->
+      <div class="cat-filter-wrapper">
+        <h3>Filtrar por Categoria</h3>
+        <div class="cat-filter" id="catFiltros">
+          <div class="cat-buttons-grid">
+            <!-- Os botões serão gerados aqui pelo JS -->
+          </div>
+        </div>
+      </div>
+
+      <div class="input-group">
+        <label for="inputBusca">Pesquisar Produto</label>
+        <input type="text" id="inputBusca" class="search-input" placeholder="Nome do produto..." oninput="render()">
+      </div>
+    </div>
+
+    <!-- Right Sidebar -->
+    <div class="sidebar right no-print">
+      <div class="sidebar-section">
+        <h3>📊 Visão Geral do Estoque</h3>
+        <div class="sidebar-info-item">
+          <span class="label"><b>Produtos Cadastrados:</b></span>
+          <span class="value" id="rightSidebarTotalProdutos" style="color: var(--accent); font-weight: bold;">0</span>
+        </div>
+        <div class="sidebar-info-item">
+          <span class="label"><b>Total Geral:</b></span>
+          <span class="value" id="rightSidebarTotalEstoqueHighlight" style="color: var(--accent); font-weight: bold;">0</span>
+        </div>
+      </div>
+
+      <div class="sidebar-section">
+        <h3>🔍 Relatório Rápido</h3>
+        <div class="input-group" style="margin-bottom: 10px;">
+          <label for="relatorioRapidoCat">Filtrar por Categoria</label>
+          <!-- Aumentei o width para caber o texto -->
+          <select id="relatorioRapidoCat" class="sort-select" style="width: 100%;" onchange="gerarRelatorioRapido()">
+            <!-- Categorias serão preenchidas via JS -->
+          </select>
+        </div>
+        <div id="relatorioDetalhado">
+          <p class="sidebar-info-item">
+            <span class="label" style="color:var(--primary);"><b>Itens nesta Categoria:</b></span>
+            <span class="value" id="itensCategoria" style="color:var(--success);">0</span>
+          </p>
+          <p class="sidebar-info-item">
+            <span class="label" style="color:var(--primary);"><b>Estoque Total da Categoria:</b></span>
+            <span class="value" id="estoqueCategoria" style="color:var(--success);">0</span>
+          </p>
+        </div>
+      </div>
+
+      <!-- Seção para Itens com MENOR Estoque -->
+      <div class="sidebar-section sidebar-stock-list">
+        <h3>📉 Itens com Menor Estoque</h3>
+        <ul id="listaMenorEstoque">
+          <!-- Produtos com menor estoque serão listados aqui -->
+          <li class="placeholder">Nenhum item encontrado nesta categoria.</li>
+        </ul>
+      </div>
+
+      <!-- Seção para Itens com MAIOR Estoque -->
+      <div class="sidebar-section sidebar-stock-list">
+        <h3>📈 Itens com Maior Estoque</h3>
+        <ul id="listaMaiorEstoque">
+          <!-- Produtos com maior estoque serão listados aqui -->
+          <li class="placeholder">Nenhum item encontrado nesta categoria.</li>
+        </ul>
+      </div>
+
+      <div class="sidebar-action-buttons">
+        <button class="btn-secondary" onclick="alert('Funcionalidade em desenvolvimento!')">⚙️ Configurações</button>
+        <button class="btn-secondary" onclick="alert('Funcionalidade em desenvolvimento!')">🔔 Notificações</button>
+      </div>
     </div>
   </div>
 
@@ -1102,9 +1298,9 @@ let sidebarImageUrl = ''; // Nova variável para guardar a Data URL da imagem da
 
 // Preenche os selects de categoria
 function preencherSelectsDeCategoria() {
-    const selects = document.querySelectorAll('#categoria, #filtroCatHist, #mCategoriaEdit');
+    const selects = document.querySelectorAll('#categoria, #filtroCatHist, #mCategoriaEdit, #relatorioRapidoCat');
     selects.forEach(select => {
-        if (select.id === 'filtroCatHist') {
+        if (select.id === 'filtroCatHist' || select.id === 'relatorioRapidoCat') {
             select.innerHTML = '<option value="Todos">Todas as Categorias</option>';
         } else {
             select.innerHTML = '';
@@ -1120,22 +1316,22 @@ function preencherSelectsDeCategoria() {
 
 // IndexedDB - FUNÇÕES ATUALIZADAS
 let dbHaris;
-let dbReadyPromise; // NOVO: Uma Promise para controlar quando o DB está pronto
+let dbReadyPromise;
 
 function initDB(){
-  if (dbReadyPromise) return dbReadyPromise; // Se a Promise já existe, retorna ela
+  if (dbReadyPromise) return dbReadyPromise;
 
   dbReadyPromise = new Promise((resolve, reject) => {
-    const request=indexedDB.open('db_haris',2); 
+    const request=indexedDB.open('db_haris',2);
     request.onsuccess=e=>{
-      dbHaris=e.target.result; 
+      dbHaris=e.target.result;
       carregarDados();
-      carregarSidebarImage(); 
-      resolve(); // Resolve a Promise quando o DB está pronto
+      carregarSidebarImage();
+      resolve();
     }
     request.onerror=e=>{
       console.log("Erro IndexedDB:", e);
-      reject(e); // Rejeita a Promise em caso de erro
+      reject(e);
     }
     request.onupgradeneeded=e=>{
       let dbe=e.target.result;
@@ -1151,12 +1347,17 @@ function initDB(){
     }
   });
   preencherSelectsDeCategoria();
-  return dbReadyPromise; // Retorna a Promise
+  return dbReadyPromise;
 }
 
 function carregarDados(){
   const t=dbHaris.transaction(['produtos','historico'],'readonly');
-  t.objectStore('produtos').getAll().onsuccess=e=>{db=e.target.result; render();}
+  t.objectStore('produtos').getAll().onsuccess=e=>{
+    db=e.target.result;
+    render();
+    // Chamar gerarRelatorioRapido AQUI, depois que db está carregado
+    gerarRelatorioRapido();
+  }
   t.objectStore('historico').getAll().onsuccess=e=>{historico=e.target.result; renderHistory();}
 }
 function salvarProdutos(){
@@ -1188,12 +1389,12 @@ function carregarSidebarImage() {
       imgElement.src = sidebarImageUrl;
       console.log("Imagem da sidebar carregada do IndexedDB.");
     } else {
-      const initialSrc = imgElement.getAttribute('src'); 
+      const initialSrc = imgElement.getAttribute('src');
       if (initialSrc &&!initialSrc.startsWith('data:') &&!initialSrc.startsWith('http')) {
-          imgElement.src = initialSrc; 
+          imgElement.src = initialSrc;
           console.log("Imagem da sidebar exibida via SRC do HTML (não encontrada no IndexedDB). Clique em 'Mudar Imagem' para salvá-la permanentemente.");
       } else {
-          imgElement.src = 'https://via.placeholder.com/280x150?text=Imagem+Nao+Encontrada'; 
+          imgElement.src = 'https://via.placeholder.com/280x150?text=Imagem+Nao+Encontrada';
           console.warn("Imagem da sidebar não encontrada no IndexedDB e SRC inicial inválido ou ausente.");
       }
     }
@@ -1217,9 +1418,9 @@ function uploadSidebarImage(event) {
     reader.onload = (e) => {
       sidebarImageUrl = e.target.result;
       document.getElementById('sidebarImage').src = sidebarImageUrl;
-      salvarSidebarImage(sidebarImageUrl); 
+      salvarSidebarImage(sidebarImageUrl);
       alert("Imagem da sidebar atualizada e salva!");
-      event.target.value = null; 
+      event.target.value = null;
     };
     reader.onerror = (e) => {
       console.error("Erro ao ler o arquivo de imagem para a sidebar:", e.target.error);
@@ -1231,7 +1432,6 @@ function uploadSidebarImage(event) {
 
 // Layout e funções
 function toggleAdmin(){
-  // A senha "RebocadorHaris"
   if(!isAdmin){
     if(prompt("Senha:")==="RebocadorHaris"){
       isAdmin=true;
@@ -1255,12 +1455,11 @@ function render(){
   const fBox=document.getElementById('catFiltros');
   const ordem=document.getElementById('ordem').value;
   v.innerHTML='';
-  
+
   // Renderiza os botões de filtro de categoria na nova div.cat-buttons-grid
-  // MUDANÇA AQUI: Altere `fBox.innerHTML` para `fBox.querySelector('.cat-buttons-grid').innerHTML`
-  fBox.querySelector('.cat-buttons-grid').innerHTML = 
+  fBox.querySelector('.cat-buttons-grid').innerHTML =
     `<button class="btn-cat ${categoriasAtivas.length === 0? 'active' : ''}" onclick="toggleCat('Todos')">Todos</button>` +
-    listaCategorias.map(c => 
+    listaCategorias.map(c =>
     `<button class="btn-cat ${categoriasAtivas.includes(c)? 'active' : ''}" onclick="toggleCat('${c}')">${c}</button>`
   ).join('');
 
@@ -1268,7 +1467,6 @@ function render(){
 
   let produtosExibidos = db.filter(p => {
     const matchesSearchTerm = p.nome.toLowerCase().includes(termo);
-    // Se nenhuma categoria específica está ativa, mostra todos. Caso contrário, filtra pelas ativas.
     const matchesCategory = categoriasAtivas.length === 0 || categoriasAtivas.includes(p.cat);
     return matchesSearchTerm && matchesCategory;
   });
@@ -1293,23 +1491,26 @@ function render(){
       </div>
       </div>`;
   });
-  document.getElementById('totalProdutos').innerText=cProd;
-  document.getElementById('totalEstoque').innerText=cEst;
+  // document.getElementById('totalEstoque').innerText=cEst; // Esta linha foi removida pois esta info agora está na sidebar direita
+
+  // ATUALIZAR DADOS DA SIDEBAR DIREITA SEMPRE QUE RENDERIZAR
+  document.getElementById('rightSidebarTotalProdutos').innerText = db.length;
+  document.getElementById('rightSidebarTotalEstoqueHighlight').innerText = db.reduce((sum, p) => sum + p.qtd, 0);
+  gerarRelatorioRapido(); // Chama a função para garantir que as listas menores/maiores sejam atualizadas
 }
 
-// FUNÇÃO ATUALIZADA PARA O COMPORTAMENTO DO FILTRO
 function toggleCat(categoria){
   if (categoria === 'Todos') {
-    categoriasAtivas = []; // Limpa todas as categorias
+    categoriasAtivas = [];
   } else {
     const index = categoriasAtivas.indexOf(categoria);
     if (index > -1) {
-      categoriasAtivas.splice(index, 1); // Remove a categoria se já estiver ativa
+      categoriasAtivas.splice(index, 1);
     } else {
-      categoriasAtivas.push(categoria); // Adiciona a categoria se não estiver ativa
+      categoriasAtivas.push(categoria);
     }
   }
-  render(); // Re-renderiza para aplicar o novo filtro
+  render();
 }
 
 function getCorCat(cat){
@@ -1320,11 +1521,11 @@ function getCorCat(cat){
     'Jotamastic A':'#facc15',
     'Jotamastic B':'#8b5cf6',
     'Solvente':'#ef4444',
-    'Filtros': '#a3e635', 
-    'Manilhas': '#ec4899', 
-    'Escova Rotativa': '#FF8C00', // Nova cor para Escova Rotativa
-    'Pincel': '#8A2BE2', // Nova cor para Pincel
-    'Rolo de Pintura': '#00CED1', // Nova cor para Rolo de Pintura
+    'Filtros': '#a3e635',
+    'Manilhas': '#ec4899',
+    'Escova Rotativa': '#FF8C00',
+    'Pincel': '#8A2BE2',
+    'Rolo de Pintura': '#00CED1',
     'Outros':'#6b7280'
   };
   return cores[cat]||'#6b7280';
@@ -1333,9 +1534,9 @@ function getCorCat(cat){
 function cadastrar(){
   const n=document.getElementById('nome').value;
   const c=document.getElementById('categoria').value;
-  const q=parseInt(document.getElementById('qtd').value); 
+  const q=parseInt(document.getElementById('qtd').value);
   const f=document.getElementById('foto').files[0];
-  if(!n||isNaN(q)||!f)return alert('Preencha todos os campos e informe uma quantidade válida!'); 
+  if(!n||isNaN(q)||!f)return alert('Preencha todos os campos e informe uma quantidade válida!');
   const reader=new FileReader();
   reader.onload=e=>{
     const novoProduto = {nome:n,cat:c,qtd:q,foto:e.target.result};
@@ -1345,10 +1546,11 @@ function cadastrar(){
 
     addRequest.onsuccess = (event) => {
         novoProduto.id = event.target.result;
-        db.push(novoProduto); 
+        db.push(novoProduto);
         salvarProdutos();
         render();
-        document.getElementById('nome').value='';document.getElementById('qtd').value='0';document.getElementById('foto').value=''; 
+        gerarRelatorioRapido(); // ATUALIZAR RELATORIO RÁPIDO
+        document.getElementById('nome').value='';document.getElementById('qtd').value='0';document.getElementById('foto').value='';
     };
     addRequest.onerror = (event) => {
         console.error("Erro ao cadastrar produto no IndexedDB:", event.target.error);
@@ -1369,24 +1571,24 @@ function abrirModal(productId){
   document.getElementById('mQtd').innerText=p.qtd;
   document.getElementById('mNota').value='';
   document.getElementById('valMov').value=0;
-  document.getElementById('mCategoriaEdit').value=p.cat; 
-  document.getElementById('mFoto').value = ''; 
+  document.getElementById('mCategoriaEdit').value=p.cat;
+  document.getElementById('mFoto').value = '';
   document.getElementById('modal').style.display='flex';
 }
 function fecharModal(){
   const p=db[editIdx];
   p.nome=document.getElementById('mNomeEdit').value;
-  p.cat=document.getElementById('mCategoriaEdit').value; 
+  p.cat=document.getElementById('mCategoriaEdit').value;
   const f=document.getElementById('mFoto').files[0];
   if(f){
     const r=new FileReader();
-    r.onload=e=>{p.foto=e.target.result; salvarProdutos(); render();}
+    r.onload=e=>{p.foto=e.target.result; salvarProdutos(); render(); gerarRelatorioRapido();} // ATUALIZAR RELATORIO RÁPIDO
     r.readAsDataURL(f);
   } else {
-    salvarProdutos(); render();
+    salvarProdutos(); render(); gerarRelatorioRapido(); // ATUALIZAR RELATORIO RÁPIDO
   }
   document.getElementById('modal').style.display='none';
-  document.getElementById('mFoto').value = ''; 
+  document.getElementById('mFoto').value = '';
 }
 
 function movimentar(tipo){
@@ -1401,7 +1603,7 @@ function movimentar(tipo){
     tipoMov = 'Entrada';
   }
   else if(tipo==='sub') {
-    if(p.qtd < val){ 
+    if(p.qtd < val){
         alert("Não é possível remover mais itens do que o estoque atual.");
         return;
     }
@@ -1410,7 +1612,7 @@ function movimentar(tipo){
   }
 
   historico.push({data:new Date().toLocaleString(),produto:p.nome,cat:p.cat,tipo:tipoMov,qtd:val,motivo:nota});
-  salvarProdutos(); salvarHistorico(); render(); renderHistory();
+  salvarProdutos(); salvarHistorico(); render(); renderHistory(); gerarRelatorioRapido(); // ATUALIZAR RELATORIO RÁPIDO
   document.getElementById('mQtd').innerText=p.qtd;
   document.getElementById('valMov').value=0;document.getElementById('mNota').value='';
 }
@@ -1422,6 +1624,7 @@ function deletarProduto(productId){
       db.splice(indexToDelete, 1);
       salvarProdutos();
       render();
+      gerarRelatorioRapido(); // ATUALIZAR RELATORIO RÁPIDO
     } else {
       alert("Produto não encontrado para exclusão.");
     }
@@ -1493,22 +1696,22 @@ function importarBackup(event){
       try {
         const importedData = JSON.parse(e.target.result);
         if (importedData.produtos && importedData.historico) {
-          // Garante que o IndexedDB está pronto antes de tentar usar 'dbHaris'
-          initDB().then(() => { // Espera o DB estar pronto
+          initDB().then(() => {
             if (confirm("Importar backup? Isso substituirá os dados atuais.")) {
               db = importedData.produtos;
               historico = importedData.historico;
-              
+
               if (importedData.sidebarImage) {
                 sidebarImageUrl = importedData.sidebarImage;
                 document.getElementById('sidebarImage').src = sidebarImageUrl;
-                salvarSidebarImage(sidebarImageUrl); // Salva no IndexedDB
+                salvarSidebarImage(sidebarImageUrl);
               }
 
               salvarProdutos();
               salvarHistorico();
               render();
               renderHistory();
+              gerarRelatorioRapido(); // ATUALIZAR RELATORIO RÁPIDO
               alert("Backup importado com sucesso!");
             }
           }).catch(error => {
@@ -1546,7 +1749,11 @@ function imprimirProdutos(){
 }
 
 function imprimirHistorico(){
-  let novaJan=window.open('','_blank');
+  let novaJan=window.open('','_blank'); // Abre em uma nova aba
+  if (!novaJan) {
+      alert('Seu navegador bloqueou a abertura da janela de impressão. Por favor, desative o bloqueador de pop-ups para este site.');
+      return;
+  }
   let currentDateTime = new Date().toLocaleString();
 
   let html=`<html><head><title>Histórico de Movimentações</title><style>
@@ -1559,7 +1766,7 @@ function imprimirHistorico(){
     tr:nth-child(even){background-color:#f9fbfc!important;}
     tr:nth-child(odd){background-color:#ffffff!important;}
     table tbody tr { page-break-inside: avoid; page-break-after: auto;}
-.tag-add{color:#10b8a6;font-weight:bold;} 
+.tag-add{color:#10b8a6;font-weight:bold;}
 .tag-sub{color:#ef4444;font-weight:bold;}
 
 .report-footer{
@@ -1618,13 +1825,114 @@ function imprimirHistorico(){
   </div></body></html>`;
 
   novaJan.document.write(html);
-  novaJan.document.close();
+  novaJan.document.close(); // Fecha o document para garantir que o conteúdo está pronto
 
-  novaJan.print();
+  novaJan.focus(); // Foca na nova janela para exibir o diálogo de impressão
+  setTimeout(() => { // Adiciona um pequeno atraso antes de chamar print()
+    try {
+        novaJan.print();
+    } catch (e) {
+        console.error("Erro ao tentar imprimir o histórico:", e);
+        // Pode alertar o usuário se o erro for relevante, mas muitas vezes
+        // o navegador já mostrará uma mensagem de erro ou falhará silenciosamente.
+        // alert("Não foi possível abrir o diálogo de impressão. Verifique as configurações do seu navegador ou tente novamente.");
+    }
+    // A janela não será fechada automaticamente, o usuário decidirá
+  }, 1000); // Aumentado para 1 segundo para dar mais tempo para renderizar em dispositivos mais lentos
+}
 
-  setTimeout(() => {
-    novaJan.close();
-  }, 100);
+// ATUALIZADO: Função para gerar o relatório rápido e as listas de estoque na sidebar direita
+function gerarRelatorioRapido() {
+    const selectedCat = document.getElementById('relatorioRapidoCat').value;
+
+    let produtosFiltrados = db;
+    if (selectedCat!== 'Todos') {
+        produtosFiltrados = db.filter(p => p.cat === selectedCat);
+    }
+
+    const totalItensCat = produtosFiltrados.length;
+    const totalQtdCat = produtosFiltrados.reduce((sum, p) => sum + p.qtd, 0);
+
+    // Atualizar os elementos individuais do relatório por categoria
+    document.getElementById('itensCategoria').innerHTML = `<b>${totalItensCat}</b>`; // Quantidade em negrito e verde
+    document.getElementById('estoqueCategoria').innerHTML = `<b>${totalQtdCat}</b>`; // Quantidade em negrito e verde
+
+    // Atualizar o "Produtos Cadastrados" e "Total em Estoque Geral" na sidebar direita
+    document.getElementById('rightSidebarTotalProdutos').innerText = db.length;
+    document.getElementById('rightSidebarTotalEstoqueHighlight').innerText = db.reduce((sum, p) => sum + p.qtd, 0);
+
+    // Chamar a função para atualizar as listas de estoque (menor e maior)
+    atualizarListasDeEstoque(produtosFiltrados);
+}
+
+// ATUALIZADA: Função para atualizar as listas de itens com menor e maior estoque
+function atualizarListasDeEstoque(produtosParaListar) {
+    const listaMenorEstoqueUl = document.getElementById('listaMenorEstoque');
+    const listaMaiorEstoqueUl = document.getElementById('listaMaiorEstoque');
+
+    listaMenorEstoqueUl.innerHTML = ''; // Limpa a lista existente
+    listaMaiorEstoqueUl.innerHTML = ''; // Limpa a lista existente
+
+    if (produtosParaListar.length === 0) {
+        listaMenorEstoqueUl.innerHTML = '<li class="placeholder">Nenhum item encontrado nesta categoria.</li>';
+        listaMaiorEstoqueUl.innerHTML = '<li class="placeholder">Nenhum item encontrado nesta categoria.</li>';
+        return;
+    }
+
+    // --- Lógica para Menor Estoque (pegando todos com a menor QTD) ---
+    const produtosOrdenadosAsc = [...produtosParaListar].sort((a, b) => a.qtd - b.qtd);
+    let menorQuantidade = produtosOrdenadosAsc.length > 0? produtosOrdenadosAsc[0].qtd : -1;
+    let produtosComMenorEstoque = produtosOrdenadosAsc.filter(p => p.qtd === menorQuantidade);
+
+    const idsMenorEstoque = new Set(); // Para rastrear os IDs dos produtos com menor estoque
+    if (produtosComMenorEstoque.length > 0) {
+        produtosComMenorEstoque.slice(0, 5).forEach(p => { // Exibe no máximo 5 itens
+            idsMenorEstoque.add(p.id); // Adiciona o ID para exclusão posterior
+            const li = document.createElement('li');
+            li.innerHTML = `<span class="product-name">${p.nome}</span> <span class="stock-count" style="color: var(--danger);"><b>${p.qtd}</b></span>`;
+            listaMenorEstoqueUl.appendChild(li);
+        });
+    } else {
+        listaMenorEstoqueUl.innerHTML = '<li class="placeholder">Nenhum item encontrado nesta categoria.</li>';
+    }
+
+    // --- Lógica para Maior Estoque (pelo menos 4 valores distintos, excluindo itens de menor estoque) ---
+    const produtosOrdenadosDesc = [...produtosParaListar].filter(p =>!idsMenorEstoque.has(p.id)) // Exclui itens de menor estoque
+                                 .sort((a, b) => b.qtd - a.qtd);
+    const topQuantities = new Set();
+    const produtosParaMaiorEstoque = [];
+    const maxItems = 5; // Limite de itens a serem exibidos
+
+    for (const p of produtosOrdenadosDesc) {
+        if (!topQuantities.has(p.qtd)) {
+            topQuantities.add(p.qtd);
+            // Adiciona todos os produtos com essa quantidade
+            produtosOrdenadosDesc.filter(item => item.qtd === p.qtd)
+                        .forEach(prod => {
+                if (!produtosParaMaiorEstoque.some(existing => existing.id === prod.id)) {
+                    produtosParaMaiorEstoque.push(prod);
+                }
+            });
+        }
+        // Se já temos itens suficientes para preencher a lista E pelo menos 4 valores distintos, podemos parar
+        // ou se já temos 5 itens, paramos também
+        if ((produtosParaMaiorEstoque.length >= maxItems && topQuantities.size >= 4) || produtosParaMaiorEstoque.length >= maxItems) {
+             break;
+        }
+    }
+
+    // Ordena o array final para exibição e limita a 'maxItems'
+    produtosParaMaiorEstoque.sort((a, b) => b.qtd - a.qtd);
+
+    if (produtosParaMaiorEstoque.length > 0) {
+        produtosParaMaiorEstoque.slice(0, maxItems).forEach(p => {
+            const li = document.createElement('li');
+            li.innerHTML = `<span class="product-name">${p.nome}</span> <span class="stock-count" style="color: var(--success);"><b>${p.qtd}</b></span>`;
+            listaMaiorEstoqueUl.appendChild(li);
+        });
+    } else {
+        listaMaiorEstoqueUl.innerHTML = '<li class="placeholder">Nenhum item encontrado nesta categoria.</li>';
+    }
 }
 
 // Inicialização
@@ -1634,10 +1942,10 @@ initDB();
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
     navigator.serviceWorker.register('/service-worker.js')
-    .then(registration => {
+.then(registration => {
         console.log('Service Worker registered:', registration);
       })
-    .catch(error => {
+.catch(error => {
         console.error('Service Worker registration failed:', error);
       });
   });
