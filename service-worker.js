@@ -2,7 +2,7 @@ const CACHE_NAME = 'haris-estoque-cache-v1.1'; // Atualize a versão do cache se
 const urlsToCache = [
   './', // A página inicial
   './index.html',
-  // Se você tiver arquivos CSS ou JS separados, adicione-os aqui:
+  // Se você tiver arquivos CSS ou JS separados, adicione-es aqui:
   // './style.css',
   // './script.js',
   'https://cdn-icons-png.flaticon.com/512/3238/3238058.png', // Seu ícone
