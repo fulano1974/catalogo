@@ -378,7 +378,7 @@ input:focus,select:focus,textarea:focus{
   justify-content:center;
 }
 .lixeira:hover{
-  background:var(--danger);
+  background:#b91c1c;
   color:white;
 }
 
@@ -979,7 +979,7 @@ input:focus,select:focus,textarea:focus{
     font-size:0.75rem;
   }
   /* Esconde a coluna de ação da lixeira na tabela para economizar espaço */
-.hist-table th:last-child,.hist-table td:last-child {
+.hist-table th:last-child,.hist-table th:nth-last-child(2),.hist-table td:last-child,.hist-table td:nth-last-child(2){
     display: none;
   }
 
@@ -1064,6 +1064,30 @@ input:focus,select:focus,textarea:focus{
   }
 }
 </style>
+<!-- Firebase SDK -->
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-storage.js"></script>
+
+<script>
+  // SUA CONFIGURAÇÃO firebaseConfig GERADA PELO CONSOLE DO FIREBASE
+  const firebaseConfig = {
+    apiKey: "AIzaSyB0dWRSytDSfIAmCtg5pTEIjvwfJPSxb74", // SEU API KEY REAL!
+    authDomain: "haris-estoque.firebaseapp.com",
+    projectId: "haris-estoque",
+    storageBucket: "haris-estoque.appspot.com", // SEU STORAGE BUCKET REAL!
+    messagingSenderId: "526155106830",
+    appId: "1:526155106830:web:55b4bf4c0d9549ec42ca5f",
+    measurementId: "G-B77P8EZ6BS" // Para Analytics, pode ser mantido ou removido se não for usar
+  };
+
+  // Inicialize o Firebase
+  firebase.initializeApp(firebaseConfig);
+
+  // Obtenha as referências para o Firestore e o Storage
+  const dbFirebase = firebase.firestore();
+  const storageFirebase = firebase.storage();
+</script>
 </head>
 <body>
 <div class="overlay">
@@ -1072,12 +1096,12 @@ input:focus,select:focus,textarea:focus{
   <div class="container-wrapper">
     <!-- Main Content Area -->
     <div class="main-content">
-      <!-- Header do App - Visível em desktop, e agora no TOPO do main-content no mobile -->
+      <!-- Header do App -->
       <div class="header no-print">
         <h1><img src="https://cdn-icons-png.flaticon.com/512/3238/3238058.png" alt="Logo" style="height:30px;"> Haris <span>Estoque</span></h1>
       </div>
 
-      <!-- Stats Bar - Visível em desktop, e agora no main-content no mobile -->
+      <!-- Stats Bar -->
       <div class="stats-bar no-print">
         <div class="backup-group" id="backupGroup">
           <button class="btn-secondary" id="btnAdmin" onclick="toggleAdmin()">🔑 Admin</button>
@@ -1093,7 +1117,7 @@ input:focus,select:focus,textarea:focus{
         <div class="input-group"><label>Nome do Produto</label><input type="text" id="nome" placeholder="Ex: Tinta Branca 5L"></div>
         <div class="input-group"><label>Categoria</label>
           <select id="categoria">
-            <!-- Categorias são geradas via JS em initDB() -->
+            <!-- Categorias são geradas via JS em initFirebase() -->
           </select>
         </div>
         <div class="input-group"><label>Quantidade Inicial</label><input type="number" id="qtd" value="0"></div>
@@ -1112,7 +1136,7 @@ input:focus,select:focus,textarea:focus{
         <div style="display:flex; gap:10px; margin-bottom:15px; flex-wrap:wrap;">
           <input type="text" id="inputBuscaHist" class="search-input" placeholder="Pesquisar produto ou motivo..." oninput="renderHistory()">
           <select id="filtroCatHist" class="sort-select" onchange="renderHistory()">
-            <!-- Categorias são geradas via JS em initDB() -->
+            <!-- Categorias são geradas via JS em initFirebase() -->
           </select>
         </div>
         <div style="overflow-x:auto;">
@@ -1289,7 +1313,7 @@ input:focus,select:focus,textarea:focus{
 </div>
 
 <script>
-let isAdmin = false, editIdx = null;
+let isAdmin = false, editIdx = null; // editIdx agora armazena o ID do produto
 let db = [], historico = [];
 let categoriasAtivas = []; // AGORA É UM ARRAY DE CATEGORIAS SELECIONADAS!
 let listaCategorias = ["Componente B", "Escova Rotativa", "Filtros", "Jotamastic A", "Jotamastic B", "Manilhas", "Pincel", "Rolo de Pintura", "Solvente", "Tinta Hardtop", "Tinta Pilot", "Outros"];
@@ -1301,10 +1325,12 @@ function preencherSelectsDeCategoria() {
     const selects = document.querySelectorAll('#categoria, #filtroCatHist, #mCategoriaEdit, #relatorioRapidoCat');
     selects.forEach(select => {
         if (select.id === 'filtroCatHist' || select.id === 'relatorioRapidoCat') {
+            // Garante que "Todos" seja a primeira opção nos filtros
             select.innerHTML = '<option value="Todos">Todas as Categorias</option>';
         } else {
-            select.innerHTML = '';
+            select.innerHTML = ''; // Limpa para categorias dinâmicas
         }
+        // Adiciona as categorias da listaCategorias (que é populada do db)
         listaCategorias.forEach(cat => {
             const option = document.createElement('option');
             option.value = cat;
@@ -1314,130 +1340,168 @@ function preencherSelectsDeCategoria() {
     });
 }
 
-// IndexedDB - FUNÇÕES ATUALIZADAS
-let dbHaris;
-let dbReadyPromise;
+// === FUNÇÕES DE INTERAÇÃO COM FIREBASE ===
 
-function initDB(){
-  if (dbReadyPromise) return dbReadyPromise;
-
-  dbReadyPromise = new Promise((resolve, reject) => {
-    const request=indexedDB.open('db_haris',2);
-    request.onsuccess=e=>{
-      dbHaris=e.target.result;
-      carregarDados();
-      carregarSidebarImage();
-      resolve();
-    }
-    request.onerror=e=>{
-      console.log("Erro IndexedDB:", e);
-      reject(e);
-    }
-    request.onupgradeneeded=e=>{
-      let dbe=e.target.result;
-      if(!dbe.objectStoreNames.contains('produtos')) {
-        dbe.createObjectStore('produtos',{keyPath:'id',autoIncrement:true});
-      }
-      if(!dbe.objectStoreNames.contains('historico')) {
-        dbe.createObjectStore('historico',{keyPath:'id',autoIncrement:true});
-      }
-      if(!dbe.objectStoreNames.contains('config')) {
-        dbe.createObjectStore('config', {keyPath: 'id'});
-      }
-    }
-  });
-  preencherSelectsDeCategoria();
-  return dbReadyPromise;
-}
-
-function carregarDados(){
-  const t=dbHaris.transaction(['produtos','historico'],'readonly');
-  t.objectStore('produtos').getAll().onsuccess=e=>{
-    db=e.target.result;
+async function initFirebase() {
+  console.log("Inicializando Firebase e carregando dados...");
+  try {
+    // Carrega produtos e histórico do Firestore
+    await carregarDadosFirebase();
+    // Carrega a imagem da sidebar do Firestore
+    await carregarSidebarImageFirebase();
+    // Preenche os selects de categoria com as categorias encontradas
+    preencherSelectsDeCategoria();
+    // Renderiza a vitrine e o histórico
     render();
-    // Chamar gerarRelatorioRapido AQUI, depois que db está carregado
+    renderHistory();
+    // Atualiza o relatório rápido
     gerarRelatorioRapido();
-  }
-  t.objectStore('historico').getAll().onsuccess=e=>{historico=e.target.result; renderHistory();}
-}
-function salvarProdutos(){
-  const t=dbHaris.transaction('produtos','readwrite');
-  const store = t.objectStore('produtos');
-  store.clear().onsuccess=()=>{
-    db.forEach(p=> {
-        const addRequest = store.add(p);
-        addRequest.onerror = (event) => console.error("Erro ao adicionar produto:", event.target.error);
-    });
+  } catch (error) {
+    console.error("Erro ao carregar dados do Firebase:", error);
+    alert("Erro ao carregar dados do Firebase. Verifique sua conexão ou configurações de segurança.");
   }
 }
-function salvarHistorico(){
-  const t=dbHaris.transaction('historico','readwrite');
-  const store=t.objectStore('historico'); store.clear().onsuccess=()=>{historico.forEach(h=>store.add(h));}
+
+async function carregarDadosFirebase() {
+  // Carregar Produtos
+  const produtosSnapshot = await dbFirebase.collection('produtos').get();
+  db = produtosSnapshot.docs.map(doc => ({ id: doc.id,...doc.data() }));
+  db.forEach(p => p.qtd = Number(p.qtd)); // Garante que qtd é número
+
+  // Carregar Histórico (ordenado pelo timestamp mais recente)
+  const historicoSnapshot = await dbFirebase.collection('historico').orderBy('dataTimestamp', 'desc').get();
+  historico = historicoSnapshot.docs.map(doc => ({ id: doc.id,...doc.data() }));
+
+  // Atualizar listaCategorias com base nos produtos carregados
+  const categoriasSet = new Set(db.map(p => p.cat).filter(Boolean));
+  const defaultCategories = ["Componente B", "Escova Rotativa", "Filtros", "Jotamastic A", "Jotamastic B", "Manilhas", "Pincel", "Rolo de Pintura", "Solvente", "Tinta Hardtop", "Tinta Pilot", "Outros"];
+  // Adiciona categorias padrão se não existirem no Firebase
+  defaultCategories.forEach(cat => categoriasSet.add(cat));
+
+  listaCategorias = Array.from(categoriasSet).sort();
 }
 
-function carregarSidebarImage() {
-  const t = dbHaris.transaction('config', 'readonly');
-  const store = t.objectStore('config');
-  const request = store.get('sidebar_image');
+async function salvarProdutoFirebase(produto) {
+  try {
+    if (produto.id) { // Se o produto já tem ID, é uma atualização
+      const { id,...data } = produto; // Separa o ID dos outros dados
+      await dbFirebase.collection('produtos').doc(id).update(data);
+      console.log("Produto atualizado no Firestore:", id);
+      return produto;
+    } else { // Senão, é um novo produto
+      const docRef = await dbFirebase.collection('produtos').add(produto);
+      produto.id = docRef.id; // Atribui o ID gerado pelo Firestore ao objeto local
+      console.log("Novo produto adicionado ao Firestore:", produto.id);
+      return produto;
+    }
+  } catch (error) {
+    console.error("Erro ao salvar produto no Firestore:", error);
+    throw error;
+  }
+}
 
-  request.onsuccess = (e) => {
-    const config = e.target.result;
+async function adicionarHistoricoFirebase(itemHistorico) {
+  try {
+    itemHistorico.dataTimestamp = firebase.firestore.FieldValue.serverTimestamp(); // Adiciona timestamp do servidor
+    const docRef = await dbFirebase.collection('historico').add(itemHistorico);
+    itemHistorico.id = docRef.id; // Guarda o ID do histórico também
+    console.log("Item de histórico adicionado:", docRef.id);
+    return itemHistorico;
+  } catch (error) {
+    console.error("Erro ao adicionar histórico no Firestore:", error);
+    throw error;
+  }
+}
+
+async function deletarProdutoFirebase(productId) {
+  try {
+    // Primeiro, tenta deletar a imagem associada ao produto (se existir)
+    const produto = db.find(p => p.id === productId);
+    if (produto && produto.foto && produto.foto.startsWith('https://firebasestorage.googleapis.com/')) {
+        const imageRef = storageFirebase.refFromURL(produto.foto);
+        await imageRef.delete().catch(err => console.warn("Não foi possível deletar a imagem do Storage (pode não existir ou erro de permissão):", err));
+    }
+    await dbFirebase.collection('produtos').doc(productId).delete();
+    console.log("Produto deletado do Firestore:", productId);
+  } catch (error) {
+    console.error("Erro ao deletar produto do Firestore:", error);
+    throw error;
+  }
+}
+
+async function deletarHistoricoFirebase(historicoId) {
+  try {
+    await dbFirebase.collection('historico').doc(historicoId).delete();
+    console.log("Item de histórico deletado do Firestore:", historicoId);
+  } catch (error) {
+    console.error("Erro ao deletar histórico do Firestore:", error);
+    throw error;
+  }
+}
+
+async function uploadImagemFirebase(file, productId, folder = 'produtos') {
+  try {
+    if (!file) return null;
+
+    // Garante um nome de arquivo único para evitar colisões
+    const uniqueFileName = `${Date.now()}_${file.name}`;
+    const storageRef = storageFirebase.ref(`${folder}/${productId}/${uniqueFileName}`);
+    const uploadTask = await storageRef.put(file);
+    const downloadURL = await uploadTask.ref.getDownloadURL();
+    console.log("Imagem uploaded:", downloadURL);
+    return downloadURL;
+  } catch (error) {
+    console.error("Erro ao fazer upload da imagem:", error);
+    throw error;
+  }
+}
+
+async function salvarSidebarImageFirebase(imageUrl) {
+  try {
+    await dbFirebase.collection('config').doc('sidebar_image').set({ imageUrl: imageUrl });
+    console.log("Imagem da sidebar salva no Firestore.");
+  } catch (error) {
+    console.error("Erro ao salvar imagem da sidebar no Firestore:", error);
+    throw error;
+  }
+}
+
+async function carregarSidebarImageFirebase() {
+  try {
+    const doc = await dbFirebase.collection('config').doc('sidebar_image').get();
     const imgElement = document.getElementById('sidebarImage');
 
-    if (config && config.imageUrl) {
-      sidebarImageUrl = config.imageUrl;
+    if (doc.exists && doc.data().imageUrl) {
+      sidebarImageUrl = doc.data().imageUrl;
       imgElement.src = sidebarImageUrl;
-      console.log("Imagem da sidebar carregada do IndexedDB.");
+      console.log("Imagem da sidebar carregada do Firestore.");
     } else {
       const initialSrc = imgElement.getAttribute('src');
       if (initialSrc &&!initialSrc.startsWith('data:') &&!initialSrc.startsWith('http')) {
-          imgElement.src = initialSrc;
-          console.log("Imagem da sidebar exibida via SRC do HTML (não encontrada no IndexedDB). Clique em 'Mudar Imagem' para salvá-la permanentemente.");
+        // Se a imagem inicial é local e não Data URL, precisa ser carregada para o Storage
+        // Por simplicidade, vamos usar um placeholder se não houver no Firestore e não for Data URL
+        imgElement.src = 'https://via.placeholder.com/280x150?text=Imagem+Nao+Encontrada';
+        console.warn("Imagem da sidebar não encontrada no Firestore. Usando placeholder.");
       } else {
-          imgElement.src = 'https://via.placeholder.com/280x150?text=Imagem+Nao+Encontrada';
-          console.warn("Imagem da sidebar não encontrada no IndexedDB e SRC inicial inválido ou ausente.");
+        imgElement.src = initialSrc || 'https://via.placeholder.com/280x150?text=Imagem+Nao+Encontrada';
+        console.warn("Imagem da sidebar não encontrada no Firestore. Usando SRC inicial ou placeholder.");
       }
     }
-  };
-  request.onerror = (e) => console.error("Erro ao carregar imagem da sidebar do IndexedDB:", e);
-}
-
-function salvarSidebarImage(imageUrl) {
-  const t = dbHaris.transaction('config', 'readwrite');
-  const store = t.objectStore('config');
-  const request = store.put({ id: 'sidebar_image', imageUrl: imageUrl });
-
-  request.onsuccess = () => console.log("Imagem da sidebar salva no IndexedDB.");
-  request.onerror = (e) => console.error("Erro ao salvar imagem da sidebar no IndexedDB:", e);
-}
-
-function uploadSidebarImage(event) {
-  const file = event.target.files[0];
-  if (file) {
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      sidebarImageUrl = e.target.result;
-      document.getElementById('sidebarImage').src = sidebarImageUrl;
-      salvarSidebarImage(sidebarImageUrl);
-      alert("Imagem da sidebar atualizada e salva!");
-      event.target.value = null;
-    };
-    reader.onerror = (e) => {
-      console.error("Erro ao ler o arquivo de imagem para a sidebar:", e.target.error);
-      alert("Erro ao ler o arquivo de imagem.");
-    };
-    reader.readAsDataURL(file);
+  } catch (error) {
+    console.error("Erro ao carregar imagem da sidebar do Firestore:", error);
+    document.getElementById('sidebarImage').src = 'https://via.placeholder.com/280x150?text=Imagem+Nao+Encontrada';
   }
 }
 
-// Layout e funções
+// === FUNÇÕES EXISTENTES ADAPTADAS PARA FIREBASE ===
+
 function toggleAdmin(){
   if(!isAdmin){
     if(prompt("Senha:")==="RebocadorHaris"){
       isAdmin=true;
       document.getElementById('adminPanel').style.display='grid';
       document.getElementById('backupGroup').style.display='flex';
-      render();
+      render(); // Atualiza a vitrine para mostrar os botões de admin
     }
   }
   else{
@@ -1445,9 +1509,283 @@ function toggleAdmin(){
     document.getElementById('adminPanel').style.display='none';
     document.getElementById('backupGroup').style.display='none';
     document.getElementById('historyPanel').style.display='none';
-    render();
+    render(); // Esconde os botões de admin
   }
 }
+
+async function cadastrar(){
+  const n=document.getElementById('nome').value;
+  const c=document.getElementById('categoria').value;
+  const q=parseInt(document.getElementById('qtd').value);
+  const f=document.getElementById('foto').files[0];
+
+  if(!n||isNaN(q)||!f) return alert('Preencha todos os campos e informe uma quantidade válida!');
+
+  try {
+    const novoProdutoData = { nome: n, cat: c, qtd: q, foto: '' }; // Inicia sem foto
+    const produtoComId = await salvarProdutoFirebase(novoProdutoData); // Salva no Firestore para pegar o ID
+
+    const fotoURL = await uploadImagemFirebase(f, produtoComId.id, 'produtos'); // Faz upload com o ID real
+    produtoComId.foto = fotoURL; // Atualiza o objeto local
+    await salvarProdutoFirebase(produtoComId); // Atualiza o Firestore com a URL da foto
+
+    db.push(produtoComId); // Adiciona ao array local
+    render();
+    gerarRelatorioRapido(); // ATUALIZAR RELATORIO RÁPIDO
+    preencherSelectsDeCategoria(); // Atualiza as categorias nos selects
+    document.getElementById('nome').value='';
+    document.getElementById('qtd').value='0';
+    document.getElementById('foto').value='';
+  } catch (error) {
+    console.error("Erro ao cadastrar produto:", error);
+    alert("Erro ao cadastrar produto. Verifique o console para mais detalhes.");
+  }
+}
+
+async function abrirModal(productId){
+  const p = db.find(prod => prod.id === productId);
+  if (!p) {
+    alert("Produto não encontrado para edição.");
+    return;
+  }
+  editIdx = productId; // Agora editIdx armazena o ID, não o índice
+  document.getElementById('mNomeEdit').value=p.nome;
+  document.getElementById('mQtd').innerText=p.qtd;
+  document.getElementById('mNota').value='';
+  document.getElementById('valMov').value=0;
+  document.getElementById('mCategoriaEdit').value=p.cat;
+  document.getElementById('mFoto').value = ''; // Limpa o campo de foto
+  document.getElementById('modal').style.display='flex';
+}
+
+async function fecharModal(){
+  const p = db.find(prod => prod.id === editIdx);
+  if (!p) return; // Se o produto não for encontrado, fecha o modal
+
+  p.nome=document.getElementById('mNomeEdit').value;
+  p.cat=document.getElementById('mCategoriaEdit').value;
+  const f=document.getElementById('mFoto').files[0];
+
+  try {
+    if(f){
+      const fotoURL = await uploadImagemFirebase(f, p.id, 'produtos'); // Upload da nova imagem
+      p.foto=fotoURL; // Atualiza URL no objeto local
+    }
+    await salvarProdutoFirebase(p); // Salva as alterações (nome, categoria, foto) no Firestore
+    render();
+    gerarRelatorioRapido(); // ATUALIZAR RELATORIO RÁPIDO
+    preencherSelectsDeCategoria(); // Atualiza as categorias nos selects
+  } catch (error) {
+    console.error("Erro ao salvar alterações do produto:", error);
+    alert("Erro ao salvar alterações. Verifique o console para mais detalhes.");
+  }
+
+  document.getElementById('modal').style.display='none';
+  document.getElementById('mFoto').value = '';
+  editIdx = null; // Limpa o ID do produto em edição
+}
+
+async function movimentar(tipo){
+  const val=parseInt(document.getElementById('valMov').value)||0;
+  if(val<=0) return alert('Informe uma quantidade válida!');
+
+  const p = db.find(prod => prod.id === editIdx);
+  if (!p) return;
+
+  const nota=document.getElementById('mNota').value||'-';
+  let tipoMov = '';
+
+  if(tipo==='add') {
+    p.qtd+=val;
+    tipoMov = 'Entrada';
+  }
+  else if(tipo==='sub') {
+    if(p.qtd < val){
+        alert("Não é possível remover mais itens do que o estoque atual.");
+        return;
+    }
+    p.qtd-=val;
+    tipoMov = 'Saída';
+  }
+
+  try {
+    await salvarProdutoFirebase(p); // Atualiza o produto no Firestore
+    const itemHistorico = {
+      data: new Date().toLocaleString(),
+      produto: p.nome,
+      cat: p.cat,
+      tipo: tipoMov,
+      qtd: val,
+      motivo: nota,
+    };
+    const savedHist = await adicionarHistoricoFirebase(itemHistorico); // Adiciona ao histórico no Firestore
+    historico.unshift(savedHist); // Adiciona ao array local no início
+
+    render();
+    renderHistory();
+    gerarRelatorioRapido(); // ATUALIZAR RELATORIO RÁPIDO
+
+    document.getElementById('mQtd').innerText=p.qtd;
+    document.getElementById('valMov').value=0;
+    document.getElementById('mNota').value='';
+  } catch (error) {
+    console.error("Erro ao movimentar estoque:", error);
+    alert("Erro ao movimentar estoque. Verifique o console para mais detalhes.");
+  }
+}
+
+async function deletarProduto(productId){
+  if(confirm('Deseja deletar este produto?')){
+    try {
+      await deletarProdutoFirebase(productId); // Deleta do Firestore e tenta deletar imagem
+      const indexToDelete = db.findIndex(p => p.id === productId);
+      if (indexToDelete > -1) {
+        db.splice(indexToDelete, 1); // Remove do array local
+      }
+      render();
+      gerarRelatorioRapido(); // ATUALIZAR RELATORIO RÁPIDO
+      preencherSelectsDeCategoria(); // Atualiza as categorias nos selects
+    } catch (error) {
+      console.error("Erro ao deletar produto:", error);
+      alert("Erro ao deletar produto. Verifique o console para mais detalhes.");
+    }
+  }
+}
+
+async function limparHistorico(){
+  if(confirm('Deseja limpar todo o histórico? Essa ação é irreversível e removerá os dados da nuvem!')){
+    try {
+      // Deleta todos os documentos do histórico um por um
+      const deletePromises = historico.map(h => deletarHistoricoFirebase(h.id));
+      await Promise.all(deletePromises);
+      historico = []; // Limpa o array local
+      renderHistory();
+      alert("Histórico limpo com sucesso!");
+    } catch (error) {
+      console.error("Erro ao limpar histórico:", error);
+      alert("Erro ao limpar histórico. Verifique o console para mais detalhes.");
+    }
+  }
+}
+
+async function deletarHist(historicoId){
+  if(confirm('Deseja deletar esta movimentação do histórico?')){
+    try {
+      await deletarHistoricoFirebase(historicoId);
+      const indexToDelete = historico.findIndex(h => h.id === historicoId);
+      if (indexToDelete > -1) {
+        historico.splice(indexToDelete, 1);
+      }
+      renderHistory();
+    } catch (error) {
+      console.error("Erro ao deletar item do histórico:", error);
+      alert("Erro ao deletar item do histórico. Verifique o console para mais detalhes.");
+    }
+  }
+}
+
+async function uploadSidebarImage(event) {
+  const file = event.target.files[0];
+  if (file) {
+    try {
+      const imgElement = document.getElementById('sidebarImage');
+      const photoId = 'sidebar'; // ID fixo para a imagem da sidebar
+      const fotoURL = await uploadImagemFirebase(file, photoId, 'config'); // Upload para a pasta 'config' no Storage
+      sidebarImageUrl = fotoURL;
+      imgElement.src = sidebarImageUrl;
+      await salvarSidebarImageFirebase(sidebarImageUrl);
+      alert("Imagem da sidebar atualizada e salva!");
+      event.target.value = null;
+    } catch (error) {
+      console.error("Erro ao atualizar imagem da sidebar:", error);
+      alert("Erro ao atualizar imagem da sidebar. Verifique o console para mais detalhes.");
+    }
+  }
+}
+
+async function importarBackup(event){
+  const file = event.target.files[0];
+  if (file) {
+    const reader = new FileReader();
+    reader.onload = async function(e) {
+      try {
+        const importedData = JSON.parse(e.target.result);
+        if (importedData.produtos && importedData.historico) {
+          if (confirm("Importar backup? Isso substituirá os dados ATUAIS no Firebase. Continuar?")) {
+            // Limpa dados existentes no Firebase
+            console.log("Limpando produtos existentes no Firebase...");
+            const deleteProdPromises = db.map(p => deletarProdutoFirebase(p.id));
+            await Promise.all(deleteProdPromises);
+            console.log("Limpando histórico existente no Firebase...");
+            const deleteHistPromises = historico.map(h => deletarHistoricoFirebase(h.id));
+            await Promise.all(deleteHistPromises);
+
+            db = []; historico = []; // Limpa arrays locais
+
+            // Importar produtos
+            console.log("Importando produtos do backup...");
+            for (const prod of importedData.produtos) {
+              const { id,...data } = prod; // Firestore gera IDs, então ignore o ID do backup
+              // Se a imagem for uma data URL, faça upload para o Storage
+              if (data.foto && data.foto.startsWith('data:image')) {
+                  const blob = await (await fetch(data.foto)).blob();
+                  const fakeFile = new File([blob], `image_${Date.now()}.png`, { type: blob.type });
+                  const savedProd = await salvarProdutoFirebase({...data, foto: '' }); // Salva sem foto primeiro
+                  const fotoURL = await uploadImagemFirebase(fakeFile, savedProd.id, 'produtos');
+                  savedProd.foto = fotoURL;
+                  await salvarProdutoFirebase(savedProd); // Atualiza com a URL da foto
+                  db.push(savedProd);
+              } else {
+                  // Se já for URL (ex: de um Storage antigo ou externa), salva direto
+                  const savedProd = await salvarProdutoFirebase(data);
+                  db.push(savedProd);
+              }
+            }
+
+            // Importar histórico
+            console.log("Importando histórico do backup...");
+            for (const histItem of importedData.historico) {
+              const { id,...data } = histItem; // Firestore gera IDs, ignore o ID do backup
+              // Adiciona um timestamp de servidor para manter a ordem se data fosse apenas string
+              data.dataTimestamp = firebase.firestore.FieldValue.serverTimestamp();
+              const savedHist = await adicionarHistoricoFirebase(data);
+              historico.push(savedHist);
+            }
+
+            if (importedData.sidebarImage) {
+              // Se a imagem da sidebar for Data URL, faça upload para o Storage
+              if (importedData.sidebarImage.startsWith('data:image')) {
+                  const blob = await (await fetch(importedData.sidebarImage)).blob();
+                  const fakeFile = new File([blob], `sidebar_image_${Date.now()}.png`, { type: blob.type });
+                  const fotoURL = await uploadImagemFirebase(fakeFile, 'sidebar', 'config');
+                  sidebarImageUrl = fotoURL;
+                  document.getElementById('sidebarImage').src = sidebarImageUrl;
+                  await salvarSidebarImageFirebase(sidebarImageUrl);
+              } else {
+                  // Se já for URL, salva direto
+                  sidebarImageUrl = importedData.sidebarImage;
+                  document.getElementById('sidebarImage').src = sidebarImageUrl;
+                  await salvarSidebarImageFirebase(sidebarImageUrl);
+              }
+            }
+
+            // Recarrega todos os dados do Firebase para garantir a consistência
+            await initFirebase();
+            alert("Backup importado com sucesso!");
+          }
+        } else {
+          alert("Arquivo de backup inválido. Estrutura incorreta.");
+        }
+      } catch (error) {
+        console.error("Erro ao ler ou importar o arquivo de backup:", error);
+        alert("Erro ao ler ou importar o arquivo de backup: " + error.message);
+      }
+    };
+    reader.readAsText(file);
+  }
+}
+
+// === FUNÇÕES AUXILIARES QUE NÃO MUDAM ===
 
 function render(){
   const v=document.getElementById('vitrine');
@@ -1491,7 +1829,6 @@ function render(){
       </div>
       </div>`;
   });
-  // document.getElementById('totalEstoque').innerText=cEst; // Esta linha foi removida pois esta info agora está na sidebar direita
 
   // ATUALIZAR DADOS DA SIDEBAR DIREITA SEMPRE QUE RENDERIZAR
   document.getElementById('rightSidebarTotalProdutos').innerText = db.length;
@@ -1531,112 +1868,11 @@ function getCorCat(cat){
   return cores[cat]||'#6b7280';
 }
 
-function cadastrar(){
-  const n=document.getElementById('nome').value;
-  const c=document.getElementById('categoria').value;
-  const q=parseInt(document.getElementById('qtd').value);
-  const f=document.getElementById('foto').files[0];
-  if(!n||isNaN(q)||!f)return alert('Preencha todos os campos e informe uma quantidade válida!');
-  const reader=new FileReader();
-  reader.onload=e=>{
-    const novoProduto = {nome:n,cat:c,qtd:q,foto:e.target.result};
-    const transaction = dbHaris.transaction('produtos', 'readwrite');
-    const store = transaction.objectStore('produtos');
-    const addRequest = store.add(novoProduto);
-
-    addRequest.onsuccess = (event) => {
-        novoProduto.id = event.target.result;
-        db.push(novoProduto);
-        salvarProdutos();
-        render();
-        gerarRelatorioRapido(); // ATUALIZAR RELATORIO RÁPIDO
-        document.getElementById('nome').value='';document.getElementById('qtd').value='0';document.getElementById('foto').value='';
-    };
-    addRequest.onerror = (event) => {
-        console.error("Erro ao cadastrar produto no IndexedDB:", event.target.error);
-        alert("Erro ao cadastrar produto.");
-    };
-  }
-  reader.readAsDataURL(f);
-}
-
-function abrirModal(productId){
-  const p = db.find(prod => prod.id == productId);
-  if (!p) {
-    alert("Produto não encontrado para edição.");
-    return;
-  }
-  editIdx = db.indexOf(p);
-  document.getElementById('mNomeEdit').value=p.nome;
-  document.getElementById('mQtd').innerText=p.qtd;
-  document.getElementById('mNota').value='';
-  document.getElementById('valMov').value=0;
-  document.getElementById('mCategoriaEdit').value=p.cat;
-  document.getElementById('mFoto').value = '';
-  document.getElementById('modal').style.display='flex';
-}
-function fecharModal(){
-  const p=db[editIdx];
-  p.nome=document.getElementById('mNomeEdit').value;
-  p.cat=document.getElementById('mCategoriaEdit').value;
-  const f=document.getElementById('mFoto').files[0];
-  if(f){
-    const r=new FileReader();
-    r.onload=e=>{p.foto=e.target.result; salvarProdutos(); render(); gerarRelatorioRapido();} // ATUALIZAR RELATORIO RÁPIDO
-    r.readAsDataURL(f);
-  } else {
-    salvarProdutos(); render(); gerarRelatorioRapido(); // ATUALIZAR RELATORIO RÁPIDO
-  }
-  document.getElementById('modal').style.display='none';
-  document.getElementById('mFoto').value = '';
-}
-
-function movimentar(tipo){
-  const val=parseInt(document.getElementById('valMov').value)||0;
-  if(val<=0) return alert('Informe uma quantidade válida!');
-  const nota=document.getElementById('mNota').value||'-';
-  const p=db[editIdx];
-  let tipoMov = '';
-
-  if(tipo==='add') {
-    p.qtd+=val;
-    tipoMov = 'Entrada';
-  }
-  else if(tipo==='sub') {
-    if(p.qtd < val){
-        alert("Não é possível remover mais itens do que o estoque atual.");
-        return;
-    }
-    p.qtd-=val;
-    tipoMov = 'Saída';
-  }
-
-  historico.push({data:new Date().toLocaleString(),produto:p.nome,cat:p.cat,tipo:tipoMov,qtd:val,motivo:nota});
-  salvarProdutos(); salvarHistorico(); render(); renderHistory(); gerarRelatorioRapido(); // ATUALIZAR RELATORIO RÁPIDO
-  document.getElementById('mQtd').innerText=p.qtd;
-  document.getElementById('valMov').value=0;document.getElementById('mNota').value='';
-}
-
-function deletarProduto(productId){
-  if(confirm('Deseja deletar este produto?')){
-    const indexToDelete = db.findIndex(p => p.id == productId);
-    if (indexToDelete > -1) {
-      db.splice(indexToDelete, 1);
-      salvarProdutos();
-      render();
-      gerarRelatorioRapido(); // ATUALIZAR RELATORIO RÁPIDO
-    } else {
-      alert("Produto não encontrado para exclusão.");
-    }
-  }
-}
-
 function toggleHistory(){
   const historyPanel = document.getElementById('historyPanel');
   historyPanel.style.display = historyPanel.style.display === 'none' || historyPanel.style.display === ''? 'block' : 'none';
   renderHistory();
 }
-function limparHistorico(){if(confirm('Deseja limpar todo o histórico?')){historico=[]; salvarHistorico(); renderHistory();}}
 
 function renderHistory(){
   const termo=document.getElementById('inputBuscaHist').value.toLowerCase();
@@ -1645,30 +1881,30 @@ function renderHistory(){
   tbody.innerHTML='';
   let totalMovimentacoes = 0;
 
-  const historicoOrdenado = [...historico].reverse();
+  // O histórico já vem ordenado pelo Firebase, mas podemos garantir se a ordem for importante
+  const historicoExibido = historico.filter(h =>
+    (h.produto.toLowerCase().includes(termo)||h.motivo.toLowerCase().includes(termo)) &&
+    (filtro==='Todos'||h.cat===filtro)
+  );
 
-  historicoOrdenado.forEach((h,i)=>{
-    if((h.produto.toLowerCase().includes(termo)||h.motivo.toLowerCase().includes(termo))&&(filtro==='Todos'||h.cat===filtro)){
-      totalMovimentacoes++;
-      let tipoDisplay = h.tipo === 'Entrada'? `<span class="tag-add">${h.tipo}</span>` : `<span class="tag-sub">${h.tipo}</span>`;
-      tbody.innerHTML+=`
+  historicoExibido.forEach((h,i)=>{
+    totalMovimentacoes++;
+    let tipoDisplay = h.tipo === 'Entrada'? `<span class="tag-add">${h.tipo}</span>` : `<span class="tag-sub">${h.tipo}</span>`;
+    tbody.innerHTML+=`
       <tr>
         <td>${h.data}</td>
         <td>${h.produto}</td>
         <td>${tipoDisplay}</td>
         <td>${h.qtd}</td>
         <td>${h.motivo}</td>
-        <td><button class="lixeira" onclick="deletarHist(${historico.length - 1 - i})">🗑️</button></td>
+        <td><button class="lixeira" onclick="deletarHist('${h.id}')">🗑️</button></td>
       </tr>`;
-    }
   });
 
   if (totalMovimentacoes === 0) {
       tbody.innerHTML += `<tr><td colspan="6" style="text-align:center; color:var(--subtle-text);">Nenhuma movimentação encontrada.</td></tr>`;
   }
 }
-
-function deletarHist(idx){historico.splice(idx,1); salvarHistorico(); renderHistory();}
 
 function exportarBackup(){
   const data = {
@@ -1686,47 +1922,6 @@ function exportarBackup(){
   a.click();
   document.body.removeChild(a);
   URL.revokeObjectURL(url);
-}
-
-function importarBackup(event){
-  const file = event.target.files[0];
-  if (file) {
-    const reader = new FileReader();
-    reader.onload = function(e) {
-      try {
-        const importedData = JSON.parse(e.target.result);
-        if (importedData.produtos && importedData.historico) {
-          initDB().then(() => {
-            if (confirm("Importar backup? Isso substituirá os dados atuais.")) {
-              db = importedData.produtos;
-              historico = importedData.historico;
-
-              if (importedData.sidebarImage) {
-                sidebarImageUrl = importedData.sidebarImage;
-                document.getElementById('sidebarImage').src = sidebarImageUrl;
-                salvarSidebarImage(sidebarImageUrl);
-              }
-
-              salvarProdutos();
-              salvarHistorico();
-              render();
-              renderHistory();
-              gerarRelatorioRapido(); // ATUALIZAR RELATORIO RÁPIDO
-              alert("Backup importado com sucesso!");
-            }
-          }).catch(error => {
-            console.error("Erro ao inicializar o IndexedDB para importar backup:", error);
-            alert("Erro ao inicializar o banco de dados para importar o backup.");
-          });
-        } else {
-          alert("Arquivo de backup inválido. Estrutura incorreta.");
-        }
-      } catch (error) {
-        alert("Erro ao ler o arquivo de backup: " + error.message);
-      }
-    };
-    reader.readAsText(file);
-  }
 }
 
 function imprimirProdutos(){
@@ -1805,7 +2000,7 @@ function imprimirHistorico(){
   const historicoParaImprimir = historico.filter(h =>
       (h.produto.toLowerCase().includes(termo)||h.motivo.toLowerCase().includes(termo)) &&
       (filtro==='Todos'||h.cat===filtro)
-  ).reverse();
+  ); // Não precisa reverter, o Firebase já ordenou
 
   historicoParaImprimir.forEach(h=>{
     totalMovimentacoesImpressao++;
@@ -1833,11 +2028,7 @@ function imprimirHistorico(){
         novaJan.print();
     } catch (e) {
         console.error("Erro ao tentar imprimir o histórico:", e);
-        // Pode alertar o usuário se o erro for relevante, mas muitas vezes
-        // o navegador já mostrará uma mensagem de erro ou falhará silenciosamente.
-        // alert("Não foi possível abrir o diálogo de impressão. Verifique as configurações do seu navegador ou tente novamente.");
     }
-    // A janela não será fechada automaticamente, o usuário decidirá
   }, 1000); // Aumentado para 1 segundo para dar mais tempo para renderizar em dispositivos mais lentos
 }
 
@@ -1898,7 +2089,7 @@ function atualizarListasDeEstoque(produtosParaListar) {
 
     // --- Lógica para Maior Estoque (pelo menos 4 valores distintos, excluindo itens de menor estoque) ---
     const produtosOrdenadosDesc = [...produtosParaListar].filter(p =>!idsMenorEstoque.has(p.id)) // Exclui itens de menor estoque
-                                 .sort((a, b) => b.qtd - a.qtd);
+                              .sort((a, b) => b.qtd - a.qtd);
     const topQuantities = new Set();
     const produtosParaMaiorEstoque = [];
     const maxItems = 5; // Limite de itens a serem exibidos
@@ -1908,7 +2099,7 @@ function atualizarListasDeEstoque(produtosParaListar) {
             topQuantities.add(p.qtd);
             // Adiciona todos os produtos com essa quantidade
             produtosOrdenadosDesc.filter(item => item.qtd === p.qtd)
-                        .forEach(prod => {
+                     .forEach(prod => {
                 if (!produtosParaMaiorEstoque.some(existing => existing.id === prod.id)) {
                     produtosParaMaiorEstoque.push(prod);
                 }
@@ -1936,7 +2127,7 @@ function atualizarListasDeEstoque(produtosParaListar) {
 }
 
 // Inicialização
-initDB();
+initFirebase();
 
 // >>>>>>>>>>> CÓDIGO DE REGISTRO DO SERVICE WORKER ADICIONADO AQUI <<<<<<<<<<<
 if ('serviceWorker' in navigator) {
