@@ -1067,7 +1067,8 @@ input:focus,select:focus,textarea:focus{
 <!-- Firebase SDK -->
 <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
 <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
-<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-storage.js"></script>
+<!-- Remover referência a firebase-storage.js pois não será usado para upload -->
+<!-- <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-storage.js"></script> -->
 
 <script>
   // SUA CONFIGURAÇÃO firebaseConfig GERADA PELO CONSOLE DO FIREBASE
@@ -1075,7 +1076,7 @@ input:focus,select:focus,textarea:focus{
     apiKey: "AIzaSyB0dWRSytDSfIAmCtg5pTEIjvwfJPSxb74", // SEU API KEY REAL!
     authDomain: "haris-estoque.firebaseapp.com",
     projectId: "haris-estoque",
-    storageBucket: "haris-estoque.appspot.com", // SEU STORAGE BUCKET REAL!
+    // storageBucket: "haris-estoque.appspot.com", // REMOVIDO: Não precisamos configurar Storage aqui se não vamos usá-lo
     messagingSenderId: "526155106830",
     appId: "1:526155106830:web:55b4bf4c0d9549ec42ca5f",
     measurementId: "G-B77P8EZ6BS" // Para Analytics, pode ser mantido ou removido se não for usar
@@ -1084,9 +1085,17 @@ input:focus,select:focus,textarea:focus{
   // Inicialize o Firebase
   firebase.initializeApp(firebaseConfig);
 
-  // Obtenha as referências para o Firestore e o Storage
+  // Obtenha a referência para o Firestore
   const dbFirebase = firebase.firestore();
-  const storageFirebase = firebase.storage();
+  // REMOVIDO: Não precisamos da referência ao storageFirebase se não vamos usá-lo
+  // const storageFirebase = firebase.storage();
+
+  // CREDENCIAIS DO CLOUDINARY
+  const CLOUDINARY_CLOUD_NAME = 'dqp57nr5g'; // SEU CLOUD NAME!
+  const CLOUDINARY_UPLOAD_PRESET = 'haris_estoque_preset'; // SEU UPLOAD PRESET!
+
+  // Você pode ignorar o analytics por enquanto, ele não é essencial para o funcionamento do app.
+  // Se quiser usar, seria: const analytics = firebase.analytics();
 </script>
 </head>
 <body>
@@ -1318,7 +1327,7 @@ let db = [], historico = [];
 let categoriasAtivas = []; // AGORA É UM ARRAY DE CATEGORIAS SELECIONADAS!
 let listaCategorias = ["Componente B", "Escova Rotativa", "Filtros", "Jotamastic A", "Jotamastic B", "Manilhas", "Pincel", "Rolo de Pintura", "Solvente", "Tinta Hardtop", "Tinta Pilot", "Outros"];
 
-let sidebarImageUrl = ''; // Nova variável para guardar a Data URL da imagem da sidebar
+let sidebarImageUrl = ''; // Nova variável para guardar a URL da imagem da sidebar
 
 // Preenche os selects de categoria
 function preencherSelectsDeCategoria() {
@@ -1340,7 +1349,7 @@ function preencherSelectsDeCategoria() {
     });
 }
 
-// === FUNÇÕES DE INTERAÇÃO COM FIREBASE ===
+// === FUNÇÕES DE INTERAÇÃO COM FIREBASE (Firestore) ===
 
 async function initFirebase() {
   console.log("Inicializando Firebase e carregando dados...");
@@ -1358,7 +1367,7 @@ async function initFirebase() {
     gerarRelatorioRapido();
   } catch (error) {
     console.error("Erro ao carregar dados do Firebase:", error);
-    alert("Erro ao carregar dados do Firebase. Verifique sua conexão ou configurações de segurança.");
+    alert("Erro ao carregar dados do Firebase. Verifique sua conexão ou configurações de segurança do Firestore.");
   }
 }
 
@@ -1415,12 +1424,9 @@ async function adicionarHistoricoFirebase(itemHistorico) {
 
 async function deletarProdutoFirebase(productId) {
   try {
-    // Primeiro, tenta deletar a imagem associada ao produto (se existir)
-    const produto = db.find(p => p.id === productId);
-    if (produto && produto.foto && produto.foto.startsWith('https://firebasestorage.googleapis.com/')) {
-        const imageRef = storageFirebase.refFromURL(produto.foto);
-        await imageRef.delete().catch(err => console.warn("Não foi possível deletar a imagem do Storage (pode não existir ou erro de permissão):", err));
-    }
+    // As imagens agora são gerenciadas pelo Cloudinary, não precisamos mais deletar do Firebase Storage.
+    // Se quiser deletar do Cloudinary, precisaria implementar a API de exclusão do Cloudinary aqui,
+    // o que exigiria um backend devido à necessidade de API_SECRET.
     await dbFirebase.collection('produtos').doc(productId).delete();
     console.log("Produto deletado do Firestore:", productId);
   } catch (error) {
@@ -1439,19 +1445,33 @@ async function deletarHistoricoFirebase(historicoId) {
   }
 }
 
-async function uploadImagemFirebase(file, productId, folder = 'produtos') {
-  try {
-    if (!file) return null;
+// === FUNÇÕES DE INTERAÇÃO COM CLOUDINARY ===
 
-    // Garante um nome de arquivo único para evitar colisões
-    const uniqueFileName = `${Date.now()}_${file.name}`;
-    const storageRef = storageFirebase.ref(`${folder}/${productId}/${uniqueFileName}`);
-    const uploadTask = await storageRef.put(file);
-    const downloadURL = await uploadTask.ref.getDownloadURL();
-    console.log("Imagem uploaded:", downloadURL);
-    return downloadURL;
+// Função para fazer upload de imagem para o Cloudinary
+async function uploadImagemCloudinary(file) {
+  if (!file) return null;
+
+  const formData = new FormData();
+  formData.append('file', file);
+  formData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
+
+  try {
+    const response = await fetch(`https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/image/upload`, {
+      method: 'POST',
+      body: formData
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      console.error("Erro no upload do Cloudinary:", errorData);
+      throw new Error(`Upload para Cloudinary falhou: ${errorData.error.message || response.statusText}`);
+    }
+
+    const data = await response.json();
+    console.log("Imagem uploaded para Cloudinary:", data.secure_url);
+    return data.secure_url; // Retorna a URL segura da imagem no Cloudinary
   } catch (error) {
-    console.error("Erro ao fazer upload da imagem:", error);
+    console.error("Erro geral no upload para Cloudinary:", error);
     throw error;
   }
 }
@@ -1478,10 +1498,10 @@ async function carregarSidebarImageFirebase() {
     } else {
       const initialSrc = imgElement.getAttribute('src');
       if (initialSrc &&!initialSrc.startsWith('data:') &&!initialSrc.startsWith('http')) {
-        // Se a imagem inicial é local e não Data URL, precisa ser carregada para o Storage
+        // Se a imagem inicial é local e não Data URL, precisa ser carregada para o Cloudinary (para aparecer)
         // Por simplicidade, vamos usar um placeholder se não houver no Firestore e não for Data URL
         imgElement.src = 'https://via.placeholder.com/280x150?text=Imagem+Nao+Encontrada';
-        console.warn("Imagem da sidebar não encontrada no Firestore. Usando placeholder.");
+        console.warn("Imagem da sidebar não encontrada no Firestore ou não é uma URL. Usando placeholder.");
       } else {
         imgElement.src = initialSrc || 'https://via.placeholder.com/280x150?text=Imagem+Nao+Encontrada';
         console.warn("Imagem da sidebar não encontrada no Firestore. Usando SRC inicial ou placeholder.");
@@ -1493,7 +1513,7 @@ async function carregarSidebarImageFirebase() {
   }
 }
 
-// === FUNÇÕES EXISTENTES ADAPTADAS PARA FIREBASE ===
+// === FUNÇÕES DE ADMINISTRAÇÃO E LÓGICA DO APP ===
 
 function toggleAdmin(){
   if(!isAdmin){
@@ -1522,12 +1542,11 @@ async function cadastrar(){
   if(!n||isNaN(q)||!f) return alert('Preencha todos os campos e informe uma quantidade válida!');
 
   try {
-    const novoProdutoData = { nome: n, cat: c, qtd: q, foto: '' }; // Inicia sem foto
-    const produtoComId = await salvarProdutoFirebase(novoProdutoData); // Salva no Firestore para pegar o ID
+    const fotoURL = await uploadImagemCloudinary(f); // <<< UPLOAD PARA CLOUDINARY
+    if (!fotoURL) throw new Error("Falha ao obter URL da imagem do Cloudinary.");
 
-    const fotoURL = await uploadImagemFirebase(f, produtoComId.id, 'produtos'); // Faz upload com o ID real
-    produtoComId.foto = fotoURL; // Atualiza o objeto local
-    await salvarProdutoFirebase(produtoComId); // Atualiza o Firestore com a URL da foto
+    const novoProdutoData = { nome: n, cat: c, qtd: q, foto: fotoURL }; // Já inclui a URL
+    const produtoComId = await salvarProdutoFirebase(novoProdutoData); // Salva no Firestore
 
     db.push(produtoComId); // Adiciona ao array local
     render();
@@ -1568,8 +1587,9 @@ async function fecharModal(){
 
   try {
     if(f){
-      const fotoURL = await uploadImagemFirebase(f, p.id, 'produtos'); // Upload da nova imagem
-      p.foto=fotoURL; // Atualiza URL no objeto local
+      const fotoURL = await uploadImagemCloudinary(f); // <<< UPLOAD PARA CLOUDINARY
+      if (fotoURL) p.foto = fotoURL; // Atualiza URL no objeto local
+      else console.warn("Não foi possível obter URL da imagem do Cloudinary. Mantendo imagem anterior.");
     }
     await salvarProdutoFirebase(p); // Salva as alterações (nome, categoria, foto) no Firestore
     render();
@@ -1582,7 +1602,7 @@ async function fecharModal(){
 
   document.getElementById('modal').style.display='none';
   document.getElementById('mFoto').value = '';
-  editIdx = null; // Limpa o ID do produto em edição
+  editIdx = null;
 }
 
 async function movimentar(tipo){
@@ -1637,7 +1657,7 @@ async function movimentar(tipo){
 async function deletarProduto(productId){
   if(confirm('Deseja deletar este produto?')){
     try {
-      await deletarProdutoFirebase(productId); // Deleta do Firestore e tenta deletar imagem
+      await deletarProdutoFirebase(productId); // Deleta do Firestore
       const indexToDelete = db.findIndex(p => p.id === productId);
       if (indexToDelete > -1) {
         db.splice(indexToDelete, 1); // Remove do array local
@@ -1653,7 +1673,7 @@ async function deletarProduto(productId){
 }
 
 async function limparHistorico(){
-  if(confirm('Deseja limpar todo o histórico? Essa ação é irreversível e removerá os dados da nuvem!')){
+  if(confirm('Deseja limpar todo o histórico? Essa ação é irreversível!')){
     try {
       // Deleta todos os documentos do histórico um por um
       const deletePromises = historico.map(h => deletarHistoricoFirebase(h.id));
@@ -1689,11 +1709,12 @@ async function uploadSidebarImage(event) {
   if (file) {
     try {
       const imgElement = document.getElementById('sidebarImage');
-      const photoId = 'sidebar'; // ID fixo para a imagem da sidebar
-      const fotoURL = await uploadImagemFirebase(file, photoId, 'config'); // Upload para a pasta 'config' no Storage
+      const fotoURL = await uploadImagemCloudinary(file); // <<< UPLOAD PARA CLOUDINARY
+      if (!fotoURL) throw new Error("Falha ao obter URL da imagem da sidebar do Cloudinary.");
+
       sidebarImageUrl = fotoURL;
       imgElement.src = sidebarImageUrl;
-      await salvarSidebarImageFirebase(sidebarImageUrl);
+      await salvarSidebarImageFirebase(sidebarImageUrl); // Salva a URL no Firestore (coleção 'config')
       alert("Imagem da sidebar atualizada e salva!");
       event.target.value = null;
     } catch (error) {
@@ -1726,20 +1747,30 @@ async function importarBackup(event){
             console.log("Importando produtos do backup...");
             for (const prod of importedData.produtos) {
               const { id,...data } = prod; // Firestore gera IDs, então ignore o ID do backup
-              // Se a imagem for uma data URL, faça upload para o Storage
+              // Se a imagem for uma data URL, faça upload para o Cloudinary
               if (data.foto && data.foto.startsWith('data:image')) {
                   const blob = await (await fetch(data.foto)).blob();
                   const fakeFile = new File([blob], `image_${Date.now()}.png`, { type: blob.type });
-                  const savedProd = await salvarProdutoFirebase({...data, foto: '' }); // Salva sem foto primeiro
-                  const fotoURL = await uploadImagemFirebase(fakeFile, savedProd.id, 'produtos');
-                  savedProd.foto = fotoURL;
-                  await salvarProdutoFirebase(savedProd); // Atualiza com a URL da foto
-                  db.push(savedProd);
-              } else {
-                  // Se já for URL (ex: de um Storage antigo ou externa), salva direto
-                  const savedProd = await salvarProdutoFirebase(data);
-                  db.push(savedProd);
+                  const fotoURL = await uploadImagemCloudinary(fakeFile); // <<< UPLOAD PARA CLOUDINARY
+                  data.foto = fotoURL; // Atualiza a foto no objeto de dados
+              } else if (data.foto && data.foto.startsWith('https://firebasestorage.googleapis.com/')) {
+                  // Se a foto é do Firebase Storage, ela não será mais carregada diretamente
+                  // Você pode optar por tentar fazer upload para o Cloudinary ou usar um placeholder
+                  console.warn(`Foto do Firebase Storage detectada para ${data.nome}. Considerar re-upload para Cloudinary ou usar URL antiga.`);
+                  // Para o backup funcionar, vamos tentar re-uploadar para o Cloudinary (se a URL antiga ainda for válida)
+                  const response = await fetch(data.foto);
+                  if (response.ok) {
+                      const blob = await response.blob();
+                      const fakeFile = new File([blob], `image_fs_${Date.now()}.png`, { type: blob.type });
+                      const fotoURL = await uploadImagemCloudinary(fakeFile);
+                      if (fotoURL) data.foto = fotoURL;
+                      else data.foto = 'https://via.placeholder.com/120x120?text=Import+Error'; // Fallback
+                  } else {
+                      data.foto = 'https://via.placeholder.com/120x120?text=FS+Error'; // Fallback
+                  }
               }
+              const savedProd = await salvarProdutoFirebase(data);
+              db.push(savedProd);
             }
 
             // Importar histórico
@@ -1752,17 +1783,38 @@ async function importarBackup(event){
               historico.push(savedHist);
             }
 
+            // Importar imagem da sidebar
             if (importedData.sidebarImage) {
-              // Se a imagem da sidebar for Data URL, faça upload para o Storage
               if (importedData.sidebarImage.startsWith('data:image')) {
                   const blob = await (await fetch(importedData.sidebarImage)).blob();
                   const fakeFile = new File([blob], `sidebar_image_${Date.now()}.png`, { type: blob.type });
-                  const fotoURL = await uploadImagemFirebase(fakeFile, 'sidebar', 'config');
-                  sidebarImageUrl = fotoURL;
-                  document.getElementById('sidebarImage').src = sidebarImageUrl;
-                  await salvarSidebarImageFirebase(sidebarImageUrl);
+                  const fotoURL = await uploadImagemCloudinary(fakeFile); // <<< UPLOAD PARA CLOUDINARY
+                  if (fotoURL) {
+                    sidebarImageUrl = fotoURL;
+                    document.getElementById('sidebarImage').src = sidebarImageUrl;
+                    await salvarSidebarImageFirebase(sidebarImageUrl);
+                  }
+              } else if (importedData.sidebarImage.startsWith('https://firebasestorage.googleapis.com/')) {
+                  console.warn("Imagem da sidebar do Firebase Storage detectada. Tentando re-upload para Cloudinary.");
+                  const response = await fetch(importedData.sidebarImage);
+                  if (response.ok) {
+                      const blob = await response.blob();
+                      const fakeFile = new File([blob], `sidebar_image_fs_${Date.now()}.png`, { type: blob.type });
+                      const fotoURL = await uploadImagemCloudinary(fakeFile);
+                      if (fotoURL) {
+                        sidebarImageUrl = fotoURL;
+                        document.getElementById('sidebarImage').src = sidebarImageUrl;
+                        await salvarSidebarImageFirebase(sidebarImageUrl);
+                      } else {
+                        sidebarImageUrl = 'https://via.placeholder.com/280x150?text=Import+Error';
+                        document.getElementById('sidebarImage').src = sidebarImageUrl;
+                      }
+                  } else {
+                      sidebarImageUrl = 'https://via.placeholder.com/280x150?text=FS+Error';
+                      document.getElementById('sidebarImage').src = sidebarImageUrl;
+                  }
               } else {
-                  // Se já for URL, salva direto
+                  // Se já for URL do Cloudinary ou externa, salva direto no Firestore
                   sidebarImageUrl = importedData.sidebarImage;
                   document.getElementById('sidebarImage').src = sidebarImageUrl;
                   await salvarSidebarImageFirebase(sidebarImageUrl);
@@ -1785,7 +1837,7 @@ async function importarBackup(event){
   }
 }
 
-// === FUNÇÕES AUXILIARES QUE NÃO MUDAM ===
+// === FUNÇÕES AUXILIARES DE RENDERIZAÇÃO E RELATÓRIOS ===
 
 function render(){
   const v=document.getElementById('vitrine');
@@ -1817,7 +1869,7 @@ function render(){
     cProd++; cEst+=parseInt(p.qtd);
     v.innerHTML+=`
       <div class="card">
-      <img src="${p.foto}">
+      <img src="${p.foto || 'https://via.placeholder.com/120x120?text=Sem+Foto'}">
       <div class="card-info">
         <h3>${p.nome}</h3>
         <span class="badge-cat" style="background:${getCorCat(p.cat)}">${p.cat||'Outros'}</span>
@@ -1881,7 +1933,7 @@ function renderHistory(){
   tbody.innerHTML='';
   let totalMovimentacoes = 0;
 
-  // O histórico já vem ordenado pelo Firebase, mas podemos garantir se a ordem for importante
+  // O histórico já vem ordenado pelo Firestore, mas podemos garantir se a ordem for importante
   const historicoExibido = historico.filter(h =>
     (h.produto.toLowerCase().includes(termo)||h.motivo.toLowerCase().includes(termo)) &&
     (filtro==='Todos'||h.cat===filtro)
