@@ -700,6 +700,56 @@ input:focus,select:focus,textarea:focus{
 .hist-table th{font-weight:bold;}
 }
 
+/* --- INÍCIO DO NOVO CSS PARA CAMPO DE SENHA --- */
+/* Estilo para o container do input de senha */
+.password-input-container {
+    position: relative;
+    display: flex; /* Garante que o input e o botão fiquem alinhados */
+    align-items: center; /* Centraliza verticalmente o conteúdo */
+    width: 100%;
+}
+
+/* Estilo para o ícone de olho (botão) */
+.toggle-password {
+    position: absolute;
+    right: 1px; /* Ajuste para o canto direito, próximo à borda */
+    height: calc(100% - 2px); /* Altura do botão para cobrir o input, menos borda */
+    width: 38px; /* Largura fixa para o botão */
+    cursor: pointer;
+    background: transparent; /* Fundo transparente */
+    border: none; /* Sem borda */
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10;
+    transition: background-color 0.2s ease;
+    border-top-right-radius: 8px; /* Arredonda as bordas do botão */
+    border-bottom-right-radius: 8px; /* Arredonda as bordas do botão */
+}
+
+.toggle-password:hover {
+    background-color: rgba(0, 0, 0, 0.05); /* Fundo sutil no hover */
+}
+
+/* Estilo para os ícones SVG dentro do botão */
+.toggle-password svg {
+    width: 20px; /* Tamanho do ícone SVG */
+    height: 20px;
+    fill: var(--subtle-text); /* Cor do ícone */
+    transition: fill 0.2s ease;
+}
+
+.toggle-password:hover svg {
+    fill: var(--primary); /* Escurece o ícone no hover */
+}
+
+/* Adicione um padding à direita no input para não cobrir o ícone */
+.password-input-container input {
+    padding-right: 40px; /* Deixa mais espaço para o ícone */
+}
+/* --- FIM DO NOVO CSS PARA CAMPO DE SENHA --- */
+
 /* Estilos para a sidebar direita */
 .sidebar-section {
     background: var(--card-bg);
@@ -1186,8 +1236,8 @@ input:focus,select:focus,textarea:focus{
               <option value="qtd-desc">Estoque ↑</option>
               <option value="qtd-asc">Estoque ↓</option>
             </select>
-            <button class="btn-secondary" style="padding:8px 12px; font-size:0.75rem; white-space:nowrap;" onclick="document.getElementById('sidebarImageUploadHidden').click()">Mudar Imagem</button>
-            <input type="file" id="sidebarImageUploadHidden" accept="image/*" style="display:none;" onchange="uploadSidebarImage(event)">
+            <button class="btn-secondary" style="padding:8px 12px; font-size:0.75rem; white-space:nowrap;" onclick="uploadSidebarImage(event)">Mudar Imagem</button>
+            <input type="file" id="sidebarImageUploadHidden" accept="image/*" style="display:none;" onchange="handleSidebarFileSelection(event)">
           </div>
         </div>
         <div class="sidebar-action-group" style="display:flex; flex-direction:column; gap:10px; margin-top: 15px;">
@@ -1516,9 +1566,8 @@ async function carregarSidebarImageFirebase() {
 // === FUNÇÕES DE ADMINISTRAÇÃO E LÓGICA DO APP ===
 
 // Função de prompt de senha customizado
-async function customPasswordPrompt(message, correctPassword, passwordType) {
+async function customPasswordPrompt(message, correctPassword) {
     return new Promise((resolve) => {
-        // Cria os elementos do modal
         const modal = document.createElement('div');
         modal.id = 'customPasswordModal';
         modal.style.cssText = `
@@ -1565,7 +1614,7 @@ async function customPasswordPrompt(message, correctPassword, passwordType) {
         passwordInput.type = 'password'; // Começa como password (asteriscos)
         passwordInput.placeholder = 'Digite a senha...';
         passwordInput.style.cssText = `
-            padding: 10px 35px 10px 12px;
+            padding: 10px 40px 10px 12px; /* Aumenta padding direito para o ícone */
             border: 1px solid var(--border-color);
             border-radius: 8px;
             width: 100%;
@@ -1580,16 +1629,27 @@ async function customPasswordPrompt(message, correctPassword, passwordType) {
             }
         });
 
+        // Ícones SVG para olho aberto e fechado
+        const eyeClosedSVG = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3zM12 6.5c-4.42 0-8.24 2.18-10 5.5 1.76 3.32 5.58 5.5 10 5.5s8.24-2.18 10-5.5c-1.76-3.32-5.58-5.5-10-5.5zM12 14.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>';
+        const eyeOpenSVG = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zm0 14.5c-4.42 0-8.24-2.18-10-5.5 1.76-3.32 5.58-5.5 10-5.5s8.24 2.18 10 5.5c-1.76-3.32-5.58-5.5-10-5.5zm0-10c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/></svg>';
+
         const toggleBtn = document.createElement('button');
         toggleBtn.className = 'toggle-password';
-        toggleBtn.innerHTML = '👁️'; // Ícone de olho fechado
-        toggleBtn.style.right = '12px'; // Ajuste fino para a posição do ícone
+        toggleBtn.innerHTML = eyeClosedSVG; // Ícone de olho fechado por padrão
         let isPasswordVisible = false;
         toggleBtn.addEventListener('click', () => {
             isPasswordVisible =!isPasswordVisible;
             passwordInput.type = isPasswordVisible? 'text' : 'password';
-            toggleBtn.innerHTML = isPasswordVisible? '👁️' : '👁️'; // Olho aberto/fechado
+            toggleBtn.innerHTML = isPasswordVisible? eyeOpenSVG : eyeClosedSVG;
+            passwordInput.focus(); // Mantém o foco no input
         });
+
+        // Oculta o botão se o input estiver vazio
+        const updateToggleVisibility = () => {
+            toggleBtn.style.display = passwordInput.value.length > 0? 'flex' : 'none';
+        };
+        passwordInput.addEventListener('input', updateToggleVisibility);
+        updateToggleVisibility(); // Chama na inicialização para estado inicial
 
         inputContainer.appendChild(passwordInput);
         inputContainer.appendChild(toggleBtn);
@@ -1647,7 +1707,7 @@ function toggleAdmin(){
   if(!isAdmin){
     // Utiliza o prompt de senha customizado
     customPasswordPrompt("Digite a senha de administrador:", "RebocadorHaris")
-     .then(isAuthenticated => {
+   .then(isAuthenticated => { // Usa.then() pois a função customPasswordPrompt retorna uma Promise
         if(isAuthenticated){
           isAdmin=true;
           document.getElementById('adminPanel').style.display='grid';
@@ -1840,15 +1900,21 @@ async function deletarHist(historicoId){
   }
 }
 
+// NOVO FLUXO: Primeiro pede a senha, depois abre o seletor de arquivos
 async function uploadSidebarImage(event) {
-  // Utiliza o prompt de senha customizado
   const isAuthenticated = await customPasswordPrompt("Digite a senha para alterar a imagem da sidebar:", "meg");
   if (!isAuthenticated) {
     alert("Senha incorreta ou operação cancelada. Imagem da sidebar não alterada.");
-    event.target.value = null; // Limpa o input file para permitir nova seleção
-    return;
+    return; // Não faz mais nada, pois a senha não foi validada
   }
 
+  // Se a senha for correta, simula um clique no input de arquivo escondido
+  document.getElementById('sidebarImageUploadHidden').click();
+  // O processo de upload continuará em handleSidebarFileSelection() quando o usuário escolher o arquivo
+}
+
+// NOVA FUNÇÃO: Lida com a seleção real do arquivo após a validação da senha
+async function handleSidebarFileSelection(event) {
   const file = event.target.files[0];
   if (file) {
     try {
@@ -1860,13 +1926,13 @@ async function uploadSidebarImage(event) {
       imgElement.src = sidebarImageUrl;
       await salvarSidebarImageFirebase(sidebarImageUrl); // Salva a URL no Firestore (coleção 'config')
       alert("Imagem da sidebar atualizada e salva!");
-      event.target.value = null;
+      event.target.value = null; // Limpa o input file para permitir nova seleção sem acionar o 'change' novamente
     } catch (error) {
       console.error("Erro ao atualizar imagem da sidebar:", error);
       alert("Erro ao atualizar imagem da sidebar. Verifique o console para mais detalhes.");
     }
   } else {
-    event.target.value = null; // Limpa o input file se nenhum arquivo foi selecionado após a senha
+    event.target.value = null; // Limpa o input file se nenhum arquivo foi selecionado
   }
 }
 
@@ -2297,7 +2363,7 @@ function atualizarListasDeEstoque(produtosParaListar) {
 
     // --- Lógica para Maior Estoque (pelo menos 4 valores distintos, excluindo itens de menor estoque) ---
     const produtosOrdenadosDesc = [...produtosParaListar].filter(p =>!idsMenorEstoque.has(p.id)) // Exclui itens de menor estoque
-                             .sort((a, b) => b.qtd - a.qtd);
+                            .sort((a, b) => b.qtd - a.qtd);
     const topQuantities = new Set();
     const produtosParaMaiorEstoque = [];
     const maxItems = 5; // Limite de itens a serem exibidos
@@ -2307,7 +2373,7 @@ function atualizarListasDeEstoque(produtosParaListar) {
             topQuantities.add(p.qtd);
             // Adiciona todos os produtos com essa quantidade
             produtosOrdenadosDesc.filter(item => item.qtd === p.qtd)
-                    .forEach(prod => {
+                   .forEach(prod => {
                 if (!produtosParaMaiorEstoque.some(existing => existing.id === prod.id)) {
                     produtosParaMaiorEstoque.push(prod);
                 }
