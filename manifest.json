@@ -1,22 +1,41 @@
+{
+  "name": "Controle de Estoque Haris",
+  "short_name": "Haris Estoque",
+  "description": "Controle de Estoque para Haris, acessível de qualquer lugar.",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#f8fafc",
+  "theme_color": "#2563eb",
+  "icons": [
     {
-      "name": "Controle de Estoque Haris",
-      "short_name": "Haris Estoque",
-      "start_url": "./index.html",
-      "display": "standalone",
-      "background_color": "#f8fafc",
-      "theme_color": "#2563eb",
-      "icons": [
-        {
-          "src": "icon-192x192.png",
-          "sizes": "192x192",
-          "type": "image/png"
-        },
-        {
-          "src": "icon-512x512.png",
-          "sizes": "512x512",
-          "type": "image/png"
-        }
-      ]
-
+      "src": "https://cdn-icons-png.flaticon.com/512/3238/3238058.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    },
+    {
+      "src": "https://cdn-icons-png.flaticon.com/512/3238/3238058.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "https://cdn-icons-png.flaticon.com/512/3238/3238058.png",
+      "sizes": "144x144",
+      "type": "image/png"
+    },
+    {
+      "src": "https://cdn-icons-png.flaticon.com/512/3238/3238058.png",
+      "sizes": "96x96",
+      "type": "image/png"
+    },
+    {
+      "src": "https://cdn-icons-png.flaticon.com/512/3238/3238058.png",
+      "sizes": "72x72",
+      "type": "image/png"
+    },
+    {
+      "src": "https://cdn-icons-png.flaticon.com/512/3238/3238058.png",
+      "sizes": "48x48",
+      "type": "image/png"
     }
-
+  ]
+}
