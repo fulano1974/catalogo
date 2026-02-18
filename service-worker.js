@@ -16,7 +16,7 @@ const urlsToCache = [
 self.addEventListener('install', event => {
   event.waitUntil(
     caches.open(CACHE_NAME)
-   .then(cache => {
+  .then(cache => {
         console.log('Service Worker: Cache opened');
         return cache.addAll(urlsToCache).then(() => {
           console.log('Service Worker: All URLs cached');
@@ -30,7 +30,7 @@ self.addEventListener('install', event => {
 self.addEventListener('fetch', event => {
   event.respondWith(
     caches.match(event.request)
-   .then(response => {
+  .then(response => {
         // Cache hit - return response
         if (response) {
           console.log('Service Worker: Serving from cache', event.request.url);
