@@ -1163,15 +1163,15 @@ input:focus,select:focus,textarea:focus{
 .card p.estoque-label.alerta-icon-inline svg {
     width: 100%;
     height: 100%;
-    stroke: currentColor; /* Usa a cor do texto pai */
-    fill: none;
-    stroke-width: 2;
+    /* stroke: currentColor; */ /* Não mais necessário, SVGs têm fill */
+    fill: currentColor; /* Usa a cor do texto pai para o preenchimento */
+    /* stroke-width: 2; */ /* Não mais necessário, SVGs têm fill */
 }
 .card.estoque-alerta p.estoque-label.alerta-icon-inline svg {
-    stroke: var(--warning); /* Cor laranja para o ícone de alerta */
+    fill: var(--warning); /* Cor laranja para o ícone de alerta */
 }
 .card.estoque-critico p.estoque-label.alerta-icon-inline svg {
-    stroke: var(--danger); /* Cor vermelha para o ícone crítico */
+    fill: var(--danger); /* Cor vermelha para o ícone crítico */
 }
 .card.estoque-alerta p.estoque-label b {
     color: var(--warning); /* Cor laranja para a quantidade em alerta */
@@ -1704,7 +1704,7 @@ async function customPasswordPrompt(message, correctPassword) {
             }
         });
 
-        // Ícones SVG para olho aberto e fechado (AGORA NOVO ESTILO)
+        // Ícones SVG para olho aberto e fechado (NOVOS ÍCONES DE TRAÇO FINO)
         // Olho fechado (estilo traço fino)
         const eyeClosedSVG = '<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-6 h-6"><path stroke-linecap="round" stroke-linejoin="round" d="M13.875 18.04C11.31 18.667 9 17.5 9 17.5s-2.25-1.167-2.25-3c0-.86.75-2 2.25-2m.917-2.45c-1.35.34-2.417.893-2.417.893s-1.067.553-2.417 1.27m3.333-5.22c1.35-.34 2.417-.893 2.417-.893s1.067-.553 2.417-1.27M12 9a3 3 0 100 6 3 3 0 000-6zM12 6.5C7.5 6.5 3.1 9.07 1 12c2.1 3.09 6.5 5.5 11 5.5s8.9-2.41 11-5.5c-2.1-3.09-6.5-5.5-11-5.5z"/></svg>';
         // Olho aberto (estilo traço fino)
@@ -2090,7 +2090,7 @@ async function importarBackup(event){
                   if (fotoURL) {
                     sidebarImageUrl = fotoURL;
                     document.getElementById('sidebarImage').src = sidebarImageUrl;
-                    await salvarSidebarImageFirebase(sidebarURL);
+                    await salvarSidebarImageFirebase(sidebarImageUrl);
                   }
               } else if (importedData.sidebarImage.startsWith('https://firebasestorage.googleapis.com/')) {
                   console.warn("Imagem da sidebar do Firebase Storage detectada. Tentando re-upload para Cloudinary.");
@@ -2175,16 +2175,16 @@ function render(){
     // NOVO: Lógica de alerta e classes (com ícones inline e discretos)
     let estoqueClass = '';
     let alertaIconInline = ''; // Agora o ícone será inline
-    const iconAlerta = '<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.174 3.35 1.94 3.35h14.72c1.766 0 2.806-1.85 1.94-3.35L12.94 3.51c-.866-1.5-3.033-1.5-3.898 0L2.697 16.276zM12 15.75h.007v.008H12v.008z" /></svg>'; // Triângulo de exclamação
-    const iconCritico = '<svg xmlns="http://www.w3.org/000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-6 h-6"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.174 3.35 1.94 3.35h14.72c1.766 0 2.806-1.85 1.94-3.35L12.94 3.51c-.866-1.5-3.033-1.5-3.898 0L2.697 16.276zM12 15.75h.007v.008H12v.008z" /></svg>'; // Exclamação dentro do triângulo
+    // SVGs para os ícones de exclamação em círculo (com fill="currentColor" para usar a cor do CSS)
+    const iconExclamacao = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg>';
 
     if (p.qtdMin > 0) { // Só aplica alerta se houver estoque mínimo definido
-        if (p.qtd <= 0) { // Estoque zero ou negativo: crítico
+        if (p.qtd < p.qtdMin) { // Abaixo do mínimo: crítico (vermelho)
             estoqueClass = 'estoque-critico';
-            alertaIconInline = `<span class="alerta-icon-inline">${iconCritico}</span>`;
-        } else if (p.qtd <= p.qtdMin) { // Abaixo ou igual ao mínimo: alerta
+            alertaIconInline = `<span class="alerta-icon-inline">${iconExclamacao}</span>`;
+        } else if (p.qtd === p.qtdMin) { // Igual ao mínimo: alerta (laranja/amarelo)
             estoqueClass = 'estoque-alerta';
-            alertaIconInline = `<span class="alerta-icon-inline">${iconAlerta}</span>`;
+            alertaIconInline = `<span class="alerta-icon-inline">${iconExclamacao}</span>`;
         }
     }
 
@@ -2372,17 +2372,25 @@ function imprimirHistorico(){
   const filtro=document.getElementById('filtroCatHist').value;
   const historicoParaImprimir = historico.filter(h =>
       (h.produto.toLowerCase().includes(termo)||h.motivo.toLowerCase().includes(termo)) &&
-      (filtro==='Todos'||h.cat===filro)
+      (filtro==='Todos'||h.cat===filtro)
   ); // Não precisa reverter, o Firebase já ordenou
 
   historicoParaImprimir.forEach(h=>{
     totalMovimentacoesImpressao++;
     let tipoDisplay = h.tipo === 'Entrada'? `<span class="tag-add">${h.tipo}</span>` : `<span class="tag-sub">${h.tipo}</span>`;
-    html+=`<tr><td>${h.data}</td><td>${h.produto}</td><td>${tipoDisplay}</td><td>${h.qtd}</td><td>${h.motivo}</td></tr>`;
+    tbody.innerHTML+=`
+      <tr>
+        <td>${h.data}</td>
+        <td>${h.produto}</td>
+        <td>${tipoDisplay}</td>
+        <td>${h.qtd}</td>
+        <td>${h.motivo}</td>
+        <td><button class="lixeira" onclick="deletarHist('${h.id}')">🗑️</button></td>
+      </tr>`;
   });
 
   if (totalMovimentacoesImpressao === 0) {
-      html += `<tr><td colspan="5" style="text-align:center; color:#64748b;">Nenhuma movimentação encontrada para o filtro atual.</td></tr>`;
+      tbody.innerHTML += `<tr><td colspan="5" style="text-align:center; color:var(--subtle-text);">Nenhuma movimentação encontrada para o filtro atual.</td></tr>`;
   }
 
   html+=`</tbody></table></div>`;
@@ -2462,7 +2470,7 @@ function atualizarListasDeEstoque(produtosParaListar) {
 
     // --- Lógica para Maior Estoque (pelo menos 4 valores distintos, excluindo itens de menor estoque) ---
     const produtosOrdenadosDesc = [...produtosParaListar].filter(p =>!idsMenorEstoque.has(p.id)) // Exclui itens de menor estoque
-                       .sort((a, b) => b.qtd - a.qtd);
+                      .sort((a, b) => b.qtd - a.qtd);
     const topQuantities = new Set();
     const produtosParaMaiorEstoque = [];
     const maxItems = 5; // Limite de itens a serem exibidos
@@ -2472,7 +2480,7 @@ function atualizarListasDeEstoque(produtosParaListar) {
             topQuantities.add(p.qtd);
             // Adiciona todos os produtos com essa quantidade
             produtosOrdenadosDesc.filter(item => item.qtd === p.qtd)
-               .forEach(prod => {
+              .forEach(prod => {
                 if (!produtosParaMaiorEstoque.some(existing => existing.id === prod.id)) {
                     produtosParaMaiorEstoque.push(prod);
                 }
