@@ -14,6 +14,7 @@
   --accent:#3b82f6; /* Azul vibrante */
   --success:#10b8a6;
   --danger:#ef4444;
+  --warning:#f59e0b; /* Laranja para alerta */
   --bg:#f8fafc; /* Fundo mais claro */
   --card-bg:white;
   --text-color:#334155;
@@ -921,37 +922,37 @@ input:focus,select:focus,textarea:focus{
 @media (max-width: 768px) {
   /* Empilhar itens do container-wrapper */
 .container-wrapper{
-    flex-direction:column; /* Empilha tudo verticalmente */
-    gap:15px; /* Reduz o espaçamento geral */
-    margin:10px auto; /* Margem menor nas laterais */
-    padding:0 10px; /* Padding menor */
+    flex-direction:column;
+    gap:15px;
+    margin:10px auto;
+    padding:0 10px;
   }
 
   /* ORDENAÇÃO NO SMARTPHONE */
 .main-content {
-    order: 1; /* Conteúdo principal aparece primeiro */
-    background: none; /* remove background para fluir com o resto */
-    padding: 0; /* remove padding para fluir */
-    box-shadow: none; /* remove sombra */
+    order: 1;
+    background: none;
+    padding: 0;
+    box-shadow: none;
   }
 .sidebar.left {
-    order: 2; /* Sidebar esquerda aparece depois do conteúdo principal */
-    box-shadow: none; /* Remove a sombra */
-    border-radius: 0; /* Remove o border-radius se não for uma seção separada visualmente */
+    order: 2;
+    box-shadow: none;
+    border-radius: 0;
   }
 .sidebar.right {
-    display: none; /* Sidebar direita completamente oculta */
+    display: none;
   }
 
   /* HEADER DENTRO DO MAIN-CONTENT - MOBILE */
-.main-content.header { /* o header que agora está dentro do main-content */
+.main-content.header {
     padding: 10px 15px;
     flex-wrap: wrap;
     gap: 10px;
     justify-content: center;
     border-radius: 12px;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.05); /* Mantém sombra no header superior */
-    margin-bottom: 15px; /* Espaço após o header */
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    margin-bottom: 15px;
   }
 .main-content.header h1 {
     font-size: 1.4rem;
@@ -964,12 +965,12 @@ input:focus,select:focus,textarea:focus{
   }
 
   /* STATS BAR DENTRO DO MAIN-CONTENT - MOBILE */
-.main-content.stats-bar { /* a stats-bar que agora está dentro do main-content */
+.main-content.stats-bar {
     padding: 10px 15px;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.05); /* Mantém sombra na stats bar */
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
     border: none;
-    justify-content: center; /* Centraliza os botões */
-    margin-bottom: 15px; /* Espaço após a stats bar */
+    justify-content: center;
+    margin-bottom: 15px;
   }
 .main-content.stats-bar.backup-group {
     display: flex;
@@ -990,36 +991,36 @@ input:focus,select:focus,textarea:focus{
   }
   /* Filtros de Categoria */
 .sidebar.left.cat-filter-wrapper {
-    margin-top: 0; /* Ajusta a margem superior */
-    border-radius: 12px; /* Mantém o border-radius da seção */
-    margin-bottom: 15px; /* Espaço após a seção */
+    margin-top: 0;
+    border-radius: 12px;
+    margin-bottom: 15px;
   }
   /* Input de Busca */
 .sidebar.left.input-group:has(#inputBusca) {
-    margin-top: 0; /* Ajusta a margem superior */
-    padding: 15px; /* Adiciona padding para parecer uma seção */
-    background: var(--card-bg); /* Adiciona background */
-    border-radius: 12px; /* Adiciona border-radius */
-    box-shadow: 0 4px 12px rgba(0,0,0,0.05); /* Adiciona sombra */
+    margin-top: 0;
+    padding: 15px;
+    background: var(--card-bg);
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
   }
   /* Categoria buttons grid */
 .cat-buttons-grid {
-    grid-template-columns: repeat(auto-fit, minmax(80px, 1fr)); /* Min-width menor para caber mais */
-    gap: 5px; /* Espaçamento menor entre filtros */
+    grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
+    gap: 5px;
   }
 .btn-cat{
-    padding:4px 6px; /* Padding ainda menor */
-    font-size:0.75rem; /* Fonte menor */
-    height: 30px; /* Altura ajustada */
+    padding:4px 6px;
+    font-size:0.75rem;
+    height: 30px;
     border-radius:15px;
   }
 
   /* ADMIN PANEL / HISTORY PANEL */
   #adminPanel, #historyPanel{
     padding:15px;
-    border-left:none; /* Remove a borda lateral */
-    border-top:5px solid var(--accent); /* Adiciona uma borda superior */
-    box-shadow: none; /* Remove sombra aqui para não duplicar */
+    border-left:none;
+    border-top:5px solid var(--accent);
+    box-shadow: none;
   }
   #historyPanel h2{
     font-size:1.1rem;
@@ -1035,23 +1036,23 @@ input:focus,select:focus,textarea:focus{
 
   /* GRID DE PRODUTOS */
 .grid{
-    grid-template-columns:repeat(auto-fill, minmax(110px, 1fr)); /* 2 ou 3 cards por linha */
-    gap:8px; /* Espaçamento menor entre cards */
+    grid-template-columns:repeat(auto-fill, minmax(110px, 1fr));
+    gap:8px;
   }
 .card{
-    padding:10px; /* Padding ajustado */
+    padding:10px;
     border-radius:10px;
   }
 .card img{
-    height:80px; /* Imagens menores */
+    height:80px;
     margin-bottom:6px;
   }
 .card h3{
-    font-size:0.75rem; /* Título menor no card */
+    font-size:0.75rem;
     line-height:1.1;
   }
 .badge-cat{
-    font-size:0.5rem; /* Fonte minúscula para badge */
+    font-size:0.5rem;
     padding:2px 5px;
     margin-top:3px;
     margin-bottom:6px;
@@ -1065,26 +1066,26 @@ input:focus,select:focus,textarea:focus{
 
   /* MODAL */
   #modal{
-    padding:0px; /* Remove padding externo para modal cobrir tudo */
-    background: rgba(15,23,42,0.9); /* Fundo mais escuro para focar */
+    padding:0px;
+    background: rgba(15,23,42,0.9);
   }
 .modal-content{
-    width:95%; /* Ocupa quase toda a largura */
-    height:auto; /* Altura flexível */
-    max-height:90vh; /* Máx 90% da viewport */
-    overflow-y:auto; /* Scroll se o conteúdo for muito grande */
+    width:95%;
+    height:auto;
+    max-height:90vh;
+    overflow-y:auto;
     padding:20px;
     border-radius:15px;
-    margin: auto; /* Centraliza */
+    margin: auto;
     box-shadow:0 10px 40px rgba(0,0,0,0.4);
-    animation:modalSlideUp 0.3s forwards ease-out; /* Nova animação de deslizar */
+    animation:modalSlideUp 0.3s forwards ease-out;
   }
   @keyframes modalSlideUp {
     from { transform:translateY(100%); opacity:0; }
     to { transform:translateY(0); opacity:1; }
   }
 .modal-actions{
-    flex-direction:column; /* Botões de ação do modal um embaixo do outro */
+    flex-direction:column;
     gap:8px;
   }
 .close-modal-btn-bottom{
@@ -1095,43 +1096,81 @@ input:focus,select:focus,textarea:focus{
 /* Ajustes para telas bem pequenas, como iPhones SE (320px de largura) */
 @media (max-width: 380px) {
 .grid{
-    grid-template-columns:repeat(auto-fill, minmax(95px, 1fr)); /* Mais cards em telas muito pequenas */
+    grid-template-columns:repeat(auto-fill, minmax(95px, 1fr));
     gap:6px;
   }
 .card h3{
-    font-size:0.7rem; /* Fonte ainda menor */
+    font-size:0.7rem;
   }
 .card img{
     height:70px;
   }
 .modal-content{
-    width:98%; /* Quase a largura toda */
+    width:98%;
     padding:15px;
   }
   /* Ajuste responsivo para a imagem da sidebar em telas muito pequenas */
 .sidebar-image img {
-    max-height: 100px; /* Reduz ainda mais para telas muito pequenas */
+    max-height: 100px;
   }
 }
-/* --- NOVO CSS PARA ESTOQUE MÍNIMO --- */
-.card.estoque-baixo {
-    border: 2px solid var(--danger); /* Borda vermelha sutil */
-    box-shadow: 0 0 15px rgba(239, 68, 68, 0.3); /* Sombra avermelhada */
-    animation: pulseRed 1.5s infinite alternate; /* Animação sutil de pulsação */
+
+/* --- NOVO CSS PARA ESTOQUE MÍNIMO MAIS PROFISSIONAL --- */
+.card.estoque-alerta {
+    border: 1px solid var(--warning); /* Borda laranja suave */
+    box-shadow: 0 0 10px rgba(245, 158, 11, 0.2); /* Sombra laranja */
+}
+.card.estoque-critico {
+    border: 2px solid var(--danger); /* Borda vermelha mais forte */
+    box-shadow: 0 0 15px rgba(239, 68, 68, 0.3); /* Sombra vermelha */
 }
 
-@keyframes pulseRed {
-    from {
-        box-shadow: 0 0 8px rgba(239, 68, 68, 0.2);
-    }
-    to {
-        box-shadow: 0 0 15px rgba(239, 68, 68, 0.4);
-    }
+/* Ícone de alerta no canto superior direito do card */
+.card.alerta-icon {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    width: 24px;
+    height: 24px;
+    color: var(--warning); /* Cor para o ícone de alerta */
+    z-index: 5; /* Garante que o ícone fique por cima */
+}
+.card.estoque-critico.alerta-icon {
+    color: var(--danger); /* Cor vermelha para ícone crítico */
+}
+.card.alerta-icon svg {
+    width: 100%;
+    height: 100%;
+    stroke: currentColor; /* Usa a cor definida acima */
+    fill: none;
+    stroke-width: 2;
 }
 
-/* Opcional: Estilizar o texto de estoque baixo */
-.card.estoque-baixo.card-info p b {
-    color: var(--danger);
+/* Estilo para o texto de estoque */
+.card p.estoque-label {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px; /* Espaço entre o ícone e o texto do estoque */
+}
+.card p.estoque-label b {
+    font-weight: 700;
+}
+.card.estoque-alerta p.estoque-label b {
+    color: var(--warning); /* Cor laranja para a quantidade em alerta */
+}
+.card.estoque-critico p.estoque-label b {
+    color: var(--danger); /* Cor vermelha para a quantidade crítica */
+}
+
+/* Animação sutil para o card quando em estado crítico */
+@keyframes pulseSubtle {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.01); }
+    100% { transform: scale(1); }
+}
+.card.estoque-critico {
+    animation: pulseSubtle 2s infinite ease-in-out;
 }
 </style>
 <!-- Firebase SDK -->
@@ -1658,7 +1697,7 @@ async function customPasswordPrompt(message, correctPassword) {
             }
         });
 
-        // Ícones SVG para olho aberto e fechado (NOVOS ÍCONES DE TRAÇO FINO)
+        // Ícones SVG para olho aberto e fechado (AGORA NOVO ESTILO)
         // Olho fechado (estilo traço fino)
         const eyeClosedSVG = '<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-6 h-6"><path stroke-linecap="round" stroke-linejoin="round" d="M13.875 18.04C11.31 18.667 9 17.5 9 17.5s-2.25-1.167-2.25-3c0-.86.75-2 2.25-2m.917-2.45c-1.35.34-2.417.893-2.417.893s-1.067.553-2.417 1.27m3.333-5.22c1.35-.34 2.417-.893 2.417-.893s1.067-.553 2.417-1.27M12 9a3 3 0 100 6 3 3 0 000-6zM12 6.5C7.5 6.5 3.1 9.07 1 12c2.1 3.09 6.5 5.5 11 5.5s8.9-2.41 11-5.5c-2.1-3.09-6.5-5.5-11-5.5z"/></svg>';
         // Olho aberto (estilo traço fino)
@@ -1738,7 +1777,7 @@ function toggleAdmin(){
   if(!isAdmin){
     // Utiliza o prompt de senha customizado
     customPasswordPrompt("Digite a senha de administrador:", "RebocadorHaris")
- .then(isAuthenticated => { // Usa.then() pois a função customPasswordPrompt retorna uma Promise
+.then(isAuthenticated => { // Usa.then() pois a função customPasswordPrompt retorna uma Promise
         if(isAuthenticated){
           isAdmin=true;
           document.getElementById('adminPanel').style.display='grid';
@@ -2125,14 +2164,28 @@ function render(){
 
   produtosExibidos.forEach(p=>{
     cProd++; cEst+=parseInt(p.qtd);
-    const estoqueBaixoClass = (p.qtd <= p.qtdMin && p.qtdMin > 0)? 'estoque-baixo' : ''; // <<< NOVO: Lógica de alerta
+    
+    // NOVO: Lógica de alerta e classes
+    let estoqueClass = '';
+    let alertaIcon = '';
+    if (p.qtdMin > 0) { // Só aplica alerta se houver estoque mínimo definido
+        if (p.qtd <= 0) { // Estoque zero ou negativo: crítico
+            estoqueClass = 'estoque-critico';
+            alertaIcon = '<div class="alerta-icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-6 h-6"><path fill-rule="evenodd" d="M12 2.25c-5.385 0-9.75 4.365-9.75 9.75s4.365 9.75 9.75 9.75 9.75-4.365 9.75-9.75S17.385 2.25 12 2.25zM12.75 6a.75.75 0 00-1.5 0v6a.75.75 0 001.5 0V6zm-.75 10.5a.75.75 0 100-1.5.75.75 0 000 1.5z" clip-rule="evenodd" /></svg></div>';
+        } else if (p.qtd <= p.qtdMin) { // Abaixo ou igual ao mínimo: alerta
+            estoqueClass = 'estoque-alerta';
+            alertaIcon = '<div class="alerta-icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-6 h-6"><path fill-rule="evenodd" d="M9.401 3.003c1.155-1.126 3.214-1.126 4.369 0L12 5.4l-2.599-2.397zM4.12 11.89c-1.637 1.488-1.637 3.911 0 5.399l1.75 1.639 2.666-3.82L4.12 11.89zM12 2.25c-5.385 0-9.75 4.365-9.75 9.75s4.365 9.75 9.75 9.75 9.75-4.365 9.75-9.75S17.385 2.25 12 2.25zM12.75 6a.75.75 0 00-1.5 0v6a.75.75 0 001.5 0V6zm-.75 10.5a.75.75 0 100-1.5.75.75 0 000 1.5z" clip-rule="evenodd" /></svg></div>'; // Triângulo de alerta
+        }
+    }
+
     v.innerHTML+=`
-      <div class="card ${estoqueBaixoClass}"> <!-- <<< APLICAR CLASSE AQUI -->
+      <div class="card ${estoqueClass}"> <!-- <<< APLICAR CLASSE AQUI -->
+        ${alertaIcon} <!-- ÍCONE DE ALERTA -->
       <img src="${p.foto || 'https://via.placeholder.com/120x120?text=Sem+Foto'}">
       <div class="card-info">
         <h3>${p.nome}</h3>
         <span class="badge-cat" style="background:${getCorCat(p.cat)}">${p.cat||'Outros'}</span>
-        <p>Estoque: <b>${p.qtd}</b></p>
+        <p class="estoque-label">Estoque: <b>${p.qtd}</b></p> <!-- CLASSE estoque-label ADICIONADA -->
         ${isAdmin?`<div class="admin-actions">
          <button class="btn-edit-card" onclick="abrirModal('${p.id}')">✏️</button>
           <button class="btn-delete-card" onclick="deletarProduto('${p.id}')">🗑️</button>
@@ -2400,7 +2453,7 @@ function atualizarListasDeEstoque(produtosParaListar) {
 
     // --- Lógica para Maior Estoque (pelo menos 4 valores distintos, excluindo itens de menor estoque) ---
     const produtosOrdenadosDesc = [...produtosParaListar].filter(p =>!idsMenorEstoque.has(p.id)) // Exclui itens de menor estoque
-                         .sort((a, b) => b.qtd - a.qtd);
+                        .sort((a, b) => b.qtd - a.qtd);
     const topQuantities = new Set();
     const produtosParaMaiorEstoque = [];
     const maxItems = 5; // Limite de itens a serem exibidos
@@ -2410,7 +2463,7 @@ function atualizarListasDeEstoque(produtosParaListar) {
             topQuantities.add(p.qtd);
             // Adiciona todos os produtos com essa quantidade
             produtosOrdenadosDesc.filter(item => item.qtd === p.qtd)
-                 .forEach(prod => {
+                .forEach(prod => {
                 if (!produtosParaMaiorEstoque.some(existing => existing.id === prod.id)) {
                     produtosParaMaiorEstoque.push(prod);
                 }
