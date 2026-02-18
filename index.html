@@ -1515,14 +1515,149 @@ async function carregarSidebarImageFirebase() {
 
 // === FUNÇÕES DE ADMINISTRAÇÃO E LÓGICA DO APP ===
 
+// Função de prompt de senha customizado
+async function customPasswordPrompt(message, correctPassword, passwordType) {
+    return new Promise((resolve) => {
+        // Cria os elementos do modal
+        const modal = document.createElement('div');
+        modal.id = 'customPasswordModal';
+        modal.style.cssText = `
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.7);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            backdrop-filter: blur(3px);
+        `;
+
+        const modalContent = document.createElement('div');
+        modalContent.style.cssText = `
+            background: var(--card-bg);
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+            text-align: center;
+            width: 300px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            animation: modalOpen 0.3s forwards ease-out;
+        `;
+
+        const messageP = document.createElement('p');
+        messageP.textContent = message;
+        messageP.style.cssText = `
+            margin: 0;
+            font-size: 1rem;
+            color: var(--primary);
+            font-weight: 500;
+        `;
+
+        const inputContainer = document.createElement('div');
+        inputContainer.className = 'password-input-container';
+
+        const passwordInput = document.createElement('input');
+        passwordInput.type = 'password'; // Começa como password (asteriscos)
+        passwordInput.placeholder = 'Digite a senha...';
+        passwordInput.style.cssText = `
+            padding: 10px 35px 10px 12px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            width: 100%;
+            box-sizing: border-box;
+            font-size: 0.9rem;
+            color: var(--text-color);
+        `;
+        passwordInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                confirmBtn.click();
+            }
+        });
+
+        const toggleBtn = document.createElement('button');
+        toggleBtn.className = 'toggle-password';
+        toggleBtn.innerHTML = '👁️'; // Ícone de olho fechado
+        toggleBtn.style.right = '12px'; // Ajuste fino para a posição do ícone
+        let isPasswordVisible = false;
+        toggleBtn.addEventListener('click', () => {
+            isPasswordVisible =!isPasswordVisible;
+            passwordInput.type = isPasswordVisible? 'text' : 'password';
+            toggleBtn.innerHTML = isPasswordVisible? '👁️' : '👁️'; // Olho aberto/fechado
+        });
+
+        inputContainer.appendChild(passwordInput);
+        inputContainer.appendChild(toggleBtn);
+
+        const buttonGroup = document.createElement('div');
+        buttonGroup.style.cssText = `
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+        `;
+
+        const confirmBtn = document.createElement('button');
+        confirmBtn.textContent = 'Confirmar';
+        confirmBtn.className = 'btn-primary';
+        confirmBtn.style.cssText = `
+            padding: 10px 20px;
+            font-size: 0.9rem;
+            border-radius: 8px;
+            flex: 1;
+        `;
+        confirmBtn.addEventListener('click', () => {
+            const enteredPassword = passwordInput.value;
+            modal.remove();
+            resolve(enteredPassword === correctPassword);
+        });
+
+        const cancelBtn = document.createElement('button');
+        cancelBtn.textContent = 'Cancelar';
+        cancelBtn.className = 'btn-secondary';
+        cancelBtn.style.cssText = `
+            padding: 10px 20px;
+            font-size: 0.9rem;
+            border-radius: 8px;
+            flex: 1;
+        `;
+        cancelBtn.addEventListener('click', () => {
+            modal.remove();
+            resolve(false); // Retorna false se o usuário cancelar
+        });
+
+        buttonGroup.appendChild(cancelBtn);
+        buttonGroup.appendChild(confirmBtn);
+
+        modalContent.appendChild(messageP);
+        modalContent.appendChild(inputContainer);
+        modalContent.appendChild(buttonGroup);
+        modal.appendChild(modalContent);
+        document.body.appendChild(modal);
+
+        passwordInput.focus(); // Foca no campo de senha
+    });
+}
+
 function toggleAdmin(){
   if(!isAdmin){
-    if(prompt("Senha:")==="RebocadorHaris"){
-      isAdmin=true;
-      document.getElementById('adminPanel').style.display='grid';
-      document.getElementById('backupGroup').style.display='flex';
-      render(); // Atualiza a vitrine para mostrar os botões de admin
-    }
+    // Utiliza o prompt de senha customizado
+    customPasswordPrompt("Digite a senha de administrador:", "RebocadorHaris")
+     .then(isAuthenticated => {
+        if(isAuthenticated){
+          isAdmin=true;
+          document.getElementById('adminPanel').style.display='grid';
+          document.getElementById('backupGroup').style.display='flex';
+          render(); // Atualiza a vitrine para mostrar os botões de admin
+          alert("Modo Administrador Ativado!");
+        } else {
+          alert("Senha incorreta ou operação cancelada.");
+        }
+      });
   }
   else{
     isAdmin=false;
@@ -1530,6 +1665,7 @@ function toggleAdmin(){
     document.getElementById('backupGroup').style.display='none';
     document.getElementById('historyPanel').style.display='none';
     render(); // Esconde os botões de admin
+    alert("Modo Administrador Desativado!");
   }
 }
 
@@ -1705,11 +1841,19 @@ async function deletarHist(historicoId){
 }
 
 async function uploadSidebarImage(event) {
+  // Utiliza o prompt de senha customizado
+  const isAuthenticated = await customPasswordPrompt("Digite a senha para alterar a imagem da sidebar:", "meg");
+  if (!isAuthenticated) {
+    alert("Senha incorreta ou operação cancelada. Imagem da sidebar não alterada.");
+    event.target.value = null; // Limpa o input file para permitir nova seleção
+    return;
+  }
+
   const file = event.target.files[0];
   if (file) {
     try {
       const imgElement = document.getElementById('sidebarImage');
-      const fotoURL = await uploadImagemCloudinary(file); // <<< UPLOAD PARA CLOUDINARY
+      const fotoURL = await uploadImagemCloudinary(file); // UPLOAD PARA CLOUDINARY
       if (!fotoURL) throw new Error("Falha ao obter URL da imagem da sidebar do Cloudinary.");
 
       sidebarImageUrl = fotoURL;
@@ -1721,6 +1865,8 @@ async function uploadSidebarImage(event) {
       console.error("Erro ao atualizar imagem da sidebar:", error);
       alert("Erro ao atualizar imagem da sidebar. Verifique o console para mais detalhes.");
     }
+  } else {
+    event.target.value = null; // Limpa o input file se nenhum arquivo foi selecionado após a senha
   }
 }
 
@@ -1756,17 +1902,21 @@ async function importarBackup(event){
               } else if (data.foto && data.foto.startsWith('https://firebasestorage.googleapis.com/')) {
                   // Se a foto é do Firebase Storage, ela não será mais carregada diretamente
                   // Você pode optar por tentar fazer upload para o Cloudinary ou usar um placeholder
-                  console.warn(`Foto do Firebase Storage detectada para ${data.nome}. Considerar re-upload para Cloudinary ou usar URL antiga.`);
-                  // Para o backup funcionar, vamos tentar re-uploadar para o Cloudinary (se a URL antiga ainda for válida)
-                  const response = await fetch(data.foto);
-                  if (response.ok) {
-                      const blob = await response.blob();
-                      const fakeFile = new File([blob], `image_fs_${Date.now()}.png`, { type: blob.type });
-                      const fotoURL = await uploadImagemCloudinary(fakeFile);
-                      if (fotoURL) data.foto = fotoURL;
-                      else data.foto = 'https://via.placeholder.com/120x120?text=Import+Error'; // Fallback
-                  } else {
-                      data.foto = 'https://via.placeholder.com/120x120?text=FS+Error'; // Fallback
+                  console.warn(`Foto do Firebase Storage detectada para ${data.nome}. Tentando re-upload para Cloudinary.`);
+                  try {
+                    const response = await fetch(data.foto);
+                    if (response.ok) {
+                        const blob = await response.blob();
+                        const fakeFile = new File([blob], `image_fs_${Date.now()}.png`, { type: blob.type });
+                        const fotoURL = await uploadImagemCloudinary(fakeFile);
+                        if (fotoURL) data.foto = fotoURL;
+                        else data.foto = 'https://via.placeholder.com/120x120?text=Import+Error'; // Fallback
+                    } else {
+                        data.foto = 'https://via.placeholder.com/120x120?text=FS+Error'; // Fallback
+                    }
+                  } catch (fetchError) {
+                      console.error("Erro ao tentar baixar imagem do Firebase Storage:", fetchError);
+                      data.foto = 'https://via.placeholder.com/120x120?text=Fetch+Error'; // Fallback
                   }
               }
               const savedProd = await salvarProdutoFirebase(data);
@@ -1796,21 +1946,27 @@ async function importarBackup(event){
                   }
               } else if (importedData.sidebarImage.startsWith('https://firebasestorage.googleapis.com/')) {
                   console.warn("Imagem da sidebar do Firebase Storage detectada. Tentando re-upload para Cloudinary.");
-                  const response = await fetch(importedData.sidebarImage);
-                  if (response.ok) {
-                      const blob = await response.blob();
-                      const fakeFile = new File([blob], `sidebar_image_fs_${Date.now()}.png`, { type: blob.type });
-                      const fotoURL = await uploadImagemCloudinary(fakeFile);
-                      if (fotoURL) {
-                        sidebarImageUrl = fotoURL;
+                  try {
+                    const response = await fetch(importedData.sidebarImage);
+                    if (response.ok) {
+                        const blob = await response.blob();
+                        const fakeFile = new File([blob], `sidebar_image_fs_${Date.now()}.png`, { type: blob.type });
+                        const fotoURL = await uploadImagemCloudinary(fakeFile);
+                        if (fotoURL) {
+                          sidebarImageUrl = fotoURL;
+                          document.getElementById('sidebarImage').src = sidebarImageUrl;
+                          await salvarSidebarImageFirebase(sidebarImageUrl);
+                        } else {
+                          sidebarImageUrl = 'https://via.placeholder.com/280x150?text=Import+Error';
+                          document.getElementById('sidebarImage').src = sidebarImageUrl;
+                        }
+                    } else {
+                        sidebarImageUrl = 'https://via.placeholder.com/280x150?text=FS+Error';
                         document.getElementById('sidebarImage').src = sidebarImageUrl;
-                        await salvarSidebarImageFirebase(sidebarImageUrl);
-                      } else {
-                        sidebarImageUrl = 'https://via.placeholder.com/280x150?text=Import+Error';
-                        document.getElementById('sidebarImage').src = sidebarImageUrl;
-                      }
-                  } else {
-                      sidebarImageUrl = 'https://via.placeholder.com/280x150?text=FS+Error';
+                    }
+                  } catch (fetchError) {
+                      console.error("Erro ao tentar baixar imagem da sidebar do Firebase Storage:", fetchError);
+                      sidebarImageUrl = 'https://via.placeholder.com/280x150?text=Fetch+Error';
                       document.getElementById('sidebarImage').src = sidebarImageUrl;
                   }
               } else {
@@ -2141,7 +2297,7 @@ function atualizarListasDeEstoque(produtosParaListar) {
 
     // --- Lógica para Maior Estoque (pelo menos 4 valores distintos, excluindo itens de menor estoque) ---
     const produtosOrdenadosDesc = [...produtosParaListar].filter(p =>!idsMenorEstoque.has(p.id)) // Exclui itens de menor estoque
-                              .sort((a, b) => b.qtd - a.qtd);
+                             .sort((a, b) => b.qtd - a.qtd);
     const topQuantities = new Set();
     const produtosParaMaiorEstoque = [];
     const maxItems = 5; // Limite de itens a serem exibidos
@@ -2151,7 +2307,7 @@ function atualizarListasDeEstoque(produtosParaListar) {
             topQuantities.add(p.qtd);
             // Adiciona todos os produtos com essa quantidade
             produtosOrdenadosDesc.filter(item => item.qtd === p.qtd)
-                     .forEach(prod => {
+                    .forEach(prod => {
                 if (!produtosParaMaiorEstoque.some(existing => existing.id === prod.id)) {
                     produtosParaMaiorEstoque.push(prod);
                 }
