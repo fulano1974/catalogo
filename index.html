@@ -1115,7 +1115,7 @@ input:focus,select:focus,textarea:focus{
   }
 }
 
-/* --- NOVO CSS PARA ESTOQUE MÍNIMO MAIS PROFISSIONAL --- */
+/* --- NOVO CSS PARA ESTOQUE MÍNIMO MAIS PROFISSIONAL E ÍCONE PEQUENO --- */
 .card.estoque-alerta {
     border: 1px solid var(--warning); /* Borda laranja suave */
     box-shadow: 0 0 10px rgba(245, 158, 11, 0.2); /* Sombra laranja */
@@ -1125,25 +1125,14 @@ input:focus,select:focus,textarea:focus{
     box-shadow: 0 0 15px rgba(239, 68, 68, 0.3); /* Sombra vermelha */
 }
 
-/* Ícone de alerta no canto superior direito do card */
-.card.alerta-icon {
-    position: absolute;
-    top: 8px;
-    right: 8px;
-    width: 24px;
-    height: 24px;
-    color: var(--warning); /* Cor para o ícone de alerta */
-    z-index: 5; /* Garante que o ícone fique por cima */
+/* Animação sutil para o card quando em estado crítico */
+@keyframes pulseSubtle {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.005); } /* Reduzindo o scale para ser ainda mais sutil */
+    100% { transform: scale(1); }
 }
-.card.estoque-critico.alerta-icon {
-    color: var(--danger); /* Cor vermelha para ícone crítico */
-}
-.card.alerta-icon svg {
-    width: 100%;
-    height: 100%;
-    stroke: currentColor; /* Usa a cor definida acima */
-    fill: none;
-    stroke-width: 2;
+.card.estoque-critico {
+    animation: pulseSubtle 2s infinite ease-in-out;
 }
 
 /* Estilo para o texto de estoque */
@@ -1152,25 +1141,43 @@ input:focus,select:focus,textarea:focus{
     align-items: center;
     justify-content: center;
     gap: 4px; /* Espaço entre o ícone e o texto do estoque */
+    margin: 0; /* Garante que não tenha margens indesejadas */
+    font-size: 0.75rem; /* FONTE DO TEXTO 'ESTOQUE' REDUZIDA */
+    color: var(--subtle-text);
 }
 .card p.estoque-label b {
     font-weight: 700;
+    font-size: 1rem; /* FONTE DO NÚMERO DO ESTOQUE REDUZIDA */
+    color: var(--primary);
+}
+
+/* Estilo para o ícone de alerta INLINE */
+.card p.estoque-label.alerta-icon-inline {
+    width: 16px; /* Tamanho pequeno para o ícone */
+    height: 16px;
+    margin-left: 4px; /* Pequena margem à esquerda para separar do número */
+    display: inline-flex; /* Para alinhar com o texto */
+    align-items: center;
+    justify-content: center;
+}
+.card p.estoque-label.alerta-icon-inline svg {
+    width: 100%;
+    height: 100%;
+    stroke: currentColor; /* Usa a cor do texto pai */
+    fill: none;
+    stroke-width: 2;
+}
+.card.estoque-alerta p.estoque-label.alerta-icon-inline svg {
+    stroke: var(--warning); /* Cor laranja para o ícone de alerta */
+}
+.card.estoque-critico p.estoque-label.alerta-icon-inline svg {
+    stroke: var(--danger); /* Cor vermelha para o ícone crítico */
 }
 .card.estoque-alerta p.estoque-label b {
     color: var(--warning); /* Cor laranja para a quantidade em alerta */
 }
 .card.estoque-critico p.estoque-label b {
     color: var(--danger); /* Cor vermelha para a quantidade crítica */
-}
-
-/* Animação sutil para o card quando em estado crítico */
-@keyframes pulseSubtle {
-    0% { transform: scale(1); }
-    50% { transform: scale(1.01); }
-    100% { transform: scale(1); }
-}
-.card.estoque-critico {
-    animation: pulseSubtle 2s infinite ease-in-out;
 }
 </style>
 <!-- Firebase SDK -->
@@ -2083,7 +2090,7 @@ async function importarBackup(event){
                   if (fotoURL) {
                     sidebarImageUrl = fotoURL;
                     document.getElementById('sidebarImage').src = sidebarImageUrl;
-                    await salvarSidebarImageFirebase(sidebarImageUrl);
+                    await salvarSidebarImageFirebase(sidebarURL);
                   }
               } else if (importedData.sidebarImage.startsWith('https://firebasestorage.googleapis.com/')) {
                   console.warn("Imagem da sidebar do Firebase Storage detectada. Tentando re-upload para Cloudinary.");
@@ -2165,27 +2172,29 @@ function render(){
   produtosExibidos.forEach(p=>{
     cProd++; cEst+=parseInt(p.qtd);
     
-    // NOVO: Lógica de alerta e classes
+    // NOVO: Lógica de alerta e classes (com ícones inline e discretos)
     let estoqueClass = '';
-    let alertaIcon = '';
+    let alertaIconInline = ''; // Agora o ícone será inline
+    const iconAlerta = '<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.174 3.35 1.94 3.35h14.72c1.766 0 2.806-1.85 1.94-3.35L12.94 3.51c-.866-1.5-3.033-1.5-3.898 0L2.697 16.276zM12 15.75h.007v.008H12v.008z" /></svg>'; // Triângulo de exclamação
+    const iconCritico = '<svg xmlns="http://www.w3.org/000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-6 h-6"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.174 3.35 1.94 3.35h14.72c1.766 0 2.806-1.85 1.94-3.35L12.94 3.51c-.866-1.5-3.033-1.5-3.898 0L2.697 16.276zM12 15.75h.007v.008H12v.008z" /></svg>'; // Exclamação dentro do triângulo
+
     if (p.qtdMin > 0) { // Só aplica alerta se houver estoque mínimo definido
         if (p.qtd <= 0) { // Estoque zero ou negativo: crítico
             estoqueClass = 'estoque-critico';
-            alertaIcon = '<div class="alerta-icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-6 h-6"><path fill-rule="evenodd" d="M12 2.25c-5.385 0-9.75 4.365-9.75 9.75s4.365 9.75 9.75 9.75 9.75-4.365 9.75-9.75S17.385 2.25 12 2.25zM12.75 6a.75.75 0 00-1.5 0v6a.75.75 0 001.5 0V6zm-.75 10.5a.75.75 0 100-1.5.75.75 0 000 1.5z" clip-rule="evenodd" /></svg></div>';
+            alertaIconInline = `<span class="alerta-icon-inline">${iconCritico}</span>`;
         } else if (p.qtd <= p.qtdMin) { // Abaixo ou igual ao mínimo: alerta
             estoqueClass = 'estoque-alerta';
-            alertaIcon = '<div class="alerta-icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-6 h-6"><path fill-rule="evenodd" d="M9.401 3.003c1.155-1.126 3.214-1.126 4.369 0L12 5.4l-2.599-2.397zM4.12 11.89c-1.637 1.488-1.637 3.911 0 5.399l1.75 1.639 2.666-3.82L4.12 11.89zM12 2.25c-5.385 0-9.75 4.365-9.75 9.75s4.365 9.75 9.75 9.75 9.75-4.365 9.75-9.75S17.385 2.25 12 2.25zM12.75 6a.75.75 0 00-1.5 0v6a.75.75 0 001.5 0V6zm-.75 10.5a.75.75 0 100-1.5.75.75 0 000 1.5z" clip-rule="evenodd" /></svg></div>'; // Triângulo de alerta
+            alertaIconInline = `<span class="alerta-icon-inline">${iconAlerta}</span>`;
         }
     }
 
     v.innerHTML+=`
-      <div class="card ${estoqueClass}"> <!-- <<< APLICAR CLASSE AQUI -->
-        ${alertaIcon} <!-- ÍCONE DE ALERTA -->
+      <div class="card ${estoqueClass}"> <!-- Aplicar classes de estoque no card -->
       <img src="${p.foto || 'https://via.placeholder.com/120x120?text=Sem+Foto'}">
       <div class="card-info">
         <h3>${p.nome}</h3>
         <span class="badge-cat" style="background:${getCorCat(p.cat)}">${p.cat||'Outros'}</span>
-        <p class="estoque-label">Estoque: <b>${p.qtd}</b></p> <!-- CLASSE estoque-label ADICIONADA -->
+        <p class="estoque-label">Estoque: <b>${p.qtd}</b>${alertaIconInline}</p> <!-- Ícone agora está aqui, inline com o texto -->
         ${isAdmin?`<div class="admin-actions">
          <button class="btn-edit-card" onclick="abrirModal('${p.id}')">✏️</button>
           <button class="btn-delete-card" onclick="deletarProduto('${p.id}')">🗑️</button>
@@ -2363,7 +2372,7 @@ function imprimirHistorico(){
   const filtro=document.getElementById('filtroCatHist').value;
   const historicoParaImprimir = historico.filter(h =>
       (h.produto.toLowerCase().includes(termo)||h.motivo.toLowerCase().includes(termo)) &&
-      (filtro==='Todos'||h.cat===filtro)
+      (filtro==='Todos'||h.cat===filro)
   ); // Não precisa reverter, o Firebase já ordenou
 
   historicoParaImprimir.forEach(h=>{
@@ -2453,7 +2462,7 @@ function atualizarListasDeEstoque(produtosParaListar) {
 
     // --- Lógica para Maior Estoque (pelo menos 4 valores distintos, excluindo itens de menor estoque) ---
     const produtosOrdenadosDesc = [...produtosParaListar].filter(p =>!idsMenorEstoque.has(p.id)) // Exclui itens de menor estoque
-                        .sort((a, b) => b.qtd - a.qtd);
+                       .sort((a, b) => b.qtd - a.qtd);
     const topQuantities = new Set();
     const produtosParaMaiorEstoque = [];
     const maxItems = 5; // Limite de itens a serem exibidos
@@ -2463,7 +2472,7 @@ function atualizarListasDeEstoque(produtosParaListar) {
             topQuantities.add(p.qtd);
             // Adiciona todos os produtos com essa quantidade
             produtosOrdenadosDesc.filter(item => item.qtd === p.qtd)
-                .forEach(prod => {
+               .forEach(prod => {
                 if (!produtosParaMaiorEstoque.some(existing => existing.id === prod.id)) {
                     produtosParaMaiorEstoque.push(prod);
                 }
