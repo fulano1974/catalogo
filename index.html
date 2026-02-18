@@ -1152,29 +1152,32 @@ input:focus,select:focus,textarea:focus{
 }
 
 /* Estilo para o ícone de alerta INLINE */
-.alerta-icon-inline { /* REMOVI A CLASSE P.ESTOQUE-LABEL DAQUI, AGORA É CLASSE DIRETA NO SPAN */
+.alerta-icon-inline { /* Removida a dependência de p.estoque-label para ser mais robusto */
     width: 16px; /* Tamanho pequeno para o ícone */
     height: 16px;
     margin-left: 4px; /* Pequena margem à esquerda para separar do número */
     display: inline-flex; /* Para alinhar com o texto */
     align-items: center;
     justify-content: center;
+    vertical-align: middle; /* Ajuda no alinhamento vertical com o texto */
 }
 .alerta-icon-inline svg {
     width: 100%;
     height: 100%;
-    fill: currentColor; /* Usa a cor do texto pai para o preenchimento */
+    fill: currentColor; /* Usa a cor do elemento pai (alerta-icon-inline) para o preenchimento */
 }
 /* Cores do texto e ícone baseadas nas classes do CARD */
-.card.estoque-alerta p.estoque-label b,
-.card.estoque-alerta.alerta-icon-inline svg { /* Aplica ao BOLD e ao SVG */
+.card.estoque-alerta.alerta-icon-inline svg { /* Aplica ao SVG dentro do span */
     fill: var(--warning);
-    color: var(--warning);
 }
-.card.estoque-critico p.estoque-label b,
-.card.estoque-critico.alerta-icon-inline svg { /* Aplica ao BOLD e ao SVG */
+.card.estoque-alerta p.estoque-label b {
+    color: var(--warning); /* Cor laranja para a quantidade em alerta */
+}
+.card.estoque-critico.alerta-icon-inline svg { /* Aplica ao SVG dentro do span */
     fill: var(--danger);
-    color: var(--danger);
+}
+.card.estoque-critico p.estoque-label b {
+    color: var(--danger); /* Cor vermelha para a quantidade crítica */
 }
 </style>
 <!-- Firebase SDK -->
@@ -2172,8 +2175,8 @@ function render(){
     // NOVO: Lógica de alerta e classes (com ícones inline e discretos)
     let estoqueClass = '';
     let alertaIconInline = ''; // Agora o ícone será inline
-    // SVGs para os ícones de exclamação em círculo (com fill="currentColor" para usar a cor do CSS)
-    const iconExclamacaoSVG = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path fill-rule="evenodd" d="M2.25 12c0-5.385 4.365-9.75 9.75-9.75s9.75 4.365 9.75 9.75-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12zm8.706-1.442c1.146-.573 2.437.463 2.126 1.708l-.672 2.857c-.322 1.36-.145 2.573 1.139 2.573H17.25a.75.75 0 000-1.5h-.867c-.288 0-.472-.191-.351-.407l.672-2.856c-.322-1.36-.145-2.573-1.139-2.573H9.75V8.507c0-.414.336-.75.75-.75h1.5a.75.75 0 010 1.5h-1.5a.75.75 0 01-.75-.75zM12 6a1.5 1.5 0 100 3 1.5 1.5 0 000-3z" clip-rule="evenodd" /></svg>';
+    // SVGs para os ícones de exclamação em círculo (APENAS CONTORNO)
+    const iconExclamacaoSVG = '<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-6 h-6"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.174 3.35 1.94 3.35h14.72c1.766 0 2.806-1.85 1.94-3.35L12.94 3.51c-.866-1.5-3.033-1.5-3.898 0L2.697 16.276zM12 15.75h.007v.008H12v.008z" /></svg>';
 
     if (p.qtdMin > 0) { // Só aplica alerta se houver estoque mínimo definido
         if (p.qtd < p.qtdMin) { // Abaixo do mínimo: crítico (vermelho)
@@ -2477,7 +2480,7 @@ function atualizarListasDeEstoque(produtosParaListar) {
             topQuantities.add(p.qtd);
             // Adiciona todos os produtos com essa quantidade
             produtosOrdenadosDesc.filter(item => item.qtd === p.qtd)
-            .forEach(prod => {
+          .forEach(prod => {
                 if (!produtosParaMaiorEstoque.some(existing => existing.id === prod.id)) {
                     produtosParaMaiorEstoque.push(prod);
                 }
