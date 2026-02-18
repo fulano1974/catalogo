@@ -1151,30 +1151,17 @@ input:focus,select:focus,textarea:focus{
     color: var(--primary); /* Cor padrão do número */
 }
 
-/* Estilo para o ícone de alerta INLINE */
-.alerta-icon-inline { /* Removida a dependência de p.estoque-label para ser mais robusto */
+/* Estilo para o ícone de alerta INLINE (agora uma imagem) */
+.alerta-icon-inline img {
     width: 16px; /* Tamanho pequeno para o ícone */
     height: 16px;
     margin-left: 4px; /* Pequena margem à esquerda para separar do número */
-    display: inline-flex; /* Para alinhar com o texto */
-    align-items: center;
-    justify-content: center;
     vertical-align: middle; /* Ajuda no alinhamento vertical com o texto */
 }
-.alerta-icon-inline svg {
-    width: 100%;
-    height: 100%;
-    fill: currentColor; /* Usa a cor do elemento pai (alerta-icon-inline) para o preenchimento */
-}
-/* Cores do texto e ícone baseadas nas classes do CARD */
-.card.estoque-alerta.alerta-icon-inline svg { /* Aplica ao SVG dentro do span */
-    fill: var(--warning);
-}
+
+/* Cores do texto baseadas nas classes do CARD */
 .card.estoque-alerta p.estoque-label b {
     color: var(--warning); /* Cor laranja para a quantidade em alerta */
-}
-.card.estoque-critico.alerta-icon-inline svg { /* Aplica ao SVG dentro do span */
-    fill: var(--danger);
 }
 .card.estoque-critico p.estoque-label b {
     color: var(--danger); /* Cor vermelha para a quantidade crítica */
@@ -2048,9 +2035,7 @@ async function importarBackup(event){
                   const fotoURL = await uploadImagemCloudinary(fakeFile); // <<< UPLOAD PARA CLOUDINARY
                   data.foto = fotoURL; // Atualiza a foto no objeto de dados
               } else if (data.foto && data.foto.startsWith('https://firebasestorage.googleapis.com/')) {
-                  // Se a foto é do Firebase Storage, ela não será mais carregada diretamente
-                  // Você pode optar por tentar fazer upload para o Cloudinary ou usar um placeholder
-                  console.warn(`Foto do Firebase Storage detectada para ${data.nome}. Tentando re-upload para Cloudinary.`);
+                  console.warn("Imagem do Firebase Storage detectada para ${data.nome}. Tentando re-upload para Cloudinary.");
                   try {
                     const response = await fetch(data.foto);
                     if (response.ok) {
@@ -2172,19 +2157,19 @@ function render(){
   produtosExibidos.forEach(p=>{
     cProd++; cEst+=parseInt(p.qtd);
     
-    // NOVO: Lógica de alerta e classes (com ícones inline e discretos)
+    // NOVO: Lógica de alerta e classes (com ícones inline e discretos, usando PNGs)
     let estoqueClass = '';
-    let alertaIconInline = ''; // Agora o ícone será inline
-    // SVGs para os ícones de exclamação em círculo (APENAS CONTORNO)
-    const iconExclamacaoSVG = '<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-6 h-6"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.174 3.35 1.94 3.35h14.72c1.766 0 2.806-1.85 1.94-3.35L12.94 3.51c-.866-1.5-3.033-1.5-3.898 0L2.697 16.276zM12 15.75h.007v.008H12v.008z" /></svg>';
+    let alertaIconInline = ''; // Agora o ícone será inline (imagem)
+    const urlIconAlerta = 'https://res.cloudinary.com/dqp57nr5g/image/upload/v1709148418/icon_alerta_amarelo.png'; // Ícone amarelo de alerta
+    const urlIconCritico = 'https://res.cloudinary.com/dqp57nr5g/image/upload/v1709148418/icon_critico_vermelho.png'; // Ícone vermelho de crítico
 
     if (p.qtdMin > 0) { // Só aplica alerta se houver estoque mínimo definido
         if (p.qtd < p.qtdMin) { // Abaixo do mínimo: crítico (vermelho)
             estoqueClass = 'estoque-critico';
-            alertaIconInline = `<span class="alerta-icon-inline">${iconExclamacaoSVG}</span>`;
+            alertaIconInline = `<span class="alerta-icon-inline"><img src="${urlIconCritico}" alt="Crítico"></span>`;
         } else if (p.qtd === p.qtdMin) { // Igual ao mínimo: alerta (laranja/amarelo)
             estoqueClass = 'estoque-alerta';
-            alertaIconInline = `<span class="alerta-icon-inline">${iconExclamacaoSVG}</span>`;
+            alertaIconInline = `<span class="alerta-icon-inline"><img src="${urlIconAlerta}" alt="Alerta"></span>`;
         }
     }
 
@@ -2480,7 +2465,7 @@ function atualizarListasDeEstoque(produtosParaListar) {
             topQuantities.add(p.qtd);
             // Adiciona todos os produtos com essa quantidade
             produtosOrdenadosDesc.filter(item => item.qtd === p.qtd)
-          .forEach(prod => {
+            .forEach(prod => {
                 if (!produtosParaMaiorEstoque.some(existing => existing.id === prod.id)) {
                     produtosParaMaiorEstoque.push(prod);
                 }
