@@ -170,6 +170,9 @@ body{
   font-weight:600;
   transition:all 0.3s ease;
   box-shadow:0 2px 5px rgba(0,0,0,0.03);
+  display: flex; /* Adicionado aqui para centralizar ícone/texto em todos os botões secundários */
+  align-items: center;
+  justify-content: center;
 }
 .btn-secondary:hover{
   background:#f0f2f5;
@@ -185,18 +188,25 @@ body{
   'opsz' 24 /* Tamanho padrão para botões e textos */
 }
 /* Ajustes para ícones em botões */
-/* Mantido este seletor para ícones em botões específicos, mas a centralização geral agora vem de.btn-primary */
 .backup-group button.material-symbols-outlined,
 .sidebar button.material-symbols-outlined,
 .history-panel-btns button.material-symbols-outlined,
 .modal-actions button.material-symbols-outlined,
-.close-modal-btn-bottom.material-symbols-outlined
+.close-modal-btn-bottom.material-symbols-outlined,
+.btn-edit-card.material-symbols-outlined,
+.btn-delete-card.material-symbols-outlined
 {
     font-size: 1.1em; /* Levemente maior que o texto do botão */
-    vertical-align: middle; /* Alinhamento vertical - menos importante com flex */
     margin-right: 5px; /* Espaçamento entre o ícone e o texto */
     color: inherit; /* Herda a cor do texto do botão */
 }
+/* Alinhamento para o ícone no título do header */
+.header h1.material-symbols-outlined {
+    font-size: 1.2em; /* Um pouco maior que o texto */
+    margin-right: 5px; /* Espaçamento entre o ícone e o texto */
+    vertical-align: middle; /* Alinha verticalmente */
+}
+
 /* Ícone da lixeira, por ser Danger, tem cor específica */
 .lixeira.material-symbols-outlined {
     font-size: 1.2em; /* Um pouco maior */
@@ -206,12 +216,7 @@ body{
 .lixeira:hover.material-symbols-outlined {
     color: white; /* Cor branca no hover */
 }
-/* Ícones de editar e deletar nos cards */
-.admin-actions button.material-symbols-outlined {
-    font-size: 1em;
-    vertical-align: middle;
-    margin-right: 0; /* Remove margem extra */
-}
+
 /* Ícones para os títulos de seção na sidebar e painel de histórico */
 .sidebar-section h3.material-symbols-outlined,
 #historyPanel h2.material-symbols-outlined,
@@ -408,10 +413,6 @@ input:focus,select:focus,textarea:focus{
   padding:8px 15px;
   border-radius:20px;
   font-size:0.8rem;
-  /* Estas propriedades já vêm de.btn-primary agora, então este seletor pode ser mais simples */
-  /* display: flex;
-  align-items: center;
-  justify-content: center; */
 }
 
 /* History Panel */
@@ -428,6 +429,8 @@ input:focus,select:focus,textarea:focus{
   font-size:1.3rem;
   margin:0;
   color:var(--primary);
+  display: flex;
+  align-items: center;
 }
 .hist-table{
   width:100%;
@@ -470,8 +473,8 @@ input:focus,select:focus,textarea:focus{
 /* Vitrine Grid */
 .grid{
   display:grid;
-  /* MODIFICADO: Min-width dos cards para 180px para tentar ter 5 colunas em telas grandes */
-  grid-template-columns:repeat(auto-fill, minmax(180px, 1fr)); /* Ajustado para 180px */
+  /* MODIFICAÇÃO CHAVE: Ajustado minmax para tentar 5 colunas, com um mínimo que ainda funciona para 4 */
+  grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); /* Reduzido min-width para encaixar 5, mas ainda ser largo */
   gap:20px;
 }
 .card{
@@ -481,34 +484,52 @@ input:focus,select:focus,textarea:focus{
   border:1px solid var(--border-color);
   text-align:center;
   transition:all 0.3s ease;
-  padding:15px;
+  padding:10px; /* Padding interno do card */
   box-shadow:0 4px 15px rgba(0,0,0,0.05);
   position:relative;
+  display:flex;
+  flex-direction:column;
 }
 .card:hover{
   transform:translateY(-5px);
   box-shadow:0 8px 25px rgba(0,0,0,0.1);
 }
-.card img{
-  width:100%;
-  height:120px; /* Altura da imagem um pouco menor */
-  object-fit:contain;
+/* Container da imagem para manter proporção quadrada */
+.card-image-container {
+  width: 100%;
+  padding-bottom: 100%; /* Isso faz o container ser quadrado (100% da largura) */
+  position: relative;
+  overflow: hidden;
+  border-radius: 8px;
   background:#fefefe;
-  border-radius:8px;
-  margin-bottom:8px; /* Margem menor */
+  margin-bottom: 8px; /* Espaço entre imagem e texto */
+}
+.card img{
+  position: absolute;
+  top: 0;
+  left: 0;
+  width:100%;
+  height:100%;
+  object-fit:contain; /* Garante que a imagem se ajuste sem cortar */
+  display:block;
+  border-radius: 8px;
 }
 .card-info{
-  padding:8px 0;
+  padding:5px 0 0; /* Ajustado padding */
   display:flex;
   flex-direction:column;
   align-items:center;
+  flex-grow:1; /* Permite que o info ocupe espaço restante */
+  justify-content: space-between; /* Espaça o conteúdo do info */
 }
 .card h3{
   margin:4px 0; /* Margem menor */
-  font-size:0.9rem; /* FONTE DO NOME DO PRODUTO REDUZIDA */
+  font-size:0.75rem; /* FONTE DO NOME DO PRODUTO REDUZIDA AINDA MAIS */
   line-height:1.2; /* Linha um pouco mais justa */
   color:var(--primary);
-  font-weight:600;
+  font-weight:600; /* MANTÉM O NEGRITO */
+  word-break: break-word; /* Garante que palavras longas quebrem a linha */
+  text-align: center; /* Centraliza o texto do título */
 }
 .badge-cat{
   font-size:0.6rem; /* FONTE DA CATEGORIA REDUZIDA */
@@ -980,7 +1001,7 @@ input:focus,select:focus,textarea:focus{
     grid-template-columns:1fr;
   }
 .grid{
-    grid-template-columns:repeat(auto-fill, minmax(140px, 1fr)); /* Ajuste para tablets */
+    grid-template-columns:repeat(auto-fill, minmax(140px, 1fr)); /* Ajuste para tablets: 3-4 colunas */
   }
 .modal-content{
     width:90%;
@@ -1119,7 +1140,7 @@ input:focus,select:focus,textarea:focus{
 
   /* GRID DE PRODUTOS */
 .grid{
-    grid-template-columns:repeat(auto-fill, minmax(110px, 1fr));
+    grid-template-columns:repeat(auto-fill, minmax(110px, 1fr)); /* Em celulares, 2 ou 3 colunas */
     gap:8px;
   }
 .card{
@@ -1127,11 +1148,11 @@ input:focus,select:focus,textarea:focus{
     border-radius:10px;
   }
 .card img{
-    height:80px;
+    /* Removido altura fixa, agora usa o container */
     margin-bottom:6px;
   }
 .card h3{
-    font-size:0.75rem;
+    font-size:0.7rem; /* Fonte um pouco menor em telas muito pequenas */
     line-height:1.1;
   }
 .badge-cat{
@@ -1183,10 +1204,10 @@ input:focus,select:focus,textarea:focus{
     gap:6px;
   }
 .card h3{
-    font-size:0.7rem;
+    font-size:0.65rem; /* Fonte ainda menor em telas muito pequenas */
   }
 .card img{
-    height:70px;
+    /* Removido altura fixa */
   }
 .modal-content{
     width:98%;
@@ -1252,10 +1273,6 @@ input:focus,select:focus,textarea:focus{
     color: var(--danger); /* Cor vermelha para a quantidade e ícone crítico */
 }
 
-/* Removido o seletor.sidebar-action-group.btn-primary */
-/* e movido o display: flex; align-items: center; justify-content: center; */
-/* diretamente para a definição de.btn-primary para aplicar a todos os botões primários */
-
 </style>
 <!-- Firebase SDK -->
 <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
@@ -1316,6 +1333,11 @@ input:focus,select:focus,textarea:focus{
           <!-- BOTÃO IMPORTAR: alterado para btn-primary, removido estilo inline para cor padrao -->
           <button class="btn-primary" onclick="document.getElementById('importInput').click()"><span class="material-symbols-outlined">upload</span> Importar</button>
           <input type="file" id="importInput" style="display:none" onchange="importarBackup(event)">
+          
+          <!-- NOVO BOTÃO PARA ABRIR O CATÁLOGO -->
+          <button class="btn-primary" onclick="window.open('catalogo.index', '_blank');">
+            <span class="material-symbols-outlined">menu_book</span> Catálogo
+          </button>
         </div>
       </div>
 
@@ -2031,8 +2053,8 @@ async function limparHistorico(){
   if(confirm('Deseja limpar todo o histórico? Essa ação é irreversível!')){
     try {
       // Deleta todos os documentos do histórico um por um
-      const deleteProdPromises = historico.map(h => deletarHistoricoFirebase(h.id));
-      await Promise.all(deleteProdPromises);
+      const deletePromises = historico.map(h => deletarHistoricoFirebase(h.id));
+      await Promise.all(deletePromises);
       historico = []; // Limpa o array local
       renderHistory();
       alert("Histórico limpo com sucesso!");
@@ -2061,7 +2083,7 @@ async function deletarHist(historicoId){
 
 // NOVO FLUXO: Primeiro pede a senha, depois abre o seletor de arquivos
 async function uploadSidebarImage(event) {
-  const isAuthenticated = await customPasswordPrompt("Digite a senha para alterar a imagem da sidebar:", "meg");
+  const isAuthenticated = await customPasswordPrompt("Digite a senha para alterar a imagem da sidebar:", "RebocadorHaris");
   if (!isAuthenticated) {
     alert("Senha incorreta ou operação cancelada. Imagem da sidebar não alterada.");
     return; // Não faz mais nada, pois a senha não foi validada
@@ -2265,21 +2287,23 @@ function render(){
     
     // Adiciona o span do ícone apenas se houver um nome de ícone definido
     if (iconName) {
-        alertaIconInline = `<span class="alerta-icon-inline material-symbols-outlined">${iconName}</span>`; // Adicionei a classe material-symbols-outlined aqui
+        alertaIconInline = `<span class="alerta-icon-inline"><span class="material-symbols-outlined">${iconName}</span></span>`; // Aninhado em span.alerta-icon-inline
     }
 
     v.innerHTML+=`
       <div class="card ${estoqueClass}"> <!-- Aplicar classes de estoque no card -->
-      <img src="${p.foto || 'https://via.placeholder.com/120x120?text=Sem+Foto'}" alt="${p.nome || 'Produto sem foto'}" loading="lazy">
-      <div class="card-info">
-        <h3>${p.nome}</h3>
-        <span class="badge-cat" style="background:${getCorCat(p.cat)}">${p.cat||'Outros'}</span>
-        <p class="estoque-label">Estoque: <b>${p.qtd}</b>${alertaIconInline}</p> <!-- Ícone agora está aqui, inline com o texto -->
-        ${isAdmin?`<div class="admin-actions">
-         <button class="btn-edit-card" onclick="abrirModal('${p.id}')"><span class="material-symbols-outlined">edit</span></button>
-          <button class="btn-delete-card" onclick="deletarProduto('${p.id}')"><span class="material-symbols-outlined">delete</span></button>
-        </div>`:''}
-      </div>
+        <div class="card-image-container">
+          <img src="${p.foto || 'https://via.placeholder.com/120x120?text=Sem+Foto'}" alt="${p.nome || 'Produto sem foto'}" loading="lazy">
+        </div>
+        <div class="card-info">
+          <h3>${p.nome}</h3>
+          <span class="badge-cat" style="background:${getCorCat(p.cat)}">${p.cat||'Outros'}</span>
+          <p class="estoque-label">Estoque: <b>${p.qtd}</b>${alertaIconInline}</p> <!-- Ícone agora está aqui, inline com o texto -->
+          ${isAdmin?`<div class="admin-actions">
+           <button class="btn-edit-card" onclick="abrirModal('${p.id}')"><span class="material-symbols-outlined">edit</span></button>
+            <button class="btn-delete-card" onclick="deletarProduto('${p.id}')"><span class="material-symbols-outlined">delete</span></button>
+          </div>`:''}
+        </div>
       </div>`;
   });
 
@@ -2334,7 +2358,7 @@ function renderHistory(){
   tbody.innerHTML='';
   let totalMovimentacoes = 0;
 
-  // O histórico já vem ordenado pelo Firestore, mas podemos garantir se a ordem for importante
+  // O histórico já vem ordenado pelo timestamp do servidor, mas podemos garantir se a ordem for importante
   const historicoExibido = historico.filter(h =>
     (h.produto.toLowerCase().includes(termo)||h.motivo.toLowerCase().includes(termo)) &&
     (filtro==='Todos'||h.cat===filtro)
@@ -2556,7 +2580,7 @@ function atualizarListasDeEstoque(produtosParaListar) {
 
     // --- Lógica para Maior Estoque (pelo menos 4 valores distintos, excluindo itens de menor estoque) ---
     const produtosOrdenadosDesc = [...produtosParaListar].filter(p =>!idsMenorEstoque.has(p.id)) // Exclui itens de menor estoque
-          .sort((a, b) => b.qtd - a.qtd);
+           .sort((a, b) => b.qtd - a.qtd);
     const topQuantities = new Set();
     const produtosParaMaiorEstoque = [];
     const maxItems = 5; // Limite de itens a serem exibidos
@@ -2566,7 +2590,2644 @@ function atualizarListasDeEstoque(produtosParaListar) {
             topQuantities.add(p.qtd);
             // Adiciona todos os produtos com essa quantidade
             produtosOrdenadosDesc.filter(item => item.qtd === p.qtd)
-   .forEach(prod => {
+     .forEach(prod => {
+                if (!produtosParaMaiorEstoque.some(existing => existing.id === prod.id)) {
+                    produtosParaMaiorEstoque.push(prod);
+                }
+            });
+        }
+        // Se já temos itens suficientes para preencher a lista E pelo menos 4 valores distintos, podemos parar
+        // ou se já temos 5 itens, paramos também
+        if ((produtosParaMaiorEstoque.length >= maxItems && topQuantities.size >= 4) || produtosParaMaiorEstoque.length >= maxItems) {
+             break;
+        }
+    }
+
+    // Ordena o array final para exibição e limita a 'maxItems'
+    produtosParaMaiorEstoque.sort((a, b) => b.qtd - a.qtd);
+
+    if (produtosParaMaiorEstoque.length > 0) {
+        produtosParaMaiorEstoque.slice(0, maxItems).forEach(p => {
+            const li = document.createElement('li');
+            li.innerHTML = `<span class="product-name">${p.nome}</span> <span class="stock-count" style="color: var(--success);"><b>${p.qtd}</b></span>`;
+            listaMaiorEstoqueUl.appendChild(li);
+        });
+    } else {
+        listaMaiorEstoqueUl.innerHTML = '<li class="placeholder">Nenhum item encontrado nesta categoria.</li>';
+    }
+}
+
+// Inicialização
+initFirebase();
+
+// >>>>>>>>>>> CÓDIGO DE REGISTRO DO SERVICE WORKER ADICIONADO AQUI <<<<<<<<<<<
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/service-worker.js')
+.then(registration => {
+        console.log('Service Worker registered:', registration);
+      })
+.catch(error => {
+        console.error('Service Worker registration failed:', error);
+      });
+  });
+}
+// >>>>>>>>>>> FIM DO CÓDIGO DO SERVICE WORKER <<<<<<<<<<<
+</script>
+</body>
+</html><!DOCTYPE html>
+<html lang="pt-br">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Controle de Estoque Haris</title>
+<meta name="theme-color" content="#2563eb">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="https://cdn-icons-png.flaticon.com/512/3238/3238058.png">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<!-- Material Symbols - Outlined style -->
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
+<style>
+:root{
+  --primary:#1f2a40; /* Azul escuro quase preto */
+  --accent:#3b82f6; /* Azul vibrante */
+  --success:#10b8a6;
+  --danger:#ef4444;
+  --warning:#f59e0b; /* Laranja para alerta */
+  --bg:#f8fafc; /* Fundo mais claro */
+  --card-bg:white;
+  --text-color:#334155;
+  --subtle-text:#64748b;
+  --border-color:#e2e8f0;
+}
+body{
+  margin:0;
+  padding:0;
+  font-family:'Poppins', sans-serif;
+  background-color:var(--bg);
+  color:var(--text-color);
+  min-height:100vh;
+  display:flex;
+  flex-direction:column;
+  background-image:url('https://source.unsplash.com/random/1920x1080/?warehouse,logistics,abstract'); /* Imagem de fundo aleatória */
+  background-size:cover;
+  background-position:center;
+  background-attachment:fixed;
+}
+.overlay{
+  background-color:rgba(248, 250, 252, 0.85); /* Overlay para a imagem de fundo */
+  min-height:100vh;
+  display:flex;
+  flex-direction:column;
+}
+.container-wrapper{
+  display:flex;
+  flex:1;
+  max-width:1600px; /* Aumentado para acomodar sidebars */
+  margin:20px auto;
+  gap:20px;
+  padding:0 20px;
+}
+.sidebar{
+  width:280px;
+  background:var(--card-bg);
+  padding:20px;
+  border-radius:12px;
+  box-shadow:0 4px 12px rgba(0,0,0,0.05);
+  display:flex;
+  flex-direction:column;
+  gap:10px; /* Reduzindo o gap geral da sidebar */
+  flex-shrink:0; /* Não encolher a sidebar */
+  /* NOVAS PROPRIEDADES PARA FIXAR */
+  position: sticky;
+  top: 20px; /* Alinha com a margem superior do container-wrapper */
+  max-height: calc(100vh - 40px); /* Altura máxima da viewport menos as margens */
+  overflow-y: auto; /* Adiciona scroll se o conteúdo for maior que a tela */
+}
+.sidebar.left{
+  order:1; /* Ordem para layout */
+}
+.sidebar.right{
+  order:3; /* Ordem para layout */
+}
+.main-content{
+  flex:1;
+  display:flex;
+  flex-direction:column;
+  gap:20px;
+  order:2; /* Ordem para layout */
+}
+/* MOBILE TOP SECTION - REMOVIDO */
+
+.header{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  background:var(--card-bg);
+  padding:15px 25px;
+  border-radius:12px;
+  box-shadow:0 4px 12px rgba(0,0,0,0.05);
+}
+.header h1{
+  font-size:1.8rem;
+  margin:0;
+  color:var(--primary);
+  display:flex;
+  align-items:center;
+  gap:8px;
+}
+.header h1 span{
+  color:var(--accent);
+}
+.search-container{
+  flex:1;
+  display:flex;
+  gap:10px;
+  align-items:center;
+  max-width:500px;
+}
+.search-input{
+  flex:1;
+  padding:10px 15px;
+  border-radius:8px;
+  border:1px solid var(--border-color);
+  font-size:0.9rem;
+  transition:all 0.3s ease;
+}
+.search-input:focus{
+  border-color:var(--accent);
+  box-shadow:0 0 0 3px rgba(59, 130, 246, 0.2);
+  outline:none;
+}
+.sort-select{
+  /* Removendo largura fixa para permitir que o select se ajuste */
+  /* width:120px; */
+  padding:10px;
+  border-radius:8px;
+  border:1px solid var(--border-color);
+  background:var(--card-bg);
+  font-size:0.85rem;
+  appearance:none; /* Remover estilo padrão do select */
+  background-image:url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%23666%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13.6-6.4H18.9c-5%200-9.3%201.8-12.9%205.4s-5.4%207.9-5.4%2012.8c0%204.8%201.8%209.1%205.4%2012.7L128.5%20287c3.6%203.5%207.8%205.3%2012.8%205.3s9.2-1.8%2012.8-5.3L287%2095.8a17.5%2017.5%200%200%200%205.3-12.7c0-5-1.8-9.2-5.3-12.7z%22%2F%3E%3C%2Fsvg%3E');
+  background-repeat:no-repeat;
+  background-position:right 0.7em top 50%, 0 0;
+  background-size:0.65em auto, 100%;
+}
+.nav-btns{
+  display:flex;
+  gap:10px;
+}
+.btn-primary{
+  padding:10px 18px;
+  border-radius:30px;
+  border:none;
+  background:var(--accent);
+  color:white;
+  cursor:pointer;
+  font-size:0.85rem;
+  font-weight:600;
+  transition:all 0.3s ease;
+  box-shadow:0 2px 8px rgba(59, 130, 246, 0.3);
+  display: flex; /* Adicionado aqui para centralizar ícone/texto em todos os botões primários */
+  align-items: center;
+  justify-content: center;
+}
+.btn-primary:hover{
+  background:#2c67d3;
+  box-shadow:0 4px 12px rgba(59, 130, 246, 0.4);
+}
+.btn-secondary{
+  padding:10px 18px;
+  border-radius:30px;
+  border:1px solid var(--border-color);
+  background:var(--card-bg);
+  color:var(--primary);
+  cursor:pointer;
+  font-size:0.85rem;
+  font-weight:600;
+  transition:all 0.3s ease;
+  box-shadow:0 2px 5px rgba(0,0,0,0.03);
+  display: flex; /* Adicionado aqui para centralizar ícone/texto em todos os botões secundários */
+  align-items: center;
+  justify-content: center;
+}
+.btn-secondary:hover{
+  background:#f0f2f5;
+  border-color:#d0d7e0;
+}
+
+/* Material Symbols Iconography */
+.material-symbols-outlined {
+  font-variation-settings:
+  'FILL' 0,
+  'wght' 400,
+  'GRAD' 0,
+  'opsz' 24 /* Tamanho padrão para botões e textos */
+}
+/* Ajustes para ícones em botões */
+.backup-group button.material-symbols-outlined,
+.sidebar button.material-symbols-outlined,
+.history-panel-btns button.material-symbols-outlined,
+.modal-actions button.material-symbols-outlined,
+.close-modal-btn-bottom.material-symbols-outlined,
+.btn-edit-card.material-symbols-outlined,
+.btn-delete-card.material-symbols-outlined
+{
+    font-size: 1.1em; /* Levemente maior que o texto do botão */
+    margin-right: 5px; /* Espaçamento entre o ícone e o texto */
+    color: inherit; /* Herda a cor do texto do botão */
+}
+/* Alinhamento para o ícone no título do header */
+.header h1.material-symbols-outlined {
+    font-size: 1.2em; /* Um pouco maior que o texto */
+    margin-right: 5px; /* Espaçamento entre o ícone e o texto */
+    vertical-align: middle; /* Alinha verticalmente */
+}
+
+/* Ícone da lixeira, por ser Danger, tem cor específica */
+.lixeira.material-symbols-outlined {
+    font-size: 1.2em; /* Um pouco maior */
+    color: var(--danger);
+    margin-right: 0; /* Remove margem extra */
+}
+.lixeira:hover.material-symbols-outlined {
+    color: white; /* Cor branca no hover */
+}
+
+/* Ícones para os títulos de seção na sidebar e painel de histórico */
+.sidebar-section h3.material-symbols-outlined,
+#historyPanel h2.material-symbols-outlined,
+.cat-filter-wrapper h3.material-symbols-outlined
+{
+    font-size: 1.2em;
+    vertical-align: middle;
+    margin-right: 8px;
+    color: var(--primary);
+}
+/* Ícones do toggle de senha */
+.toggle-password.material-symbols-outlined {
+    font-size: 1.2em; /* Um pouco maior para o olho */
+    color: var(--subtle-text);
+}
+.toggle-password:hover.material-symbols-outlined {
+    color: var(--primary);
+}
+/* Estilo para os ícones de alerta/crítico nos cards */
+/* A span.alerta-icon-inline é a que contém o ícone do Material Symbols */
+/* A cor deve ser aplicada diretamente ao span.material-symbols-outlined que está DENTRO de p.estoque-label */
+.card p.estoque-label.alerta-icon-inline.material-symbols-outlined { /* Corrigido o seletor */
+    font-size: 1.1em; /* Tamanho do ícone */
+    vertical-align: middle; /* Alinha com o texto */
+    margin-left: 4px; /* Espaçamento do número */
+}
+/* Cores do texto e ícone baseadas nas classes do CARD */
+/* Aplica a cor ao `b` e ao ícone dentro de `alerta-icon-inline` */
+.card.estoque-alerta p.estoque-label b,
+.card.estoque-alerta p.estoque-label.alerta-icon-inline.material-symbols-outlined { /* Seletores mais específicos */
+    color: var(--warning); /* Cor laranja para a quantidade e ícone em alerta */
+}
+.card.estoque-critico p.estoque-label b,
+.card.estoque-critico p.estoque-label.alerta-icon-inline.material-symbols-outlined { /* Seletores mais específicos */
+    color: var(--danger); /* Cor vermelha para a quantidade e ícone crítico */
+}
+
+/* Categoria Filters */
+.cat-filter-wrapper{
+  background:var(--card-bg);
+  padding:15px;
+  border-radius:12px;
+  box-shadow:0 4px 12px rgba(0,0,0,0.05);
+}
+.cat-filter-wrapper h3{
+  font-size:1rem;
+  margin-top:0;
+  margin-bottom:10px;
+  color:var(--primary);
+  display: flex;
+  align-items: center;
+}
+/* Estilo para a nova div de grid dos botões de categoria - AJUSTADO NOVAMENTE */
+.cat-buttons-grid {
+  display: grid;
+  /* Min-width maior para caber o texto */
+  grid-template-columns: repeat(auto-fit, minmax(90px, 1fr));
+  gap: 8px; /* Espaço entre os botões */
+}
+
+.btn-cat {
+  padding: 0 10px; /* Padding um pouco maior */
+  height: 32px; /* Altura ajustada para caber o texto */
+  border-radius: 16px; /* Mais arredondado */
+  font-size: 0.8rem; /* Fonte um pouco maior */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  box-sizing: border-box;
+  white-space: nowrap;
+  border:1px solid var(--border-color);
+  background:var(--card-bg);
+  cursor:pointer;
+  transition:all 0.3s ease;
+  color:var(--subtle-text);
+  font-weight:500;
+}
+
+.btn-cat.active{
+  background:var(--accent);
+  color:white;
+  border-color:var(--accent);
+  box-shadow:0 2px 8px rgba(59, 130, 246, 0.2);
+}
+.btn-cat:hover:not(.active){
+  background:#f0f2f5;
+  border-color:#d0d7e0;
+}
+
+/* Imagem na sidebar - AJUSTADA PARA MAIOR */
+.sidebar-image {
+  width: 100%;
+  padding: 0;
+  margin: 0;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow:0 4px 12px rgba(0,0,0,0.05);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 10px; /* Reduzindo margem inferior */
+}
+
+.sidebar-image img {
+  max-width: 100%;
+  max-height: 250px; /* ALTURA MÁXIMA AUMENTADA */
+  height: auto;
+  object-fit: contain;
+  display: block;
+  border-radius: 12px;
+  width: auto;
+}
+
+/* Ajuste para o grupo de input de busca */
+.input-group:not(.file-upload-group) { /* Exclui o file-upload-group para não afetar o modal */
+  flex: none; /* Remover o flex-grow */
+}
+
+/* Admin Panel */
+#adminPanel{
+  display:none; /* É 'none' por padrão e JS muda para 'grid' */
+  background:var(--card-bg);
+  padding:20px;
+  border-radius:12px;
+  grid-template-columns:repeat(auto-fit, minmax(150px, 1fr));
+  gap:15px;
+  align-items:end;
+  border-left:5px solid var(--accent);
+  box-shadow:0 4px 12px rgba(0,0,0,0.05);
+}
+.input-group label{
+  font-size:0.7rem;
+  font-weight:600;
+  color:var(--subtle-text);
+  margin-bottom:5px;
+  display:block;
+}
+input,select,textarea{
+  padding:10px 12px;
+  border:1px solid var(--border-color);
+  border-radius:8px;
+  width:100%;
+  box-sizing:border-box;
+  font-size:0.9rem;
+  background-color:var(--bg);
+  color:var(--text-color);
+  transition:all 0.3s ease;
+}
+input:focus,select:focus,textarea:focus{
+  border-color:var(--accent);
+  box-shadow:0 0 0 3px rgba(59, 130, 246, 0.2);
+  outline:none;
+  background-color:white;
+}
+
+#adminPanel button{
+  height:40px;
+  font-size:0.9rem;
+  padding:0 20px;
+}
+
+/* Stats Bar */
+.stats-bar{
+  display:flex;
+  justify-content:flex-end; /* Alinha os itens à direita */
+  align-items:center;
+  background:var(--card-bg);
+  padding:15px 25px;
+  border-radius:12px;
+  border:1px solid var(--border-color);
+  font-size:0.9rem;
+  box-shadow:0 2px 8px rgba(0,0,0,0.03);
+  gap:10px; /* Adiciona espaçamento entre os grupos de botões */
+  flex-wrap: wrap; /* Permite quebrar linha em telas menores */
+  margin-bottom: 20px; /* Adicionado para afastar da vitrine */
+}
+.stats-bar > div{ /* Ajuste para o.backup-group */
+  display:flex;
+  gap:10px;
+  flex-wrap: wrap; /* Permite quebrar linha em telas menores */
+}
+.stats-bar b{
+  font-weight:700;
+  color:var(--primary);
+  font-size:1rem;
+}
+.backup-group{
+  display:none; /* É 'none' por padrão e JS muda para 'flex' */
+  gap:10px;
+  flex-wrap: wrap; /* Permite quebrar linha em telas menores */
+}
+.backup-group button{
+  padding:8px 15px;
+  border-radius:20px;
+  font-size:0.8rem;
+}
+
+/* History Panel */
+#historyPanel{
+  display:none; /* É 'none' por padrão e JS muda para 'block' */
+  background:var(--card-bg);
+  padding:25px;
+  border-radius:16px;
+  margin-bottom:20px;
+  border-left:5px solid var(--primary);
+  box-shadow:0 4px 12px rgba(0,0,0,0.05);
+}
+#historyPanel h2{
+  font-size:1.3rem;
+  margin:0;
+  color:var(--primary);
+  display: flex;
+  align-items: center;
+}
+.hist-table{
+  width:100%;
+  border-collapse:collapse;
+  margin-top:15px;
+  font-size:0.85rem;
+}
+.hist-table th,.hist-table td{
+  padding:12px;
+  text-align:left;
+  border-bottom:1px solid #e0e7ee;
+}
+.hist-table th{
+  background-color:#f0f4f8;
+  font-weight:600;
+  color:var(--primary);
+}
+.hist-table tr:nth-child(even){background:#f9fbfc;}
+.hist-table input{font-weight:bold;font-family:inherit;}
+.tag-add{color:var(--success);font-weight:bold;}
+.tag-sub{color:var(--danger);font-weight:bold;}
+.lixeira{
+  background:#fef2f2;
+  border:none;
+  border-radius:5px;
+  color:var(--danger);
+  font-size:1rem;
+  cursor:pointer;
+  padding:5px 8px;
+  transition:all 0.2s ease;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+}
+.lixeira:hover{
+  background:#b91c1c;
+  color:white;
+}
+
+/* Vitrine Grid */
+.grid{
+  display:grid;
+  /* MODIFICAÇÃO CHAVE: Ajustado minmax para tentar 5 colunas, com um mínimo que ainda funciona para 4 */
+  grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); /* Reduzido min-width para encaixar 5, mas ainda ser largo */
+  gap:20px;
+}
+.card{
+  background:var(--card-bg);
+  border-radius:12px;
+  overflow:hidden;
+  border:1px solid var(--border-color);
+  text-align:center;
+  transition:all 0.3s ease;
+  padding:10px; /* Padding interno do card */
+  box-shadow:0 4px 15px rgba(0,0,0,0.05);
+  position:relative;
+  display:flex;
+  flex-direction:column;
+}
+.card:hover{
+  transform:translateY(-5px);
+  box-shadow:0 8px 25px rgba(0,0,0,0.1);
+}
+/* Container da imagem para manter proporção quadrada */
+.card-image-container {
+  width: 100%;
+  padding-bottom: 100%; /* Isso faz o container ser quadrado (100% da largura) */
+  position: relative;
+  overflow: hidden;
+  border-radius: 8px;
+  background:#fefefe;
+  margin-bottom: 8px; /* Espaço entre imagem e texto */
+}
+.card img{
+  position: absolute;
+  top: 0;
+  left: 0;
+  width:100%;
+  height:100%;
+  object-fit:contain; /* Garante que a imagem se ajuste sem cortar */
+  display:block;
+  border-radius: 8px;
+}
+.card-info{
+  padding:5px 0 0; /* Ajustado padding */
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  flex-grow:1; /* Permite que o info ocupe espaço restante */
+  justify-content: space-between; /* Espaça o conteúdo do info */
+}
+.card h3{
+  margin:4px 0; /* Margem menor */
+  font-size:0.75rem; /* FONTE DO NOME DO PRODUTO REDUZIDA AINDA MAIS */
+  line-height:1.2; /* Linha um pouco mais justa */
+  color:var(--primary);
+  font-weight:600; /* MANTÉM O NEGRITO */
+  word-break: break-word; /* Garante que palavras longas quebrem a linha */
+  text-align: center; /* Centraliza o texto do título */
+}
+.badge-cat{
+  font-size:0.6rem; /* FONTE DA CATEGORIA REDUZIDA */
+  padding:3px 8px; /* Padding menor */
+  border-radius:15px;
+  color:white;
+  font-weight:600;
+  text-transform:uppercase;
+  margin-top:4px; /* Margem menor */
+  margin-bottom:8px; /* Margem menor */
+  display:inline-block; /* Para padding funcionar bem */
+}
+.card p{
+  margin:0;
+  font-size:0.75rem; /* FONTE DO TEXTO 'ESTOQUE' REDUZIDA */
+  color:var(--subtle-text);
+}
+.card p b{
+  font-size:1rem; /* FONTE DO NÚMERO DO ESTOQUE REDUZIDA */
+  color:var(--primary);
+}
+.admin-actions{
+  display:flex;
+  flex-direction:row;
+  justify-content:center;
+  gap:8px;
+  margin-top:10px;
+}
+.btn-edit-card,.btn-delete-card{
+  font-size:0.75rem;
+  padding:6px 10px;
+  background:#f0f4f8;
+  border:1px solid var(--border-color);
+  border-radius:6px;
+  cursor:pointer;
+  color:var(--primary);
+  transition:all 0.2s ease;
+  display: flex; /* Para alinhar o ícone com o texto */
+  align-items: center;
+  justify-content: center;
+}
+.btn-edit-card:hover{background:#e0e7ee;}
+.btn-delete-card{
+  background:#fef2f2;
+  border-color:#fca5a5;
+  color:#b91c1c;
+}
+.btn-delete-card:hover{
+  background:#b91c1c;
+  color:white;
+}
+
+/* Modal Styling - REVISADO */
+#modal{
+  display:none;
+  position:fixed;
+  top:0;
+  left:0;
+  width:100%;
+  height:100%;
+  background: rgba(15,23,42,0.7);
+  z-index:1000;
+  align-items:center;
+  justify-content:center;
+  backdrop-filter:blur(5px);
+}
+.modal-content{
+  background:var(--card-bg);
+  padding:30px;
+  border-radius:20px;
+  width:400px; /* Aumentado para melhor layout */
+  text-align:center;
+  box-shadow:0 10px 30px rgba(0,0,0,0.2);
+  transform:scale(0.95);
+  animation:modalOpen 0.3s forwards ease-out;
+  display:flex;
+  flex-direction:column;
+  gap:15px; /* Espaçamento entre os elementos do modal */
+}
+@keyframes modalOpen {
+  to { transform:scale(1); opacity:1; }
+}
+.modal-content h2.modal-title{ /* Novo título para o modal */
+  font-size:1.4rem;
+  margin:0 0 10px 0;
+  font-weight:700;
+}
+.modal-content.input-group{ /* Reutilizando estilo de input-group */
+  text-align:left;
+  margin-bottom:5px;
+}
+.modal-content.input-group label{
+  font-size:0.85rem;
+  font-weight:600;
+  color:var(--subtle-text);
+  margin-bottom:5px;
+  display:block;
+}
+.modal-content input,.modal-content select,.modal-content textarea{
+  padding:10px 12px;
+  border:1px solid var(--border-color);
+  border-radius:8px;
+  box-sizing:border-box;
+  font-size:0.9rem;
+  background-color:var(--bg);
+  color:var(--text-color);
+  transition:all 0.3s ease;
+}
+input:focus,select:focus,textarea:focus{
+  border-color:var(--accent);
+  box-shadow:0 0 0 3px rgba(59, 130, 246, 0.2);
+  outline:none;
+  background-color:white;
+}
+
+#mNomeEdit{ /* Estilo específico para o nome do produto */
+  font-weight:600;
+  text-align:center;
+  font-size:1.1rem;
+  color:var(--primary);
+  background:var(--bg);
+  border-color:var(--border-color);
+}
+.current-stock-display{
+  background:#f0f4f8;
+  padding:10px;
+  border-radius:10px;
+  margin-bottom:5px;
+}
+.current-stock-display p{
+  margin:0;
+  font-size:0.7rem;
+  color:var(--subtle-text);
+}
+.current-stock-display b{
+  font-size:1.8rem;
+  color:var(--primary);
+}
+#valMov{
+  text-align:center;
+  width:100px; /* Ajustado para caber no layout */
+  margin:auto;
+  background:var(--bg);
+  border-color:var(--border-color);
+}
+#mNota{
+  height:60px;
+  font-size:0.8rem;
+  resize:vertical;
+  background:var(--bg);
+  border-color:var(--border-color);
+}
+.file-upload-group{
+  margin-top:5px;
+  text-align:left;
+}
+.file-upload-group label{
+  display:block;
+  margin-bottom:5px;
+  font-weight:500;
+  color:var(--subtle-text);
+  font-size:0.85rem;
+}
+.file-upload-group input[type="file"]{
+  padding:8px;
+  border:1px solid var(--border-color);
+  border-radius:8px;
+  background-color:var(--bg);
+  font-size:0.8rem;
+  cursor:pointer;
+}
+.modal-actions{
+  display:flex;
+  gap:10px;
+  margin-top:10px;
+}
+.modal-actions button{
+  flex:1;
+  padding:12px;
+  border-radius:10px;
+  font-size:0.9rem;
+  font-weight:600;
+  box-shadow:0 2px 10px rgba(0,0,0,0.05);
+  cursor:pointer;
+  transition:all 0.3s ease;
+}
+.btn-entry{ /* Botão Entrada */
+  background:var(--success);
+  color:white;
+  border:none;
+}
+.btn-entry:hover{
+  background:#0d9488;
+}
+.btn-exit{ /* Botão Saída */
+  background:var(--danger);
+  color:white;
+  border:none;
+}
+.btn-exit:hover{
+  background:#b91c1c;
+}
+.close-modal-btn-bottom{ /* Botão Salvar e Fechar */
+  margin-top:15px;
+  padding:12px;
+  border-radius:10px;
+  font-size:0.9rem;
+  font-weight:600;
+  background:var(--primary); /* Cor mais neutra para salvar */
+  color:white;
+  border:none;
+  box-shadow:0 2px 10px rgba(0,0,0,0.05);
+  cursor:pointer;
+  transition:all 0.3s ease;
+}
+.close-modal-btn-bottom:hover{
+  background:#1e293b;
+}
+
+.print-only{display:none;}
+@media print{
+  body{background:white;padding:0;}
+.overlay{background:white;padding:0;}
+.no-print{display:none!important;}
+.print-only{display:block;}
+.print-header{text-align:center;font-size:28px;font-weight:bold;border-bottom:2px solid #000;padding-bottom:10px;margin-bottom:20px;}
+.grid{
+    display:grid!important;
+    grid-template-columns:repeat(6,1fr)!important; /* Mais colunas para PDF */
+    gap:5px!important;
+  }
+.card{
+    border:1px solid #eee!important;
+    box-shadow:none!important;
+    padding:5px!important;
+    page-break-inside:avoid;
+  }
+.card img{height:70px!important; margin-bottom:5px!important;}
+.card h3{font-size:0.55rem!important; line-height:1.1!important;}
+.card p{font-size:0.6rem!important;}
+.card p b{font-size:0.8rem!important;}
+.badge-cat{font-size:0.5rem!important; padding:2px 6px!important; margin-top:2px!important;}
+.admin-actions{display:none!important;}
+
+.report-footer{
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 10px;
+      border-top: 1px solid #000;
+      padding: 5px 15mm;
+      background: white;
+      box-sizing: border-box;
+      page-break-inside: avoid; /* Evita que o footer seja quebrado entre páginas */
+      page-break-before: avoid;
+    }
+.report-footer.datetime-info {
+      flex-grow: 1;
+      text-align: center;
+      order: 2;
+    }
+.report-footer.count-info {
+      flex-grow: 1;
+      text-align: right;
+      order: 3;
+    }
+.report-footer.flex-spacer-left {
+      flex-grow: 1;
+      order: 1;
+    }
+
+.hist-table th{font-weight:bold;}
+}
+
+/* --- INÍCIO DO NOVO CSS PARA CAMPO DE SENHA --- */
+/* Estilo para o container do input de senha */
+.password-input-container {
+    position: relative;
+    display: flex; /* Garante que o input e o botão fiquem alinhados */
+    align-items: center; /* Centraliza verticalmente o conteúdo */
+    width: 100%;
+}
+
+/* Estilo para o ícone de olho (botão) */
+.toggle-password {
+    position: absolute;
+    right: 1px; /* Ajuste para o canto direito, próximo à borda */
+    height: calc(100% - 2px); /* Altura do botão para cobrir o input, menos borda */
+    width: 38px; /* Largura fixa para o botão */
+    cursor: pointer;
+    background: transparent; /* Fundo transparente */
+    border: none; /* Sem borda */
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10;
+    transition: background-color 0.2s ease;
+    border-top-right-radius: 8px; /* Arredonda as bordas do botão */
+    border-bottom-right-radius: 8px; /* Arredonda as bordas do botão */
+}
+
+.toggle-password:hover {
+    background-color: rgba(0, 0, 0, 0.05); /* Fundo sutil no hover */
+}
+
+/* Estilo para os ícones Material Symbols dentro do botão */
+.toggle-password.material-symbols-outlined {
+    font-size: 1.2em; /* Um pouco maior para o olho */
+    color: var(--subtle-text);
+}
+.toggle-password:hover.material-symbols-outlined {
+    color: var(--primary);
+}
+
+/* Adicione um padding à direita no input para não cobrir o ícone */
+.password-input-container input {
+    padding-right: 40px; /* Deixa mais espaço para o ícone */
+}
+/* --- FIM DO NOVO CSS PARA CAMPO DE SENHA --- */
+
+/* Estilos para a sidebar direita */
+.sidebar-section {
+    background: var(--card-bg);
+    padding: 15px;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    margin-bottom: 15px; /* Espaço entre as seções */
+}
+.sidebar-section h3 {
+    font-size: 1rem;
+    margin-top: 0;
+    margin-bottom: 10px;
+    color: var(--primary);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+.sidebar-section p {
+    font-size: 0.9rem;
+    margin-bottom: 5px;
+    color: var(--text-color);
+}
+.sidebar-highlight {
+    font-size: 1.5rem; /* Fonte maior para destaque */
+    font-weight: 700;
+    color: var(--accent); /* Cor de destaque */
+    display: block;
+    text-align: center;
+    margin: 10px 0;
+}
+/* Estilo para os itens de informação na sidebar direita */
+.sidebar-info-item {
+    display: flex;
+    align-items: baseline; /* Alinha pela base do texto para um look mais natural */
+    justify-content: flex-start; /* Alinha o conteúdo à esquerda */
+    gap: 8px; /* Espaçamento entre o label e o valor */
+    padding: 5px 0;
+    /* Removi a borda inferior daqui para ser mais seletivo */
+    font-size: 0.9rem; /* Tamanho base um pouco maior */
+}
+/* Estilo para a borda do relatório detalhado - para não afetar os itens de cima */
+.sidebar-section > #relatorioDetalhado >.sidebar-info-item {
+    border-bottom: 1px dashed var(--border-color);
+}
+
+.sidebar-info-item:last-of-type { /* O último item não precisa de borda inferior */
+    border-bottom: none;
+}
+.sidebar-info-item.label { /* Label dentro do item de informação */
+    font-weight: bold; /* Negrito para o label */
+    color: var(--primary); /* Cor principal */
+    white-space: nowrap; /* Evita quebra de linha do label */
+}
+.sidebar-info-item.value { /* Valor dentro do item de informação */
+    font-weight: bold; /* Negrito para o valor */
+    font-size: 1rem; /* Tamanho do valor um pouco maior */
+    color: var(--accent); /* Cor de destaque para o valor */
+    white-space: nowrap; /* Evita quebra de linha do valor */
+}
+
+.sidebar-stock-list ul {
+    list-style: none;
+    padding: 0;
+    margin: 10px 0 0 0;
+}
+.sidebar-stock-list li {
+    font-size: 0.85rem;
+    padding: 5px 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px dotted var(--border-color);
+}
+.sidebar-stock-list li:last-child {
+    border-bottom: none;
+}
+.sidebar-stock-list li.product-name { /* Adicionado a classe para o span */
+    flex: 1;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    margin-right: 10px;
+}
+.sidebar-stock-list li.stock-count { /* Adicionado a classe para o span */
+    font-weight: 600;
+    min-width: 30px; /* Para alinhar bem o número */
+    text-align: right;
+}
+.sidebar-action-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: auto; /* Empurra para o final da sidebar */
+}
+
+/* Responsive adjustments */
+@media (min-width: 1201px) { /* Apenas para telas grandes */
+.sidebar-action-group {
+    margin-top: 15px; /* Adiciona um pouco de margem para afastar do conteúdo */
+  }
+}
+
+@media (max-width: 1200px) {
+.container-wrapper{
+    flex-direction:column;
+    gap:20px;
+    margin:15px auto;
+    padding:0 15px;
+  }
+.sidebar{
+    width:100%;
+    order:unset; /* Remover ordem para mobile */
+    position: static; /* Remove o sticky em telas pequenas */
+    max-height: none;
+    overflow-y: visible;
+  }
+/* Ações de admin no mobile (sem margin-top: auto) */
+.sidebar-action-group {
+    margin-top: 15px!important; /* Espaçamento padrão para mobile */
+}
+.main-content{
+    order:unset;
+  }
+.header{
+    flex-wrap:wrap;
+    gap:15px;
+    justify-content:center;
+  }
+.header h1{
+    width:100%;
+    text-align:center;
+    justify-content:center;
+    font-size:1.6rem; /* Levemente menor para tablets */
+  }
+.search-container{
+    order:3;
+    width:100%;
+    max-width:none;
+  }
+.nav-btns{
+    order:2;
+  }
+  #adminPanel{
+    grid-template-columns:1fr;
+  }
+.grid{
+    grid-template-columns:repeat(auto-fill, minmax(140px, 1fr)); /* Ajuste para tablets: 3-4 colunas */
+  }
+.modal-content{
+    width:90%;
+    max-width:450px; /* Limita um pouco o tamanho em tablets */
+  }
+.stats-bar{
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 10px 15px;
+  }
+.stats-bar > div{
+    flex-wrap: wrap;
+    gap: 15px;
+  }
+.backup-group{
+    flex-wrap: wrap;
+  }
+}
+
+/* NOVO PONTO DE RUPTURA: Celulares e telas pequenas (menor que 768px) */
+@media (max-width: 768px) {
+  /* Empilhar itens do container-wrapper */
+.container-wrapper{
+    flex-direction:column;
+    gap:15px;
+    margin:10px auto;
+    padding:0 10px;
+  }
+
+  /* ORDENAÇÃO NO SMARTPHONE */
+.main-content {
+    order: 1;
+    background: none;
+    padding: 0;
+    box-shadow: none;
+  }
+.sidebar.left {
+    order: 2;
+    box-shadow: none;
+    border-radius: 0;
+  }
+.sidebar.right {
+    display: none;
+  }
+
+  /* HEADER DENTRO DO MAIN-CONTENT - MOBILE */
+.main-content.header {
+    padding: 10px 15px;
+    flex-wrap: wrap;
+    gap: 10px;
+    justify-content: center;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    margin-bottom: 15px;
+  }
+.main-content.header h1 {
+    font-size: 1.4rem;
+    width: 100%;
+    text-align: center;
+    justify-content: center;
+  }
+.main-content.header h1 img {
+    height: 25px;
+  }
+
+  /* STATS BAR DENTRO DO MAIN-CONTENT - MOBILE */
+.main-content.stats-bar {
+    padding: 10px 15px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    border: none;
+    justify-content: center;
+    margin-bottom: 15px;
+  }
+.main-content.stats-bar.backup-group {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+.main-content.stats-bar.backup-group button {
+    font-size: 0.75rem;
+    padding: 6px 10px;
+    border-radius: 15px;
+  }
+
+  /* SIDEBAR ESQUERDA - AJUSTES PARA MOBILE */
+  /* Elementos da sidebar esquerda que devem ser escondidos no mobile */
+.sidebar-desktop-only {
+    display: none;
+  }
+  /* Filtros de Categoria */
+.sidebar.left.cat-filter-wrapper {
+    margin-top: 0;
+    border-radius: 12px;
+    margin-bottom: 15px;
+  }
+  /* Input de Busca */
+.sidebar.left.input-group:has(#inputBusca) {
+    margin-top: 0;
+    padding: 15px;
+    background: var(--card-bg);
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+  }
+  /* Categoria buttons grid */
+.cat-buttons-grid {
+    grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
+    gap: 5px;
+  }
+.btn-cat{
+    padding:4px 6px;
+    font-size:0.75rem;
+    height: 30px;
+    border-radius:15px;
+  }
+
+  /* ADMIN PANEL / HISTORY PANEL */
+  #adminPanel, #historyPanel{
+    padding:15px;
+    border-left:none;
+    border-top:5px solid var(--accent);
+    box-shadow: none;
+  }
+  #historyPanel h2{
+    font-size:1.1rem;
+  }
+.hist-table th,.hist-table td{
+    padding:8px;
+    font-size:0.75rem;
+  }
+  /* Esconde a coluna de ação da lixeira na tabela para economizar espaço */
+.hist-table th:last-child,.hist-table th:nth-last-child(2),.hist-table td:last-child,.hist-table th:nth-last-child(2){
+    display: none;
+  }
+
+  /* GRID DE PRODUTOS */
+.grid{
+    grid-template-columns:repeat(auto-fill, minmax(110px, 1fr)); /* Em celulares, 2 ou 3 colunas */
+    gap:8px;
+  }
+.card{
+    padding:10px;
+    border-radius:10px;
+  }
+.card img{
+    /* Removido altura fixa, agora usa o container */
+    margin-bottom:6px;
+  }
+.card h3{
+    font-size:0.7rem; /* Fonte um pouco menor em telas muito pequenas */
+    line-height:1.1;
+  }
+.badge-cat{
+    font-size:0.5rem;
+    padding:2px 5px;
+    margin-top:3px;
+    margin-bottom:6px;
+  }
+.card p{
+    font-size:0.65rem;
+  }
+.card p b{
+    font-size:0.9rem;
+  }
+
+  /* MODAL */
+  #modal{
+    padding:0px;
+    background: rgba(15,23,42,0.9);
+  }
+.modal-content{
+    width:95%;
+    height:auto;
+    max-height:90vh;
+    overflow-y:auto;
+    padding:20px;
+    border-radius:15px;
+    margin: auto;
+    box-shadow:0 10px 40px rgba(0,0,0,0.4);
+    animation:modalSlideUp 0.3s forwards ease-out;
+  }
+  @keyframes modalSlideUp {
+    from { transform:translateY(100%); opacity:0; }
+    to { transform:translateY(0); opacity:1; }
+  }
+.modal-actions{
+    flex-direction:column;
+    gap:8px;
+  }
+.close-modal-btn-bottom{
+    margin-top:10px;
+  }
+}
+
+/* Ajustes para telas bem pequenas, como iPhones SE (320px de largura) */
+@media (max-width: 380px) {
+.grid{
+    grid-template-columns:repeat(auto-fill, minmax(95px, 1fr));
+    gap:6px;
+  }
+.card h3{
+    font-size:0.65rem; /* Fonte ainda menor em telas muito pequenas */
+  }
+.card img{
+    /* Removido altura fixa */
+  }
+.modal-content{
+    width:98%;
+    padding:15px;
+  }
+  /* Ajuste responsivo para a imagem da sidebar em telas muito pequenas */
+.sidebar-image img {
+    max-height: 100px;
+  }
+}
+
+/* --- NOVO CSS PARA ESTOQUE MÍNIMO MAIS PROFISSIONAL E ÍCONE PEQUENO (CORRIGIDO) --- */
+.card.estoque-alerta {
+    border: 1px solid var(--warning); /* Borda laranja suave */
+    box-shadow: 0 0 10px rgba(245, 158, 11, 0.2); /* Sombra laranja */
+}
+.card.estoque-critico {
+    border: 2px solid var(--danger); /* Borda vermelha mais forte */
+    box-shadow: 0 0 15px rgba(239, 68, 68, 0.3); /* Sombra vermelha */
+}
+
+/* Animação sutil para o card quando em estado crítico */
+@keyframes pulseSubtle {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.005); } /* Reduzindo o scale para ser ainda mais sutil */
+    100% { transform: scale(1); }
+}
+.card.estoque-critico {
+    animation: pulseSubtle 2s infinite ease-in-out;
+}
+
+/* Estilo para o texto de estoque */
+.card p.estoque-label {
+    display: flex; /* Para alinhar o texto "Estoque: BOLD_QTD ICON" */
+    align-items: center;
+    justify-content: center;
+    gap: 4px; /* Espaço entre o ícone e o texto do estoque */
+    margin: 0; /* Garante que não tenha margens indesejadas */
+    font-size: 0.75rem; /* FONTE DO TEXTO 'ESTOQUE' REDUZIDA */
+    color: var(--subtle-text);
+}
+.card p.estoque-label b {
+    font-weight: 700;
+    font-size: 1rem; /* FONTE DO NÚMERO DO ESTOQUE REDUZIDA */
+    color: var(--primary); /* Cor padrão do número */
+}
+
+/* Estilo para o ícone de alerta INLINE (agora um Material Symbol) */
+/* O seletor foi ajustado para pegar o span do Material Symbols corretamente */
+.card p.estoque-label.alerta-icon-inline.material-symbols-outlined {
+    font-size: 1.1em; /* Tamanho do ícone */
+    vertical-align: middle; /* Alinha com o texto */
+    margin-left: 4px; /* Espaçamento do número */
+}
+/* Cores do texto e ícone baseadas nas classes do CARD */
+/* Aplica a cor ao `b` e ao ícone dentro de `alerta-icon-inline` */
+.card.estoque-alerta p.estoque-label b,
+.card.estoque-alerta p.estoque-label.alerta-icon-inline.material-symbols-outlined { /* Seletores mais específicos */
+    color: var(--warning); /* Cor laranja para a quantidade e ícone em alerta */
+}
+.card.estoque-critico p.estoque-label b,
+.card.estoque-critico p.estoque-label.alerta-icon-inline.material-symbols-outlined { /* Seletores mais específicos */
+    color: var(--danger); /* Cor vermelha para a quantidade e ícone crítico */
+}
+
+</style>
+<!-- Firebase SDK -->
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
+<!-- Remover referência a firebase-storage.js pois não será usado para upload -->
+<!-- <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-storage.js"></script> -->
+
+<script>
+  // SUA CONFIGURAÇÃO firebaseConfig GERADA PELO CONSOLE DO FIREBASE
+  const firebaseConfig = {
+    apiKey: "AIzaSyB0dWRSytDSfIAmCtg5pTEIjvwfJPSxb74", // SEU API KEY REAL!
+    authDomain: "haris-estoque.firebaseapp.com",
+    projectId: "haris-estoque",
+    // storageBucket: "haris-estoque.appspot.com", // REMOVIDO: Não precisamos configurar Storage aqui se não vamos usá-lo
+    messagingSenderId: "526155106830",
+    appId: "1:526155106830:web:55b4bf4c0d9549ec42ca5f",
+    measurementId: "G-B77P8EZ6BS" // Para Analytics, pode ser mantido ou removido se não for usar
+  };
+
+  // Inicialize o Firebase
+  firebase.initializeApp(firebaseConfig);
+
+  // Obtenha a referência para o Firestore
+  const dbFirebase = firebase.firestore();
+  // REMOVIDO: Não precisamos da referência ao storageFirebase se não vamos usá-lo
+  // const storageFirebase = firebase.storage();
+
+  // CREDENCIAIS DO CLOUDINARY
+  const CLOUDINARY_CLOUD_NAME = 'dqp57nr5g'; // SEU CLOUD NAME!
+  const CLOUDINARY_UPLOAD_PRESET = 'haris_estoque_preset'; // SEU UPLOAD PRESET!
+
+  // Você pode ignorar o analytics por enquanto, ele não é essencial para o funcionamento do app.
+  // Se quiser usar, seria: const analytics = firebase.analytics();
+</script>
+</head>
+<body>
+<div class="overlay">
+  <div class="print-only print-header">📦 Relatório de Estoque Haris</div>
+
+  <div class="container-wrapper">
+    <!-- Main Content Area -->
+    <div class="main-content">
+      <!-- Header do App -->
+      <div class="header no-print">
+        <h1><img src="https://cdn-icons-png.flaticon.com/512/3238/3238058.png" alt="Logo" style="height:30px;"> Haris <span>Estoque</span></h1>
+        <!-- Ícone do cabeçalho original foi removido para evitar duplicação -->
+      </div>
+
+      <!-- Stats Bar -->
+      <div class="stats-bar no-print">
+        <div class="backup-group" id="backupGroup">
+          <!-- BOTÃO ADMIN: alterado para btn-primary -->
+          <button class="btn-primary" id="btnAdmin" onclick="toggleAdmin()"><span class="material-symbols-outlined">key</span> Admin</button>
+          <button class="btn-primary" style="background:#1c74d0;" onclick="imprimirProdutos()"><span class="material-symbols-outlined">description</span> PDF</button>
+          <!-- BOTÃO HISTÓRICO: alterado para btn-primary -->
+          <button class="btn-primary" onclick="toggleHistory()"><span class="material-symbols-outlined">history</span> Histórico</button>
+          <button class="btn-primary" style="background:#1c74d0;" onclick="exportarBackup()"><span class="material-symbols-outlined">download</span> Exportar</button>
+          <!-- BOTÃO IMPORTAR: alterado para btn-primary, removido estilo inline para cor padrao -->
+          <button class="btn-primary" onclick="document.getElementById('importInput').click()"><span class="material-symbols-outlined">upload</span> Importar</button>
+          <input type="file" id="importInput" style="display:none" onchange="importarBackup(event)">
+          
+          <!-- NOVO BOTÃO PARA ABRIR O CATÁLOGO -->
+          <button class="btn-primary" onclick="window.open('catalogo.index', '_blank');">
+            <span class="material-symbols-outlined">menu_book</span> Catálogo
+          </button>
+        </div>
+      </div>
+
+      <div id="adminPanel" class="no-print">
+        <div class="input-group"><label>Nome do Produto</label><input type="text" id="nome" placeholder="Ex: Tinta Branca 5L"></div>
+        <div class="input-group"><label>Categoria</label>
+          <select id="categoria">
+            <!-- Categorias são geradas via JS em initFirebase() -->
+          </select>
+        </div>
+        <div class="input-group"><label>Quantidade Inicial</label><input type="number" id="qtd" value="0"></div>
+        <div class="input-group"><label>Estoque Mínimo</label><input type="number" id="qtdMin" value="0"></div> <!-- NOVO CAMPO: Estoque Mínimo -->
+        <div class="input-group"><label>Foto do Produto</label><input type="file" id="foto" accept="image/*"></div>
+        <button class="btn-primary" style="align-self: flex-end;" onclick="cadastrar()">ADICIONAR PRODUTO</button>
+      </div>
+
+      <div id="historyPanel" class="no-print">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; flex-wrap:wrap; gap:10px;" class="history-panel-btns">
+          <h2><span class="material-symbols-outlined">history</span> Histórico de Movimentações</h2>
+          <div style="display:flex; gap:10px; flex-wrap:wrap;">
+            <!-- AQUI FOI FEITA A CORREÇÃO NO ONCLICK -->
+            <button class="btn-primary" onclick="imprimirHistorico()"><span class="material-symbols-outlined">description</span> PDF Histórico</button>
+            <button class="btn-secondary" onclick="limparHistorico()"><span class="material-symbols-outlined">delete_sweep</span> Limpar Histórico</button>
+          </div>
+        </div>
+        <div style="display:flex; gap:10px; margin-bottom:15px; flex-wrap:wrap;">
+          <input type="text" id="inputBuscaHist" class="search-input" placeholder="Pesquisar produto ou motivo..." oninput="renderHistory()">
+          <select id="filtroCatHist" class="sort-select" onchange="renderHistory()">
+            <!-- Categorias são geradas via JS em initFirebase() -->
+          </select>
+        </div>
+        <div style="overflow-x:auto;">
+          <table class="hist-table">
+            <thead>
+              <tr>
+                <th>Data</th>
+                <th>Produto</th>
+                <th>Tipo</th>
+                <th>Qtd</th>
+                <th>Motivo</th>
+                <th>Ação</th>
+              </tr>
+            </thead>
+            <tbody id="listaHist"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="grid" id="vitrine"></div>
+    </div>
+
+    <!-- Left Sidebar -->
+    <div class="sidebar left no-print">
+      <!-- Conteúdo Desktop Only (visível apenas em desktop) -->
+      <div class="sidebar-desktop-only">
+        <div class="header" style="box-shadow:none; padding:0;">
+            <h1><img src="https://cdn-icons-png.flaticon.com/512/3238/3238058.png" alt="Logo" style="height:30px;"> Haris <span>Estoque</span></h1>
+        </div>
+        <div class="sidebar-image">
+          <img id="sidebarImage" src="animao-de-um-rebocador-com-haris-escrito-na-inscri.jpeg" alt="Rebocador Haris">
+        </div>
+        <div class="input-group" style="display:flex; flex-direction:column; gap:5px;">
+          <label for="ordem">Ordenar Por</label>
+          <div style="display:flex; align-items:center; gap:10px;">
+            <select id="ordem" class="sort-select" style="flex:1;" onchange="render()">
+              <option value="nome">A-Z</option>
+              <option value="qtd-desc">Estoque ↑</option>
+              <option value="qtd-asc">Estoque ↓</option>
+            </select>
+            <!-- BOTÃO MUDAR IMAGEM: removido o estilo inline para usar a classe btn-primary -->
+            <button class="btn-primary" onclick="uploadSidebarImage(event)"><span class="material-symbols-outlined">image</span> Mudar Imagem</button>
+            <input type="file" id="sidebarImageUploadHidden" accept="image/*" style="display:none;" onchange="handleSidebarFileSelection(event)">
+          </div>
+        </div>
+        <div class="sidebar-action-group" style="display:flex; flex-direction:column; gap:10px; margin-top: 15px;">
+        </div>
+      </div>
+
+      <!-- Conteúdo da Sidebar Esquerda visível no Mobile -->
+      <div class="cat-filter-wrapper">
+        <h3><span class="material-symbols-outlined">filter_list</span> Filtrar por Categoria</h3>
+        <div class="cat-filter" id="catFiltros">
+          <div class="cat-buttons-grid">
+            <!-- Os botões serão gerados aqui pelo JS -->
+          </div>
+        </div>
+      </div>
+
+      <div class="input-group">
+        <label for="inputBusca">Pesquisar Produto</label>
+        <input type="text" id="inputBusca" class="search-input" placeholder="Nome do produto..." oninput="render()">
+      </div>
+    </div>
+
+    <!-- Right Sidebar -->
+    <div class="sidebar right no-print">
+      <div class="sidebar-section">
+        <h3><span class="material-symbols-outlined">insights</span> Visão Geral do Estoque</h3>
+        <div class="sidebar-info-item">
+          <span class="label"><b>Produtos Cadastrados:</b></span>
+          <span class="value" id="rightSidebarTotalProdutos" style="color: var(--accent); font-weight: bold;">0</span>
+        </div>
+        <div class="sidebar-info-item">
+          <span class="label"><b>Total Geral:</b></span>
+          <span class="value" id="rightSidebarTotalEstoqueHighlight" style="color: var(--accent); font-weight: bold;">0</span>
+        </div>
+      </div>
+
+      <div class="sidebar-section">
+        <h3><span class="material-symbols-outlined">search</span> Relatório Rápido</h3>
+        <div class="input-group" style="margin-bottom: 10px;">
+          <label for="relatorioRapidoCat">Filtrar por Categoria</label>
+          <!-- Aumentei o width para caber o texto -->
+          <select id="relatorioRapidoCat" class="sort-select" style="width: 100%;" onchange="gerarRelatorioRapido()">
+            <!-- Categorias serão preenchidas via JS -->
+          </select>
+        </div>
+        <div id="relatorioDetalhado">
+          <p class="sidebar-info-item">
+            <span class="label" style="color:var(--primary);"><b>Itens nesta Categoria:</b></span>
+            <span class="value" id="itensCategoria" style="color:var(--success);">0</span>
+          </p>
+          <p class="sidebar-info-item">
+            <span class="label" style="color:var(--primary);"><b>Estoque Total da Categoria:</b></span>
+            <span class="value" id="estoqueCategoria" style="color:var(--success);">0</span>
+          </p>
+        </div>
+      </div>
+
+      <!-- Seção para Itens com MENOR Estoque -->
+      <div class="sidebar-section sidebar-stock-list">
+        <h3><span class="material-symbols-outlined">south_east</span> Itens com Menor Estoque</h3>
+        <ul id="listaMenorEstoque">
+          <!-- Produtos com menor estoque serão listados aqui -->
+          <li class="placeholder">Nenhum item encontrado nesta categoria.</li>
+        </ul>
+      </div>
+
+      <!-- Seção para Itens com MAIOR Estoque -->
+      <div class="sidebar-section sidebar-stock-list">
+        <h3><span class="material-symbols-outlined">north_east</span> Itens com Maior Estoque</h3>
+        <ul id="listaMaiorEstoque">
+          <!-- Produtos com maior estoque serão listados aqui -->
+          <li class="placeholder">Nenhum item encontrado nesta categoria.</li>
+        </ul>
+      </div>
+
+      <div class="sidebar-action-buttons">
+        <button class="btn-secondary" onclick="alert('Funcionalidade em desenvolvimento!')"><span class="material-symbols-outlined">settings</span> Configurações</button>
+        <button class="btn-secondary" onclick="alert('Funcionalidade em desenvolvimento!')"><span class="material-symbols-outlined">notifications</span> Notificações</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Rodapé do PDF de produtos. Será preenchido com JS -->
+  <div class="print-only report-footer" id="productPrintFooter">
+    <span class="flex-spacer-left"></span>
+    <span class="datetime-info"></span>
+    <span class="count-info"></span>
+  </div>
+</div>
+
+<div id="modal" class="no-print">
+  <div class="modal-content">
+    <h2 class="modal-title">EDITAR PRODUTO</h2>
+    <div class="input-group">
+        <label for="mNomeEdit">Nome do Produto</label>
+        <input type="text" id="mNomeEdit">
+    </div>
+
+    <div class="input-group">
+        <label for="mCategoriaEdit">Categoria</label>
+        <select id="mCategoriaEdit">
+          <!-- Categorias serão preenchidas via JS -->
+        </select>
+    </div>
+
+    <div class="current-stock-display">
+      <p>Estoque Atual</p>
+      <b id="mQtd">0</b>
+    </div>
+
+    <div class="input-group">
+        <label for="valMov">Quantidade de Movimentação</label>
+        <input type="number" id="valMov" value="0">
+    </div>
+    
+    <div class="input-group"> <!-- NOVO CAMPO: Estoque Mínimo no modal de edição -->
+        <label for="mQtdMinEdit">Estoque Mínimo</label>
+        <input type="number" id="mQtdMinEdit" value="0">
+    </div>
+
+    <div class="input-group">
+        <label for="mNota">Motivo da movimentação</label>
+        <textarea id="mNota" placeholder="Motivo da movimentação..."></textarea>
+    </div>
+
+    <div class="file-upload-group">
+      <label for="mFoto">Alterar Foto:</label>
+      <input type="file" id="mFoto" accept="image/*">
+    </div>
+
+    <div class="modal-actions">
+      <button class="btn-entry" onclick="movimentar('add')"><span class="material-symbols-outlined">add_box</span> ENTRADA</button>
+      <button class="btn-exit" onclick="movimentar('sub')"><span class="material-symbols-outlined">remove_box</span> SAÍDA</button>
+    </div>
+    <button class="close-modal-btn-bottom" onclick="fecharModal()"><span class="material-symbols-outlined">save</span> SALVAR E FECHAR</button>
+  </div>
+</div>
+
+<script>
+let isAdmin = false, editIdx = null; // editIdx agora armazena o ID do produto
+let db = [], historico = [];
+let categoriasAtivas = []; // AGORA É UM ARRAY DE CATEGORIAS SELECIONADAS!
+let listaCategorias = ["Componente B", "Escova Rotativa", "Filtros", "Jotamastic A", "Jotamastic B", "Manilhas", "Pincel", "Rolo de Pintura", "Solvente", "Tinta Hardtop", "Tinta Pilot", "Outros"];
+
+let sidebarImageUrl = ''; // Nova variável para guardar a URL da imagem da sidebar
+
+// Preenche os selects de categoria
+function preencherSelectsDeCategoria() {
+    const selects = document.querySelectorAll('#categoria, #filtroCatHist, #mCategoriaEdit, #relatorioRapidoCat');
+    selects.forEach(select => {
+        if (select.id === 'filtroCatHist' || select.id === 'relatorioRapidoCat') {
+            // Garante que "Todos" seja a primeira opção nos filtros
+            select.innerHTML = '<option value="Todos">Todas as Categorias</option>';
+        } else {
+            select.innerHTML = ''; // Limpa para categorias dinâmicas
+        }
+        // Adiciona as categorias da listaCategorias (que é populada do db)
+        listaCategorias.forEach(cat => {
+            const option = document.createElement('option');
+            option.value = cat;
+            option.textContent = cat;
+            select.appendChild(option);
+        });
+    });
+}
+
+// === FUNÇÕES DE INTERAÇÃO COM FIREBASE (Firestore) ===
+
+async function initFirebase() {
+  console.log("Inicializando Firebase e carregando dados...");
+  try {
+    // Carrega produtos e histórico do Firestore
+    await carregarDadosFirebase();
+    // Carrega a imagem da sidebar do Firestore
+    await carregarSidebarImageFirebase();
+    // Preenche os selects de categoria com as categorias encontradas
+    preencherSelectsDeCategoria();
+    // Renderiza a vitrine e o histórico
+    render();
+    renderHistory();
+    // Atualiza o relatório rápido
+    gerarRelatorioRapido();
+  } catch (error) {
+    console.error("Erro ao carregar dados do Firebase:", error);
+    alert("Erro ao carregar dados do Firebase. Verifique sua conexão ou configurações de segurança do Firestore.");
+  }
+}
+
+async function carregarDadosFirebase() {
+  // Carregar Produtos
+  const produtosSnapshot = await dbFirebase.collection('produtos').get();
+  db = produtosSnapshot.docs.map(doc => ({ id: doc.id,...doc.data() }));
+  db.forEach(p => {
+    p.qtd = Number(p.qtd);
+    p.qtdMin = Number(p.qtdMin || 0); // Garante que qtdMin é número, com padrão 0
+  });
+
+  // Carregar Histórico (ordenado pelo timestamp mais recente)
+  const historicoSnapshot = await dbFirebase.collection('historico').orderBy('dataTimestamp', 'desc').get();
+  historico = historicoSnapshot.docs.map(doc => ({ id: doc.id,...doc.data() }));
+
+  // Atualizar listaCategorias com base nos produtos carregados
+  const categoriasSet = new Set(db.map(p => p.cat).filter(Boolean));
+  const defaultCategories = ["Componente B", "Escova Rotativa", "Filtros", "Jotamastic A", "Jotamastic B", "Manilhas", "Pincel", "Rolo de Pintura", "Solvente", "Tinta Hardtop", "Tinta Pilot", "Outros"];
+  // Adiciona categorias padrão se não existirem no Firebase
+  defaultCategories.forEach(cat => categoriasSet.add(cat));
+
+  listaCategorias = Array.from(categoriasSet).sort();
+}
+
+async function salvarProdutoFirebase(produto) {
+  try {
+    if (produto.id) { // Se o produto já tem ID, é uma atualização
+      const { id,...data } = produto; // Separa o ID dos outros dados
+      await dbFirebase.collection('produtos').doc(id).update(data);
+      console.log("Produto atualizado no Firestore:", id);
+      return produto;
+    } else { // Senão, é um novo produto
+      const docRef = await dbFirebase.collection('produtos').add(produto);
+      produto.id = docRef.id; // Atribui o ID gerado pelo Firestore ao objeto local
+      console.log("Novo produto adicionado ao Firestore:", produto.id);
+      return produto;
+    }
+  } catch (error) {
+    console.error("Erro ao salvar produto no Firestore:", error);
+    throw error;
+  }
+}
+
+async function adicionarHistoricoFirebase(itemHistorico) {
+  try {
+    itemHistorico.dataTimestamp = firebase.firestore.FieldValue.serverTimestamp(); // Adiciona timestamp do servidor
+    const docRef = await dbFirebase.collection('historico').add(itemHistorico);
+    itemHistorico.id = docRef.id; // Guarda o ID do histórico também
+    console.log("Item de histórico adicionado:", docRef.id);
+    return itemHistorico;
+  } catch (error) {
+    console.error("Erro ao adicionar histórico no Firestore:", error);
+    throw error;
+  }
+}
+
+async function deletarProdutoFirebase(productId) {
+  try {
+    // As imagens agora são gerenciadas pelo Cloudinary, não precisamos mais deletar do Firebase Storage.
+    // Se quiser deletar do Cloudinary, precisaria implementar a API de exclusão do Cloudinary aqui,
+    // o que exigiria um backend devido à necessidade de API_SECRET.
+    await dbFirebase.collection('produtos').doc(productId).delete();
+    console.log("Produto deletado do Firestore:", productId);
+  } catch (error) {
+    console.error("Erro ao deletar produto do Firestore:", error);
+    throw error;
+  }
+}
+
+async function deletarHistoricoFirebase(historicoId) {
+  try {
+    await dbFirebase.collection('historico').doc(historicoId).delete();
+    console.log("Item de histórico deletado do Firestore:", historicoId);
+  } catch (error) {
+    console.error("Erro ao deletar histórico do Firestore:", error);
+    throw error;
+  }
+}
+
+// === FUNÇÕES DE INTERAÇÃO COM CLOUDINARY ===
+
+// Função para fazer upload de imagem para o Cloudinary
+async function uploadImagemCloudinary(file) {
+  if (!file) return null;
+
+  const formData = new FormData();
+  formData.append('file', file);
+  formData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
+
+  try {
+    const response = await fetch(`https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/image/upload`, {
+      method: 'POST',
+      body: formData
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      console.error("Erro no upload do Cloudinary:", errorData);
+      throw new Error(`Upload para Cloudinary falhou: ${errorData.error.message || response.statusText}`);
+    }
+
+    const data = await response.json();
+    console.log("Imagem uploaded para Cloudinary:", data.secure_url);
+    return data.secure_url; // Retorna a URL segura da imagem no Cloudinary
+  } catch (error) {
+    console.error("Erro geral no upload para Cloudinary:", error);
+    throw error;
+  }
+}
+
+async function salvarSidebarImageFirebase(imageUrl) {
+  try {
+    await dbFirebase.collection('config').doc('sidebar_image').set({ imageUrl: imageUrl });
+    console.log("Imagem da sidebar salva no Firestore.");
+  } catch (error) {
+    console.error("Erro ao salvar imagem da sidebar no Firestore:", error);
+    throw error;
+  }
+}
+
+async function carregarSidebarImageFirebase() {
+  try {
+    const doc = await dbFirebase.collection('config').doc('sidebar_image').get();
+    const imgElement = document.getElementById('sidebarImage');
+
+    if (doc.exists && doc.data().imageUrl) {
+      sidebarImageUrl = doc.data().imageUrl;
+      imgElement.src = sidebarImageUrl;
+      console.log("Imagem da sidebar carregada do Firestore.");
+    } else {
+      const initialSrc = imgElement.getAttribute('src');
+      if (initialSrc &&!initialSrc.startsWith('data:') &&!initialSrc.startsWith('http')) {
+        // Se a imagem inicial é local e não Data URL, precisa ser carregada para o Cloudinary (para aparecer)
+        // Por simplicidade, vamos usar um placeholder se não houver no Firestore e não for Data URL
+        imgElement.src = 'https://via.placeholder.com/280x150?text=Imagem+Nao+Encontrada';
+        console.warn("Imagem da sidebar não encontrada no Firestore ou não é uma URL. Usando placeholder.");
+      } else {
+        imgElement.src = initialSrc || 'https://via.placeholder.com/280x150?text=Imagem+Nao+Encontrada';
+        console.warn("Imagem da sidebar não encontrada no Firestore. Usando SRC inicial ou placeholder.");
+      }
+    }
+  } catch (error) {
+    console.error("Erro ao carregar imagem da sidebar do Firestore:", error);
+    document.getElementById('sidebarImage').src = 'https://via.placeholder.com/280x150?text=Imagem+Nao+Encontrada';
+  }
+}
+
+// === FUNÇÕES DE ADMINISTRAÇÃO E LÓGICA DO APP ===
+
+// Função de prompt de senha customizado
+async function customPasswordPrompt(message, correctPassword) {
+    return new Promise((resolve) => {
+        const modal = document.createElement('div');
+        modal.id = 'customPasswordModal';
+        modal.style.cssText = `
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.7);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            backdrop-filter: blur(3px);
+        `;
+
+        const modalContent = document.createElement('div');
+        modalContent.style.cssText = `
+            background: var(--card-bg);
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+            text-align: center;
+            width: 300px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            animation: modalOpen 0.3s forwards ease-out;
+        `;
+
+        const messageP = document.createElement('p');
+        messageP.textContent = message;
+        messageP.style.cssText = `
+            margin: 0;
+            font-size: 1rem;
+            color: var(--primary);
+            font-weight: 500;
+        `;
+
+        const inputContainer = document.createElement('div');
+        inputContainer.className = 'password-input-container';
+
+        const passwordInput = document.createElement('input');
+        passwordInput.type = 'password'; // Começa como password (asteriscos)
+        passwordInput.placeholder = 'Digite a senha...';
+        passwordInput.style.cssText = `
+            padding: 10px 40px 10px 12px; /* Aumenta padding direito para o ícone */
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            width: 100%;
+            box-sizing: border-box;
+            font-size: 0.9rem;
+            color: var(--text-color);
+        `;
+        passwordInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                confirmBtn.click();
+            }
+        });
+
+        // Material Symbols para olho aberto e fechado
+        const toggleBtn = document.createElement('button');
+        toggleBtn.className = 'toggle-password';
+        toggleBtn.innerHTML = '<span class="material-symbols-outlined">visibility_off</span>'; // Ícone de olho fechado por padrão
+        let isPasswordVisible = false;
+        toggleBtn.addEventListener('click', () => {
+            isPasswordVisible =!isPasswordVisible;
+            passwordInput.type = isPasswordVisible? 'text' : 'password';
+            toggleBtn.innerHTML = isPasswordVisible? '<span class="material-symbols-outlined">visibility</span>' : '<span class="material-symbols-outlined">visibility_off</span>';
+            passwordInput.focus(); // Mantém o foco no input
+        });
+
+        // Oculta o botão se o input estiver vazio
+        const updateToggleVisibility = () => {
+            toggleBtn.style.display = passwordInput.value.length > 0? 'flex' : 'none';
+        };
+        passwordInput.addEventListener('input', updateToggleVisibility);
+        updateToggleVisibility(); // Chama na inicialização para estado inicial
+
+        inputContainer.appendChild(passwordInput);
+        inputContainer.appendChild(toggleBtn);
+
+        const buttonGroup = document.createElement('div');
+        buttonGroup.style.cssText = `
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+        `;
+
+        const confirmBtn = document.createElement('button');
+        confirmBtn.textContent = 'Confirmar';
+        confirmBtn.className = 'btn-primary';
+        confirmBtn.style.cssText = `
+            padding: 10px 20px;
+            font-size: 0.9rem;
+            border-radius: 8px;
+            flex: 1;
+        `;
+        confirmBtn.addEventListener('click', () => {
+            const enteredPassword = passwordInput.value;
+            modal.remove();
+            resolve(enteredPassword === correctPassword);
+        });
+
+        const cancelBtn = document.createElement('button');
+        cancelBtn.textContent = 'Cancelar';
+        cancelBtn.className = 'btn-secondary';
+        cancelBtn.style.cssText = `
+            padding: 10px 20px;
+            font-size: 0.9rem;
+            border-radius: 8px;
+            flex: 1;
+        `;
+        cancelBtn.addEventListener('click', () => {
+            modal.remove();
+            resolve(false); // Retorna false se o usuário cancelar
+        });
+
+        buttonGroup.appendChild(cancelBtn);
+        buttonGroup.appendChild(confirmBtn);
+
+        modalContent.appendChild(messageP);
+        modalContent.appendChild(inputContainer);
+        modalContent.appendChild(buttonGroup);
+        modal.appendChild(modalContent);
+        document.body.appendChild(modal);
+
+        passwordInput.focus(); // Foca no campo de senha
+    });
+}
+
+function toggleAdmin(){
+  if(!isAdmin){
+    // Utiliza o prompt de senha customizado
+    customPasswordPrompt("Digite a senha de administrador:", "RebocadorHaris")
+.then(isAuthenticated => { // Usa.then() pois a função customPasswordPrompt retorna uma Promise
+        if(isAuthenticated){
+          isAdmin=true;
+          document.getElementById('adminPanel').style.display='grid';
+          document.getElementById('backupGroup').style.display='flex';
+          render(); // Atualiza a vitrine para mostrar os botões de admin
+          alert("Modo Administrador Ativado!");
+        } else {
+          alert("Senha incorreta ou operação cancelada.");
+        }
+      });
+  }
+  else{
+    isAdmin=false;
+    document.getElementById('adminPanel').style.display='none';
+    document.getElementById('backupGroup').style.display='none';
+    document.getElementById('historyPanel').style.display='none';
+    render(); // Esconde os botões de admin
+    alert("Modo Administrador Desativado!");
+  }
+}
+
+async function cadastrar(){
+  const n=document.getElementById('nome').value;
+  const c=document.getElementById('categoria').value;
+  const q=parseInt(document.getElementById('qtd').value);
+  const qMin=parseInt(document.getElementById('qtdMin').value); // <<< NOVO: Ler estoque mínimo
+  const f=document.getElementById('foto').files[0];
+
+  if(!n||isNaN(q)||!f) return alert('Preencha todos os campos e informe uma quantidade válida!');
+
+  try {
+    const fotoURL = await uploadImagemCloudinary(f); // <<< UPLOAD PARA CLOUDINARY
+    if (!fotoURL) throw new Error("Falha ao obter URL da imagem do Cloudinary.");
+
+    const novoProdutoData = { nome: n, cat: c, qtd: q, qtdMin: qMin, foto: fotoURL }; // <<< ADICIONADO qtdMin
+    const produtoComId = await salvarProdutoFirebase(novoProdutoData); // Salva no Firestore
+    
+    db.push(produtoComId); // Adiciona ao array local
+    render();
+    gerarRelatorioRapido(); // ATUALIZAR RELATORIO RÁPIDO
+    preencherSelectsDeCategoria(); // Atualiza as categorias nos selects
+    document.getElementById('nome').value='';
+    document.getElementById('qtd').value='0';
+    document.getElementById('qtdMin').value='0'; // <<< NOVO: Resetar estoque mínimo
+    document.getElementById('foto').value='';
+  } catch (error) {
+    console.error("Erro ao cadastrar produto:", error);
+    alert("Erro ao cadastrar produto. Verifique o console para mais detalhes.");
+  }
+}
+
+async function abrirModal(productId){
+  const p = db.find(prod => prod.id === productId);
+  if (!p) {
+    alert("Produto não encontrado para edição.");
+    return;
+  }
+  editIdx = productId; // Agora editIdx armazena o ID, não o índice
+  document.getElementById('mNomeEdit').value=p.nome;
+  document.getElementById('mQtd').innerText=p.qtd;
+  document.getElementById('mQtdMinEdit').value=p.qtdMin; // <<< NOVO: Preencher estoque mínimo
+  document.getElementById('mNota').value='';
+  document.getElementById('valMov').value=0;
+  document.getElementById('mCategoriaEdit').value=p.cat;
+  document.getElementById('mFoto').value = ''; // Limpa o campo de foto
+  document.getElementById('modal').style.display='flex';
+}
+
+async function fecharModal(){
+  const p = db.find(prod => prod.id === editIdx);
+  if (!p) return; // Se o produto não for encontrado, fecha o modal
+
+  p.nome=document.getElementById('mNomeEdit').value;
+  p.cat=document.getElementById('mCategoriaEdit').value;
+  p.qtdMin=parseInt(document.getElementById('mQtdMinEdit').value); // <<< NOVO: Salvar estoque mínimo
+  const f=document.getElementById('mFoto').files[0];
+
+  try {
+    if(f){
+      const fotoURL = await uploadImagemCloudinary(f); // <<< UPLOAD PARA CLOUDINARY
+      if (fotoURL) p.foto = fotoURL; // Atualiza URL no objeto local
+      else console.warn("Não foi possível obter URL da imagem do Cloudinary. Mantendo imagem anterior.");
+    }
+    await salvarProdutoFirebase(p); // Salva as alterações (nome, categoria, foto, qtdMin) no Firestore
+    render();
+    gerarRelatorioRapido(); // ATUALIZAR RELATORIO RÁPIDO
+    preencherSelectsDeCategoria(); // Atualiza as categorias nos selects
+  } catch (error) {
+    console.error("Erro ao salvar alterações do produto:", error);
+    alert("Erro ao salvar alterações. Verifique o console para mais detalhes.");
+  }
+
+  document.getElementById('modal').style.display='none';
+  document.getElementById('mFoto').value = '';
+  editIdx = null;
+}
+
+async function movimentar(tipo){
+  const val=parseInt(document.getElementById('valMov').value)||0;
+  if(val<=0) return alert('Informe uma quantidade válida!');
+
+  const p = db.find(prod => prod.id === editIdx);
+  if (!p) return;
+
+  const nota=document.getElementById('mNota').value||'-';
+  let tipoMov = '';
+
+  if(tipo==='add') {
+    p.qtd+=val;
+    tipoMov = 'Entrada';
+  }
+  else if(tipo==='sub') {
+    if(p.qtd < val){
+        alert("Não é possível remover mais itens do que o estoque atual.");
+        return;
+    }
+    p.qtd-=val;
+    tipoMov = 'Saída';
+  }
+
+  try {
+    await salvarProdutoFirebase(p); // Atualiza o produto no Firestore
+    const itemHistorico = {
+      data: new Date().toLocaleString(),
+      produto: p.nome,
+      cat: p.cat,
+      tipo: tipoMov,
+      qtd: val,
+      motivo: nota,
+    };
+    const savedHist = await adicionarHistoricoFirebase(itemHistorico); // Adiciona ao histórico no Firestore
+    historico.unshift(savedHist); // Adiciona ao array local no início
+
+    render();
+    renderHistory();
+    gerarRelatorioRapido(); // ATUALIZAR RELATORIO RÁPIDO
+
+    document.getElementById('mQtd').innerText=p.qtd;
+    document.getElementById('valMov').value=0;
+    document.getElementById('mNota').value='';
+  } catch (error) {
+    console.error("Erro ao movimentar estoque:", error);
+    alert("Erro ao movimentar estoque. Verifique o console para mais detalhes.");
+  }
+}
+
+async function deletarProduto(productId){
+  if(confirm('Deseja deletar este produto?')){
+    try {
+      await deletarProdutoFirebase(productId); // Deleta do Firestore
+      const indexToDelete = db.findIndex(p => p.id === productId);
+      if (indexToDelete > -1) {
+        db.splice(indexToDelete, 1); // Remove do array local
+      }
+      render();
+      gerarRelatorioRapido(); // ATUALIZAR RELATORIO RÁPIDO
+      preencherSelectsDeCategoria(); // Atualiza as categorias nos selects
+    } catch (error) {
+      console.error("Erro ao deletar produto:", error);
+      alert("Erro ao deletar produto. Verifique o console para mais detalhes.");
+    }
+  }
+}
+
+async function limparHistorico(){
+  if(confirm('Deseja limpar todo o histórico? Essa ação é irreversível!')){
+    try {
+      // Deleta todos os documentos do histórico um por um
+      const deletePromises = historico.map(h => deletarHistoricoFirebase(h.id));
+      await Promise.all(deletePromises);
+      historico = []; // Limpa o array local
+      renderHistory();
+      alert("Histórico limpo com sucesso!");
+    } catch (error) {
+      console.error("Erro ao limpar histórico:", error);
+      alert("Erro ao limpar histórico. Verifique o console para mais detalhes.");
+    }
+  }
+}
+
+async function deletarHist(historicoId){
+  if(confirm('Deseja deletar esta movimentação do histórico?')){
+    try {
+      await deletarHistoricoFirebase(historicoId);
+      const indexToDelete = historico.findIndex(h => h.id === historicoId);
+      if (indexToDelete > -1) {
+        historico.splice(indexToDelete, 1);
+      }
+      renderHistory();
+    } catch (error) {
+      console.error("Erro ao deletar item do histórico:", error);
+      alert("Erro ao deletar item do histórico. Verifique o console para mais detalhes.");
+    }
+  }
+}
+
+// NOVO FLUXO: Primeiro pede a senha, depois abre o seletor de arquivos
+async function uploadSidebarImage(event) {
+  const isAuthenticated = await customPasswordPrompt("Digite a senha para alterar a imagem da sidebar:", "RebocadorHaris");
+  if (!isAuthenticated) {
+    alert("Senha incorreta ou operação cancelada. Imagem da sidebar não alterada.");
+    return; // Não faz mais nada, pois a senha não foi validada
+  }
+
+  // Se a senha for correta, simula um clique no input de arquivo escondido
+  document.getElementById('sidebarImageUploadHidden').click();
+  // O processo de upload continuará em handleSidebarFileSelection() quando o usuário escolher o arquivo
+}
+
+// NOVA FUNÇÃO: Lida com a seleção real do arquivo após a validação da senha
+async function handleSidebarFileSelection(event) {
+  const file = event.target.files[0];
+  if (file) {
+    try {
+      const imgElement = document.getElementById('sidebarImage');
+      const fotoURL = await uploadImagemCloudinary(file); // <<< UPLOAD PARA CLOUDINARY
+      if (!fotoURL) throw new Error("Falha ao obter URL da imagem da sidebar do Cloudinary.");
+
+      sidebarImageUrl = fotoURL;
+      imgElement.src = sidebarImageUrl;
+      await salvarSidebarImageFirebase(sidebarImageUrl); // Salva a URL no Firestore (coleção 'config')
+      alert("Imagem da sidebar atualizada e salva!");
+      event.target.value = null; // Limpa o input file para permitir nova seleção sem acionar o 'change' novamente
+    } catch (error) {
+      console.error("Erro ao atualizar imagem da sidebar:", error);
+      alert("Erro ao atualizar imagem da sidebar. Verifique o console para mais detalhes.");
+    }
+  } else {
+    event.target.value = null; // Limpa o input file se nenhum arquivo foi selecionado
+  }
+}
+
+async function importarBackup(event){
+  const file = event.target.files[0];
+  if (file) {
+    const reader = new FileReader();
+    reader.onload = async function(e) {
+      try {
+        const importedData = JSON.parse(e.target.result);
+        if (importedData.produtos && importedData.historico) {
+          if (confirm("Importar backup? Isso substituirá os dados ATUAIS no Firebase. Continuar?")) {
+            // Limpa dados existentes no Firebase
+            console.log("Limpando produtos existentes no Firebase...");
+            const deleteProdPromises = db.map(p => deletarProdutoFirebase(p.id));
+            await Promise.all(deleteProdPromises);
+            console.log("Limpando histórico existente no Firebase...");
+            const deleteHistPromises = historico.map(h => deletarHistoricoFirebase(h.id));
+            await Promise.all(deleteHistPromises);
+
+            db = []; historico = []; // Limpa arrays locais
+
+            // Importar produtos
+            console.log("Importando produtos do backup...");
+            for (const prod of importedData.produtos) {
+              const { id,...data } = prod; // Firestore gera IDs, então ignore o ID do backup
+              data.qtdMin = Number(data.qtdMin || 0); // Garante que qtdMin seja um número ou 0
+              // Se a imagem for uma data URL, faça upload para o Cloudinary
+              if (data.foto && data.foto.startsWith('data:image')) {
+                  const blob = await (await fetch(data.foto)).blob();
+                  const fakeFile = new File([blob], `image_${Date.now()}.png`, { type: blob.type });
+                  const fotoURL = await uploadImagemCloudinary(fakeFile); // <<< UPLOAD PARA CLOUDINARY
+                  data.foto = fotoURL; // Atualiza a foto no objeto de dados
+              } else if (data.foto && data.foto.startsWith('https://firebasestorage.googleapis.com/')) {
+                  console.warn(`Foto do Firebase Storage detectada para ${data.nome}. Tentando re-upload para Cloudinary.`);
+                  try {
+                    const response = await fetch(data.foto);
+                    if (response.ok) {
+                        const blob = await response.blob();
+                        const fakeFile = new File([blob], `image_fs_${Date.now()}.png`, { type: blob.type });
+                        const fotoURL = await uploadImagemCloudinary(fakeFile);
+                        if (fotoURL) data.foto = fotoURL;
+                        else data.foto = 'https://via.placeholder.com/120x120?text=Import+Error'; // Fallback
+                    } else {
+                        data.foto = 'https://via.placeholder.com/120x120?text=FS+Error'; // Fallback
+                    }
+                  } catch (fetchError) {
+                      console.error("Erro ao tentar baixar imagem do Firebase Storage:", fetchError);
+                      data.foto = 'https://via.placeholder.com/120x120?text=Fetch+Error'; // Fallback
+                  }
+              }
+              const savedProd = await salvarProdutoFirebase(data);
+              db.push(savedProd);
+            }
+
+            // Importar histórico
+            console.log("Importando histórico do backup...");
+            for (const histItem of importedData.historico) {
+              const { id,...data } = histItem; // Firestore gera IDs, ignore o ID do backup
+              // Adiciona um timestamp de servidor para manter a ordem se data fosse apenas string
+              data.dataTimestamp = firebase.firestore.FieldValue.serverTimestamp();
+              const savedHist = await adicionarHistoricoFirebase(data);
+              historico.push(savedHist);
+            }
+
+            // Importar imagem da sidebar
+            if (importedData.sidebarImage) {
+              if (importedData.sidebarImage.startsWith('data:image')) {
+                  const blob = await (await fetch(importedData.sidebarImage)).blob();
+                  const fakeFile = new File([blob], `sidebar_image_${Date.now()}.png`, { type: blob.type });
+                  const fotoURL = await uploadImagemCloudinary(fakeFile); // <<< UPLOAD PARA CLOUDINARY
+                  if (fotoURL) {
+                    sidebarImageUrl = fotoURL;
+                    document.getElementById('sidebarImage').src = sidebarImageUrl;
+                    await salvarSidebarImageFirebase(sidebarImageUrl);
+                  }
+              } else if (importedData.sidebarImage.startsWith('https://firebasestorage.googleapis.com/')) {
+                  console.warn("Imagem da sidebar do Firebase Storage detectada. Tentando re-upload para Cloudinary.");
+                  try {
+                    const response = await fetch(importedData.sidebarImage);
+                    if (response.ok) {
+                        const blob = await response.blob();
+                        const fakeFile = new File([blob], `sidebar_image_fs_${Date.now()}.png`, { type: blob.type });
+                        const fotoURL = await uploadImagemCloudinary(fakeFile);
+                        if (fotoURL) {
+                          sidebarImageUrl = fotoURL;
+                          document.getElementById('sidebarImage').src = sidebarImageUrl;
+                          await salvarSidebarImageFirebase(sidebarImageUrl);
+                        } else {
+                          sidebarImageUrl = 'https://via.placeholder.com/280x150?text=Import+Error';
+                          document.getElementById('sidebarImage').src = sidebarImageUrl;
+                        }
+                    } else {
+                        sidebarImageUrl = 'https://via.placeholder.com/280x150?text=FS+Error';
+                        document.getElementById('sidebarImage').src = sidebarImageUrl;
+                    }
+                  } catch (fetchError) {
+                      console.error("Erro ao tentar baixar imagem da sidebar do Firebase Storage:", fetchError);
+                      sidebarImageUrl = 'https://via.placeholder.com/280x150?text=Fetch+Error';
+                      document.getElementById('sidebarImage').src = sidebarImageUrl;
+                  }
+              } else {
+                  // Se já for URL do Cloudinary ou externa, salva direto no Firestore
+                  sidebarImageUrl = importedData.sidebarImage;
+                  document.getElementById('sidebarImage').src = sidebarImageUrl;
+                  await salvarSidebarImageFirebase(sidebarImageUrl);
+              }
+            }
+
+            // Recarrega todos os dados do Firebase para garantir a consistência
+            await initFirebase();
+            alert("Backup importado com sucesso!");
+          }
+        } else {
+          alert("Arquivo de backup inválido. Estrutura incorreta.");
+        }
+      } catch (error) {
+        console.error("Erro ao ler ou importar o arquivo de backup:", error);
+        alert("Erro ao ler ou importar o arquivo de backup: " + error.message);
+      }
+    };
+    reader.readAsText(file);
+  }
+}
+
+// === FUNÇÕES AUXILIARES DE RENDERIZAÇÃO E RELATÓRIOS ===
+
+function render(){
+  const v=document.getElementById('vitrine');
+  const termo=document.getElementById('inputBusca').value.toLowerCase();
+  const fBox=document.getElementById('catFiltros');
+  const ordem=document.getElementById('ordem').value;
+  v.innerHTML='';
+
+  // Renderiza os botões de filtro de categoria na nova div.cat-buttons-grid
+  fBox.querySelector('.cat-buttons-grid').innerHTML =
+    `<button class="btn-cat ${categoriasAtivas.length === 0? 'active' : ''}" onclick="toggleCat('Todos')">Todos</button>` +
+    listaCategorias.map(c =>
+    `<button class="btn-cat ${categoriasAtivas.includes(c)? 'active' : ''}" onclick="toggleCat('${c}')">${c}</button>`
+  ).join('');
+
+  let cProd=0,cEst=0;
+
+  let produtosExibidos = db.filter(p => {
+    const matchesSearchTerm = p.nome.toLowerCase().includes(termo);
+    const matchesCategory = categoriasAtivas.length === 0 || categoriasAtivas.includes(p.cat);
+    return matchesSearchTerm && matchesCategory;
+  });
+
+  if(ordem==='nome') produtosExibidos.sort((a,b)=>a.nome.localeCompare(b.nome));
+  else if(ordem==='qtd-desc') produtosExibidos.sort((a,b)=>b.qtd-a.qtd);
+  else if(ordem==='qtd-asc') produtosExibidos.sort((a,b)=>a.qtd-b.qtd);
+
+  produtosExibidos.forEach(p=>{
+    cProd++; cEst+=parseInt(p.qtd);
+    
+    // NOVO: Lógica de alerta e classes (com ícones inline e discretos, agora usando Material Symbols)
+    let estoqueClass = '';
+    let alertaIconInline = ''; 
+    let iconName = ''; // Nome do ícone Material Symbols
+
+    if (p.qtdMin > 0) { // Só aplica alerta se houver estoque mínimo definido
+        if (p.qtd < p.qtdMin) { // Abaixo do mínimo: crítico (vermelho)
+            estoqueClass = 'estoque-critico';
+            iconName = 'error'; // Ícone de erro/crítico
+        } else if (p.qtd === p.qtdMin) { // Igual ao mínimo: alerta (laranja/amarelo)
+            estoqueClass = 'estoque-alerta';
+            iconName = 'notification_important'; // Ícone de alerta
+        }
+    }
+    
+    // Adiciona o span do ícone apenas se houver um nome de ícone definido
+    if (iconName) {
+        alertaIconInline = `<span class="alerta-icon-inline"><span class="material-symbols-outlined">${iconName}</span></span>`; // Aninhado em span.alerta-icon-inline
+    }
+
+    v.innerHTML+=`
+      <div class="card ${estoqueClass}"> <!-- Aplicar classes de estoque no card -->
+        <div class="card-image-container">
+          <img src="${p.foto || 'https://via.placeholder.com/120x120?text=Sem+Foto'}" alt="${p.nome || 'Produto sem foto'}" loading="lazy">
+        </div>
+        <div class="card-info">
+          <h3>${p.nome}</h3>
+          <span class="badge-cat" style="background:${getCorCat(p.cat)}">${p.cat||'Outros'}</span>
+          <p class="estoque-label">Estoque: <b>${p.qtd}</b>${alertaIconInline}</p> <!-- Ícone agora está aqui, inline com o texto -->
+          ${isAdmin?`<div class="admin-actions">
+           <button class="btn-edit-card" onclick="abrirModal('${p.id}')"><span class="material-symbols-outlined">edit</span></button>
+            <button class="btn-delete-card" onclick="deletarProduto('${p.id}')"><span class="material-symbols-outlined">delete</span></button>
+          </div>`:''}
+        </div>
+      </div>`;
+  });
+
+  // ATUALIZAR DADOS DA SIDEBAR DIREITA SEMPRE QUE RENDERIZAR
+  document.getElementById('rightSidebarTotalProdutos').innerText = db.length;
+  document.getElementById('rightSidebarTotalEstoqueHighlight').innerText = db.reduce((sum, p) => sum + p.qtd, 0);
+  gerarRelatorioRapido(); // Chama a função para garantir que as listas menores/maiores sejam atualizadas
+}
+
+function toggleCat(categoria){
+  if (categoria === 'Todos') {
+    categoriasAtivas = [];
+  } else {
+    const index = categoriasAtivas.indexOf(categoria);
+    if (index > -1) {
+      categoriasAtivas.splice(index, 1);
+    } else {
+      categoriasAtivas.push(categoria);
+    }
+  }
+  render();
+}
+
+function getCorCat(cat){
+  const cores={
+    'Tinta Hardtop':'#f97316',
+    'Tinta Pilot':'#3b82f6',
+    'Componente B':'#14b8a6',
+    'Jotamastic A':'#facc15',
+    'Jotamastic B':'#8b5cf6',
+    'Solvente':'#ef4444',
+    'Filtros': '#a3e635',
+    'Manilhas': '#ec4899',
+    'Escova Rotativa': '#FF8C00',
+    'Pincel': '#8A2BE2',
+    'Rolo de Pintura': '#00CED1',
+    'Outros':'#6b7280'
+  };
+  return cores[cat]||'#6b7280';
+}
+
+function toggleHistory(){
+  const historyPanel = document.getElementById('historyPanel');
+  historyPanel.style.display = historyPanel.style.display === 'none' || historyPanel.style.display === ''? 'block' : 'none';
+  renderHistory();
+}
+
+function renderHistory(){
+  const termo=document.getElementById('inputBuscaHist').value.toLowerCase();
+  const filtro=document.getElementById('filtroCatHist').value;
+  const tbody=document.getElementById('listaHist');
+  tbody.innerHTML='';
+  let totalMovimentacoes = 0;
+
+  // O histórico já vem ordenado pelo timestamp do servidor, mas podemos garantir se a ordem for importante
+  const historicoExibido = historico.filter(h =>
+    (h.produto.toLowerCase().includes(termo)||h.motivo.toLowerCase().includes(termo)) &&
+    (filtro==='Todos'||h.cat===filtro)
+  );
+
+  historicoExibido.forEach((h,i)=>{
+    totalMovimentacoes++;
+    let tipoDisplay = h.tipo === 'Entrada'? `<span class="tag-add">${h.tipo}</span>` : `<span class="tag-sub">${h.tipo}</span>`;
+    tbody.innerHTML+=`
+      <tr>
+        <td>${h.data}</td>
+        <td>${h.produto}</td>
+        <td>${tipoDisplay}</td>
+        <td>${h.qtd}</td>
+        <td>${h.motivo}</td>
+        <td><button class="lixeira" onclick="deletarHist('${h.id}')"><span class="material-symbols-outlined">delete</span></button></td>
+      </tr>`;
+  });
+
+  if (totalMovimentacoes === 0) {
+      tbody.innerHTML += `<tr><td colspan="6" style="text-align:center; color:var(--subtle-text);">Nenhuma movimentação encontrada.</td></tr>`;
+  }
+}
+
+function exportarBackup(){
+  const data = {
+    produtos: db,
+    historico: historico,
+    sidebarImage: sidebarImageUrl
+  };
+  const jsonString = JSON.stringify(data, null, 2);
+  const blob = new Blob([jsonString], { type: "application/json" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = "haris_estoque_backup.json";
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
+function imprimirProdutos(){
+  window.onbeforeprint = () => {
+    const printFooter = document.getElementById('productPrintFooter');
+    const currentDateTime = new Date().toLocaleString();
+    const totalProductsCount = db.length;
+
+    printFooter.querySelector('.datetime-info').textContent = `Data de Emissão: ${currentDateTime}`;
+    printFooter.querySelector('.count-info').textContent = `QTD Produtos: ${totalProductsCount}`;
+  };
+
+  window.print();
+
+  window.onafterprint = () => {
+    const printFooter = document.getElementById('productPrintFooter');
+    printFooter.querySelector('.datetime-info').textContent = '';
+    printFooter.querySelector('.count-info').textContent = '';
+  };
+}
+
+function imprimirHistorico(){
+  let novaJan=window.open('','_blank'); // Abre em uma nova aba
+  if (!novaJan) {
+      alert('Seu navegador bloqueou a abertura da janela de impressão. Por favor, desative o bloqueador de pop-ups para este site.');
+      return;
+  }
+  let currentDateTime = new Date().toLocaleString();
+
+  let html=`<html><head><title>Histórico de Movimentações</title><style>
+    body{font-family:'Poppins', sans-serif;padding:0; margin: 0; min-height: 100vh; display: flex; flex-direction: column;}
+.content-wrapper { flex-grow: 1; padding: 15mm; }
+    h1{text-align:center;font-size:24px;font-weight:bold;margin-bottom:20px; color:#1f2a40;}
+    table{width:100%;border-collapse:collapse;font-size:12px; margin-top: 15px;}
+    th,td{padding:8px;border:1px solid #e0e7ee;text-align:left; page-break-inside: avoid;}
+    th{font-weight:600; background-color: #f0f4f8; color:#334155;}
+    tr:nth-child(even){background-color:#f9fbfc!important;}
+    tr:nth-child(odd){background-color:#ffffff!important;}
+    table tbody tr { page-break-inside: avoid; page-break-after: auto;}
+.tag-add{color:#10b8a6;font-weight:bold;}
+.tag-sub{color:#ef4444;font-weight:bold;}
+
+.report-footer{
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        font-size: 10px;
+        border-top: 1px solid #000;
+        padding: 5mm 15mm;
+        background: white;
+        box-sizing: border-box;
+        page-break-before: avoid;
+      }
+.report-footer.datetime-info { flex-grow: 1; text-align: center; order: 2; }
+.report-footer.count-info { flex-grow: 1; text-align: right; order: 3; }
+.report-footer.flex-spacer-left { flex-grow: 1; order: 1; }
+
+    @page { margin: 15mm; }
+    table th:nth-child(1), table td:nth-child(1) { width: 18%; }
+    table th:nth-child(2), table td:nth-child(2) { width: 30%; }
+    table th:nth-child(3), table td:nth-child(3) { width: 12%; }
+    table th:nth-child(4) { width: 8%; }
+    table td:nth-child(4) { width: 8%; text-align: center; }
+    table th:nth-child(5), table td:nth-child(5) { width: 32%; }
+  </style></head><body>`;
+
+  html+=`<div class="content-wrapper"><h1>Histórico de Movimentações Haris</h1><table><thead><tr><th>Data</th><th>Produto</th><th>Tipo</th><th>Qtd</th><th>Motivo</th></tr></thead><tbody>`;
+
+  let totalMovimentacoesImpressao = 0;
+  const termo=document.getElementById('inputBuscaHist').value.toLowerCase();
+  const filtro=document.getElementById('filtroCatHist').value;
+  const historicoParaImprimir = historico.filter(h =>
+      (h.produto.toLowerCase().includes(termo)||h.motivo.toLowerCase().includes(termo)) &&
+      (filtro==='Todos'||h.cat===filtro)
+  );
+
+  // Construir o conteúdo do tbody separadamente
+  let tbodyContent = '';
+  historicoParaImprimir.forEach(h=>{
+    totalMovimentacoesImpressao++;
+    let tipoDisplay = h.tipo === 'Entrada'? `<span class="tag-add">${h.tipo}</span>` : `<span class="tag-sub">${h.tipo}</span>`;
+    tbodyContent+=`
+      <tr>
+        <td>${h.data}</td>
+        <td>${h.produto}</td>
+        <td>${tipoDisplay}</td>
+        <td>${h.qtd}</td>
+        <td>${h.motivo}</td>
+        <td><button class="lixeira" onclick="deletarHist('${h.id}')"><span class="material-symbols-outlined">delete</span></button></td>
+      </tr>`;
+  });
+
+  if (totalMovimentacoesImpressao === 0) {
+      tbodyContent += `<tr><td colspan="6" style="text-align:center; color:var(--subtle-text);">Nenhuma movimentação encontrada.</td></tr>`;
+  }
+
+  // Adicionar o conteúdo do tbody ao HTML final
+  html+= tbodyContent;
+  html+=`</tbody></table></div>`;
+  html+=`<div class="report-footer">
+    <span class="flex-spacer-left"></span>
+    <span class="datetime-info">Data de Emissão: ${currentDateTime}</span>
+    <span class="count-info">QTD Movimentações: ${totalMovimentacoesImpressao}</span>
+  </div></body></html>`;
+
+  novaJan.document.write(html);
+  novaJan.document.close(); // Fecha o document para garantir que o conteúdo está pronto
+
+  novaJan.focus(); // Foca na nova janela para exibir o diálogo de impressão
+  setTimeout(() => { // Adiciona um pequeno atraso antes de chamar print()
+    try {
+        novaJan.print();
+        // Opcional: fechar a janela após a impressão/cancelamento, mas alguns usuários preferem que ela fique aberta.
+        // novaJan.close(); 
+    } catch (e) {
+        console.error("Erro ao tentar imprimir o histórico:", e);
+    }
+  }, 1000); // Aumentado para 1 segundo para dar mais tempo para renderizar em dispositivos mais lentos
+}
+
+// ATUALIZADO: Função para gerar o relatório rápido e as listas de estoque na sidebar direita
+function gerarRelatorioRapido() {
+    const selectedCat = document.getElementById('relatorioRapidoCat').value;
+
+    let produtosFiltrados = db;
+    if (selectedCat!== 'Todos') {
+        produtosFiltrados = db.filter(p => p.cat === selectedCat);
+    }
+
+    const totalItensCat = produtosFiltrados.length;
+    const totalQtdCat = produtosFiltrados.reduce((sum, p) => sum + p.qtd, 0);
+
+    // Atualizar os elementos individuais do relatório por categoria
+    document.getElementById('itensCategoria').innerHTML = `<b>${totalItensCat}</b>`; // Quantidade em negrito e verde
+    document.getElementById('estoqueCategoria').innerHTML = `<b>${totalQtdCat}</b>`; // Quantidade em negrito e verde
+
+    // Atualizar o "Produtos Cadastrados" e "Total em Estoque Geral" na sidebar direita
+    document.getElementById('rightSidebarTotalProdutos').innerText = db.length;
+    document.getElementById('rightSidebarTotalEstoqueHighlight').innerText = db.reduce((sum, p) => sum + p.qtd, 0);
+
+    // Chamar a função para atualizar as listas de estoque (menor e maior)
+    atualizarListasDeEstoque(produtosFiltrados);
+}
+
+// ATUALIZADA: Função para atualizar as listas de itens com menor e maior estoque
+function atualizarListasDeEstoque(produtosParaListar) {
+    const listaMenorEstoqueUl = document.getElementById('listaMenorEstoque');
+    const listaMaiorEstoqueUl = document.getElementById('listaMaiorEstoque');
+
+    listaMenorEstoqueUl.innerHTML = ''; // Limpa a lista existente
+    listaMaiorEstoqueUl.innerHTML = ''; // Limpa a lista existente
+
+    if (produtosParaListar.length === 0) {
+        listaMenorEstoqueUl.innerHTML = '<li class="placeholder">Nenhum item encontrado nesta categoria.</li>';
+        listaMaiorEstoqueUl.innerHTML = '<li class="placeholder">Nenhum item encontrado nesta categoria.</li>';
+        return;
+    }
+
+    // --- Lógica para Menor Estoque (pegando todos com a menor QTD) ---
+    const produtosOrdenadosAsc = [...produtosParaListar].sort((a, b) => a.qtd - b.qtd);
+    let menorQuantidade = produtosOrdenadosAsc.length > 0? produtosOrdenadosAsc[0].qtd : -1;
+    let produtosComMenorEstoque = produtosOrdenadosAsc.filter(p => p.qtd === menorQuantidade);
+
+    const idsMenorEstoque = new Set(); // Para rastrear os IDs dos produtos com menor estoque
+    if (produtosComMenorEstoque.length > 0) {
+        produtosComMenorEstoque.slice(0, 5).forEach(p => { // Exibe no máximo 5 itens
+            idsMenorEstoque.add(p.id); // Adiciona o ID para exclusão posterior
+            const li = document.createElement('li');
+            li.innerHTML = `<span class="product-name">${p.nome}</span> <span class="stock-count" style="color: var(--danger);"><b>${p.qtd}</b></span>`;
+            listaMenorEstoqueUl.appendChild(li);
+        });
+    } else {
+        listaMenorEstoqueUl.innerHTML = '<li class="placeholder">Nenhum item encontrado nesta categoria.</li>';
+    }
+
+    // --- Lógica para Maior Estoque (pelo menos 4 valores distintos, excluindo itens de menor estoque) ---
+    const produtosOrdenadosDesc = [...produtosParaListar].filter(p =>!idsMenorEstoque.has(p.id)) // Exclui itens de menor estoque
+           .sort((a, b) => b.qtd - a.qtd);
+    const topQuantities = new Set();
+    const produtosParaMaiorEstoque = [];
+    const maxItems = 5; // Limite de itens a serem exibidos
+
+    for (const p of produtosOrdenadosDesc) {
+        if (!topQuantities.has(p.qtd)) {
+            topQuantities.add(p.qtd);
+            // Adiciona todos os produtos com essa quantidade
+            produtosOrdenadosDesc.filter(item => item.qtd === p.qtd)
+     .forEach(prod => {
                 if (!produtosParaMaiorEstoque.some(existing => existing.id === prod.id)) {
                     produtosParaMaiorEstoque.push(prod);
                 }
