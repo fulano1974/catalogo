@@ -36,14 +36,14 @@
             background-position:center;
             background-attachment:fixed;
         }
-      .overlay{
+     .overlay{
             background-color:rgba(248, 250, 252, 0.85); /* Overlay para a imagem de fundo */
             min-height:100vh;
             display:flex;
             flex-direction:column;
             padding: 20px; /* Adicionado padding para o overlay */
         }
-      .catalog-header {
+     .catalog-header {
             background: var(--card-bg);
             padding: 15px 25px;
             border-radius: 12px;
@@ -54,7 +54,7 @@
             gap: 15px;
             align-items: center;
         }
-      .catalog-header h1 {
+     .catalog-header h1 {
             font-size: 2rem;
             margin: 0;
             color: var(--primary);
@@ -62,10 +62,10 @@
             align-items: center;
             gap: 8px;
         }
-      .catalog-header h1 span {
+     .catalog-header h1 span {
             color: var(--accent);
         }
-      .catalog-controls {
+     .catalog-controls {
             display: flex;
             gap: 10px;
             width: 100%;
@@ -73,8 +73,8 @@
             flex-wrap: wrap; /* Permite quebrar linha em telas menores */
             justify-content: center;
         }
-      .catalog-controls input,
-      .catalog-controls select { /* Seletor mais genérico para inputs/selects */
+     .catalog-controls input,
+     .catalog-controls select { /* Seletor mais genérico para inputs/selects */
             flex: 1;
             min-width: 150px; /* Garante que os inputs não fiquem muito pequenos */
             padding: 10px 15px;
@@ -85,13 +85,13 @@
             color: var(--text-color);
             transition: all 0.3s ease;
         }
-      .catalog-controls input:focus,
-      .catalog-controls select:focus {
+     .catalog-controls input:focus,
+     .catalog-controls select:focus {
             border-color:var(--accent);
             box-shadow:0 0 0 3px rgba(59, 130, 246, 0.2);
             outline:none;
         }
-      .catalog-controls select {
+     .catalog-controls select {
             appearance: none;
             background-image: url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%23666%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13.6-6.4H18.9c-5%200-9.3%201.8-12.9%205.4s-5.4%207.9-5.4%2012.8c0%204.8%201.8%209.1%205.4%2012.7L128.5%20287c3.6%203.5%207.8%205.3%2012.8%205.3s9.2-1.8%2012.8-5.3L287%2095.8a17.5%2017.5%200%200%200%205.3-12.7c0-5-1.8-9.2-5.3-12.7z%22%2F%3E%3C%2Fsvg%3E');
             background-repeat: no-repeat;
@@ -99,7 +99,7 @@
             background-size: 0.65em auto, 100%;
         }
 
-      .share-button {
+     .share-button {
             display: none; /* Escondido por padrão, só aparece no mobile */
             padding: 10px 18px;
             border-radius: 30px;
@@ -119,16 +119,16 @@
             align-items: center;
             justify-content: center;
         }
-      .share-button span.material-symbols-outlined { /* Estilo para o ícone dentro do botão */
+     .share-button span.material-symbols-outlined { /* Estilo para o ícone dentro do botão */
             margin-right: 5px;
             font-size: 1.1em;
         }
-      .share-button:hover {
+     .share-button:hover {
             background: #2c67d3;
             box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
         }
         @media (max-width: 768px) {
-          .share-button {
+         .share-button {
                 display: flex; /* Mostra no mobile */
                 width: calc(100% - 40px); /* Ocupa quase toda a largura */
                 max-width: 300px; /* Limite de largura para botões em mobile */
@@ -136,7 +136,7 @@
         }
 
         /* Grid de produtos (Vitrine) */
-      .grid{
+     .grid{
             display:grid;
             grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); /* Tentando 5 colunas */
             gap:20px;
@@ -144,7 +144,7 @@
             margin-top: 20px;
             align-items: start; /* <--- ADICIONADO AQUI */
         }
-      .card{
+     .card{
             background:var(--card-bg);
             border-radius:12px;
             overflow:hidden;
@@ -157,11 +157,11 @@
             display:flex;
             flex-direction:column;
         }
-      .card:hover{
+     .card:hover{
             transform:translateY(-5px);
             box-shadow:0 8px 25px rgba(0,0,0,0.1);
         }
-      .card-image-container {
+     .card-image-container {
             width: 100%;
             padding-bottom: 100%;
             position: relative;
@@ -170,7 +170,7 @@
             background:#fefefe;
             margin-bottom: 8px;
         }
-      .card img{
+     .card img{
             position: absolute;
             top: 0;
             left: 0;
@@ -180,16 +180,15 @@
             display:block;
             border-radius: 8px;
         }
-      .card-info{
+     .card-info{
             padding:5px 0 0;
             display:flex;
             flex-direction:column;
             align-items:center;
             flex-grow:1;
-            /* justify-content: space-between; <-- LINHA REMOVIDA */
             gap: 5px; /* Adicionado um pequeno espaçamento entre os itens */
         }
-      .card h3{
+     .card h3{
             margin:4px 0;
             font-size:0.75rem; /* FONTE DO NOME DO PRODUTO REDUZIDA */
             line-height:1.2;
@@ -198,7 +197,7 @@
             word-break: break-word;
             text-align: center;
         }
-      .badge-cat{
+     .badge-cat{
             font-size:0.6rem;
             padding:3px 8px;
             border-radius:15px;
@@ -209,57 +208,99 @@
             margin-bottom:8px;
             display:inline-block;
         }
-      .card p.estoque-label {
-            display: none; /* Esconder a informação de estoque */
+      
+        /* REMOVIDO: display: none; */
+       .card p.estoque-label {
+            margin:0;
+            font-size:0.75rem; /* FONTE DO TEXTO 'ESTOQUE' REDUZIDA */
+            color:var(--subtle-text);
+            display: flex; /* Para alinhar o texto "Estoque: BOLD_QTD ICON" */
+            align-items: center;
+            justify-content: center;
+            gap: 4px; /* Espaço entre o ícone e o texto do estoque */
+        }
+       .card p.estoque-label b {
+            font-weight: 700;
+            font-size: 1rem; /* FONTE DO NÚMERO DO ESTOQUE REDUZIDA */
+            color: var(--primary); /* Cor padrão do número */
         }
 
         /* Material Symbols Iconography */
-      .material-symbols-outlined {
+     .material-symbols-outlined {
             font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24
+        }
+        /* Estilos para ícones de alerta/crítico */
+       .card p.estoque-label.alerta-icon-inline.material-symbols-outlined {
+            font-size: 1.1em; /* Tamanho do ícone */
+            vertical-align: middle; /* Alinha com o texto */
+            margin-left: 4px; /* Espaçamento do número */
+        }
+       .card.estoque-alerta p.estoque-label b,
+       .card.estoque-alerta p.estoque-label.alerta-icon-inline.material-symbols-outlined {
+            color: var(--warning); /* Cor laranja para a quantidade e ícone em alerta */
+        }
+       .card.estoque-critico p.estoque-label b,
+       .card.estoque-critico p.estoque-label.alerta-icon-inline.material-symbols-outlined {
+            color: var(--danger); /* Cor vermelha para a quantidade e ícone crítico */
+        }
+        /* Classes para status de estoque no card */
+       .card.estoque-alerta {
+            border: 1px solid var(--warning);
+            box-shadow: 0 0 10px rgba(245, 158, 11, 0.2);
+        }
+       .card.estoque-critico {
+            border: 2px solid var(--danger);
+            box-shadow: 0 0 15px rgba(239, 68, 68, 0.3);
+            animation: pulseSubtle 2s infinite ease-in-out;
+        }
+        @keyframes pulseSubtle {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.005); }
+            100% { transform: scale(1); }
         }
 
         /* Ajustes Responsivos */
         @media (max-width: 1200px) {
-          .grid{
+         .grid{
                 grid-template-columns:repeat(auto-fill, minmax(140px, 1fr)); /* Ajuste para tablets */
             }
         }
         @media (max-width: 768px) {
-          .overlay {
+         .overlay {
                 padding: 10px;
             }
-          .catalog-header {
+         .catalog-header {
                 padding: 10px 15px;
                 margin-bottom: 15px;
             }
-          .catalog-header h1 {
+         .catalog-header h1 {
                 font-size: 1.6rem;
             }
-          .catalog-controls {
+         .catalog-controls {
                 flex-direction: column;
                 max-width: none;
             }
-          .catalog-controls input,
-          .catalog-controls select { /* Ajustado o seletor */
+         .catalog-controls input,
+         .catalog-controls select { /* Ajustado o seletor */
                 min-width: unset;
             }
-          .grid{
+         .grid{
                 grid-template-columns:repeat(auto-fill, minmax(110px, 1fr)); /* Em celulares, 2 ou 3 colunas */
                 gap:10px;
             }
-          .card h3{
+         .card h3{
                 font-size:0.7rem; /* Fonte um pouco menor em telas muito pequenas */
             }
-          .share-button {
+         .share-button {
                 margin-top: 10px;
             }
         }
         @media (max-width: 380px) {
-          .grid{
+         .grid{
                 grid-template-columns:repeat(auto-fill, minmax(95px, 1fr));
                 gap:8px;
             }
-          .card h3{
+         .card h3{
                 font-size:0.65rem; /* Fonte ainda menor em telas muito pequenas */
             }
         }
@@ -303,6 +344,11 @@
                 // Carregar Produtos
                 const produtosSnapshot = await dbFirebase.collection('produtos').get();
                 db = produtosSnapshot.docs.map(doc => ({ id: doc.id,...doc.data() }));
+                // Garante que qtdMin esteja definido e seja número (importante para alertas visuais)
+                db.forEach(p => {
+                    p.qtd = Number(p.qtd);
+                    p.qtdMin = Number(p.qtdMin || 0); 
+                });
                 
                 // Atualizar listaCategorias com base nos produtos carregados
                 const categoriasSet = new Set(db.map(p => p.cat).filter(Boolean));
@@ -344,15 +390,37 @@
                 vitrine.innerHTML = '<p style="text-align:center; color:var(--subtle-text); grid-column: 1 / -1;">Nenhum produto encontrado para os critérios de busca/filtro.</p>';
             } else {
                 produtosExibidos.forEach(p => {
+                    // ---- INÍCIO DA LÓGICA PARA EXIBIR ESTOQUE E ALERTAS ----
+                    let estoqueClass = '';
+                    let alertaIconInline = '';
+                    let iconName = '';
+
+                    // Lógica para detectar status de estoque (igual ao arquivo de controle de estoque)
+                    if (p.qtdMin > 0) {
+                        if (p.qtd < p.qtdMin) {
+                            estoqueClass = 'estoque-critico';
+                            iconName = 'error';
+                        } else if (p.qtd === p.qtdMin) {
+                            estoqueClass = 'estoque-alerta';
+                            iconName = 'notification_important';
+                        }
+                    }
+                    
+                    if (iconName) {
+                        alertaIconInline = `<span class="alerta-icon-inline"><span class="material-symbols-outlined">${iconName}</span></span>`;
+                    }
+                    // ---- FIM DA LÓGICA PARA EXIBIR ESTOQUE E ALERTAS ----
+
                     vitrine.innerHTML += `
-                        <div class="card">
+                        <div class="card ${estoqueClass}"> <!-- Aplicar classes de estoque no card -->
                             <div class="card-image-container">
                                 <img src="${p.foto || 'https://via.placeholder.com/120x120?text=Sem+Foto'}" alt="${p.nome || 'Produto sem foto'}" loading="lazy">
                             </div>
                             <div class="card-info">
                                 <h3>${p.nome}</h3>
                                 <span class="badge-cat" style="background:${getCorCat(p.cat)}">${p.cat || 'Outros'}</span>
-                                <!-- Informações de estoque removidas para o catálogo -->
+                                <!-- Informação de estoque agora visível -->
+                                <p class="estoque-label">Estoque: <b>${p.qtd}</b>${alertaIconInline}</p>
                             </div>
                         </div>`;
                 });
@@ -385,8 +453,8 @@
                     text: 'Confira nosso catálogo de produtos!',
                     url: window.location.href // A URL atual do catálogo
                 })
-              .then(() => console.log('Catálogo compartilhado com sucesso!'))
-              .catch((error) => console.error('Erro ao compartilhar catálogo:', error));
+             .then(() => console.log('Catálogo compartilhado com sucesso!'))
+             .catch((error) => console.error('Erro ao compartilhar catálogo:', error));
             } else {
                 alert('A função de compartilhamento não é suportada neste navegador/dispositivo.');
             }
