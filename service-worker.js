@@ -10,16 +10,13 @@ const urlsToCache = [
   // Imagem de fundo aleatória (pode mudar, então talvez não seja ideal cachear fixamente)
   // 'https://source.unsplash.com/random/1920x1080/?warehouse,logistics,abstract',
   './animao-de-um-rebocador-com-haris-escrito-na-inscri.jpeg', // Sua imagem local
-  './manifest.json', // Adicione o manifest
-  // Adicione aqui as URLs dos seus ícones de alerta/crítico se forem estáticos e não gerados dinamicamente
-  'https://res.cloudinary.com/dqp57nr5g/image/upload/v1771459662/icone_amarelo_alerta_ykelar.png',
-  'https://res.cloudinary.com/dqp57nr5g/image/upload/v1771459681/icone_vermelho_critico_zsxrwm.png'
+  './manifest.json' // Adicione o manifest
 ];
 
 self.addEventListener('install', event => {
   event.waitUntil(
     caches.open(CACHE_NAME)
-      .then(cache => {
+.then(cache => {
         console.log('Service Worker: Cache opened');
         return cache.addAll(urlsToCache).then(() => {
           console.log('Service Worker: All URLs cached');
@@ -33,7 +30,7 @@ self.addEventListener('install', event => {
 self.addEventListener('fetch', event => {
   event.respondWith(
     caches.match(event.request)
-      .then(response => {
+.then(response => {
         // Cache hit - return response
         if (response) {
           console.log('Service Worker: Serving from cache', event.request.url);
