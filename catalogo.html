@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Catálogo Online Haris</title>
+    <meta name="theme-color" content="#2563eb">
+    <link rel="icon" href="https://cdn-icons-png.flaticon.com/512/3238/3238058.png">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Material Symbols - Outlined style -->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
+    <style>
+        :root{
+            --primary:#1f2a40; /* Azul escuro quase preto */
+            --accent:#3b82f6; /* Azul vibrante */
+            --success:#10b8a6;
+            --danger:#ef4444;
+            --warning:#f59e0b; /* Laranja para alerta */
+            --bg:#f8fafc; /* Fundo mais claro */
+            --card-bg:white;
+            --text-color:#334155;
+            --subtle-text:#64748b;
+            --border-color:#e2e8f0;
+        }
+        body{
+            margin:0;
+            padding:0;
+            font-family:'Poppins', sans-serif;
+            background-color:var(--bg);
+            color:var(--text-color);
+            min-height:100vh;
+            display:flex;
+            flex-direction:column;
+            background-image:url('https://source.unsplash.com/random/1920x1080/?warehouse,logistics,abstract'); /* Imagem de fundo aleatória */
+            background-size:cover;
+            background-position:center;
+            background-attachment:fixed;
+        }
+      .overlay{
+            background-color:rgba(248, 250, 252, 0.85); /* Overlay para a imagem de fundo */
+            min-height:100vh;
+            display:flex;
+            flex-direction:column;
+            padding: 20px; /* Adicionado padding para o overlay */
+        }
+      .catalog-header {
+            background: var(--card-bg);
+            padding: 15px 25px;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+            margin-bottom: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            align-items: center;
+        }
+      .catalog-header h1 {
+            font-size: 2rem;
+            margin: 0;
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+      .catalog-header h1 span {
+            color: var(--accent);
+        }
+      .catalog-controls {
+            display: flex;
+            gap: 10px;
+            width: 100%;
+            max-width: 600px; /* Limita a largura para melhor visualização */
+            flex-wrap: wrap; /* Permite quebrar linha em telas menores */
+            justify-content: center;
+        }
+      .catalog-controls input,
+      .catalog-controls select { /* Seletor mais genérico para inputs/selects */
+            flex: 1;
+            min-width: 150px; /* Garante que os inputs não fiquem muito pequenos */
+            padding: 10px 15px;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            font-size: 0.9rem;
+            background-color: var(--card-bg); /* Fundo branco para os controles */
+            color: var(--text-color);
+            transition: all 0.3s ease;
+        }
+      .catalog-controls input:focus,
+      .catalog-controls select:focus {
+            border-color:var(--accent);
+            box-shadow:0 0 0 3px rgba(59, 130, 246, 0.2);
+            outline:none;
+        }
+      .catalog-controls select {
+            appearance: none;
+            background-image: url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%23666%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13.6-6.4H18.9c-5%200-9.3%201.8-12.9%205.4s-5.4%207.9-5.4%2012.8c0%204.8%201.8%209.1%205.4%2012.7L128.5%20287c3.6%203.5%207.8%205.3%2012.8%205.3s9.2-1.8%2012.8-5.3L287%2095.8a17.5%2017.5%200%200%200%205.3-12.7c0-5-1.8-9.2-5.3-12.7z%22%2F%3E%3C%2Fsvg%3E');
+            background-repeat: no-repeat;
+            background-position: right 0.7em top 50%, 0 0;
+            background-size: 0.65em auto, 100%;
+        }
+
+      .share-button {
+            display: none; /* Escondido por padrão, só aparece no mobile */
+            padding: 10px 18px;
+            border-radius: 30px;
+            border: none;
+            background: var(--accent);
+            color: white;
+            cursor: pointer;
+            font-size: 0.9rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 8px rgba(59, 130, 246, 0.3);
+            margin-top: 15px; /* Espaçamento com os controles */
+            align-self: center; /* Centraliza o botão */
+            text-decoration: none; /* Para garantir que não parece um link */
+            /* Garante que o ícone e texto fiquem centralizados */
+            display: flex; 
+            align-items: center;
+            justify-content: center;
+        }
+      .share-button span.material-symbols-outlined { /* Estilo para o ícone dentro do botão */
+            margin-right: 5px;
+            font-size: 1.1em;
+        }
+      .share-button:hover {
+            background: #2c67d3;
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
+        }
+        @media (max-width: 768px) {
+          .share-button {
+                display: flex; /* Mostra no mobile */
+                width: calc(100% - 40px); /* Ocupa quase toda a largura */
+                max-width: 300px; /* Limite de largura para botões em mobile */
+            }
+        }
+
+        /* Grid de produtos (Vitrine) */
+      .grid{
+            display:grid;
+            grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); /* Tentando 5 colunas */
+            gap:20px;
+            flex-grow: 1; /* Para ocupar o espaço restante */
+            margin-top: 20px;
+            align-items: start; /* <--- ADICIONADO AQUI */
+        }
+      .card{
+            background:var(--card-bg);
+            border-radius:12px;
+            overflow:hidden;
+            border:1px solid var(--border-color);
+            text-align:center;
+            transition:all 0.3s ease;
+            padding:10px;
+            box-shadow:0 4px 15px rgba(0,0,0,0.05);
+            position:relative;
+            display:flex;
+            flex-direction:column;
+        }
+      .card:hover{
+            transform:translateY(-5px);
+            box-shadow:0 8px 25px rgba(0,0,0,0.1);
+        }
+      .card-image-container {
+            width: 100%;
+            padding-bottom: 100%;
+            position: relative;
+            overflow: hidden;
+            border-radius: 8px;
+            background:#fefefe;
+            margin-bottom: 8px;
+        }
+      .card img{
+            position: absolute;
+            top: 0;
+            left: 0;
+            width:100%;
+            height:100%;
+            object-fit:contain;
+            display:block;
+            border-radius: 8px;
+        }
+      .card-info{
+            padding:5px 0 0;
+            display:flex;
+            flex-direction:column;
+            align-items:center;
+            flex-grow:1;
+            /* justify-content: space-between; <-- LINHA REMOVIDA */
+            gap: 5px; /* Adicionado um pequeno espaçamento entre os itens */
+        }
+      .card h3{
+            margin:4px 0;
+            font-size:0.75rem; /* FONTE DO NOME DO PRODUTO REDUZIDA */
+            line-height:1.2;
+            color:var(--primary);
+            font-weight:600; /* MANTÉM O NEGRITO */
+            word-break: break-word;
+            text-align: center;
+        }
+      .badge-cat{
+            font-size:0.6rem;
+            padding:3px 8px;
+            border-radius:15px;
+            color:white;
+            font-weight:600;
+            text-transform:uppercase;
+            margin-top:4px;
+            margin-bottom:8px;
+            display:inline-block;
+        }
+      .card p.estoque-label {
+            display: none; /* Esconder a informação de estoque */
+        }
+
+        /* Material Symbols Iconography */
+      .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24
+        }
+
+        /* Ajustes Responsivos */
+        @media (max-width: 1200px) {
+          .grid{
+                grid-template-columns:repeat(auto-fill, minmax(140px, 1fr)); /* Ajuste para tablets */
+            }
+        }
+        @media (max-width: 768px) {
+          .overlay {
+                padding: 10px;
+            }
+          .catalog-header {
+                padding: 10px 15px;
+                margin-bottom: 15px;
+            }
+          .catalog-header h1 {
+                font-size: 1.6rem;
+            }
+          .catalog-controls {
+                flex-direction: column;
+                max-width: none;
+            }
+          .catalog-controls input,
+          .catalog-controls select { /* Ajustado o seletor */
+                min-width: unset;
+            }
+          .grid{
+                grid-template-columns:repeat(auto-fill, minmax(110px, 1fr)); /* Em celulares, 2 ou 3 colunas */
+                gap:10px;
+            }
+          .card h3{
+                font-size:0.7rem; /* Fonte um pouco menor em telas muito pequenas */
+            }
+          .share-button {
+                margin-top: 10px;
+            }
+        }
+        @media (max-width: 380px) {
+          .grid{
+                grid-template-columns:repeat(auto-fill, minmax(95px, 1fr));
+                gap:8px;
+            }
+          .card h3{
+                font-size:0.65rem; /* Fonte ainda menor em telas muito pequenas */
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="overlay">
+        <div class="catalog-header">
+            <h1><img src="https://cdn-icons-png.flaticon.com/512/3238/3238058.png" alt="Logo" style="height:30px;"> Catálogo <span>Haris</span></h1>
+            <div class="catalog-controls">
+                <input type="text" id="catalogSearchInput" placeholder="Pesquisar produto..." oninput="renderCatalog()">
+                <select id="catalogFilterCat" onchange="renderCatalog()">
+                    <!-- Categorias serão preenchidas via JS -->
+                </select>
+            </div>
+            <button class="share-button" onclick="shareCatalog()"><span class="material-symbols-outlined">share</span> Compartilhar Catálogo</button>
+        </div>
+        <div class="grid" id="catalogVitrine"></div>
+    </div>
+
+    <!-- Firebase SDK (igual ao seu) -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyB0dWRSytDSfIAmCtg5pTEIjvwfJPSxb74", // SEU API KEY REAL!
+            authDomain: "haris-estoque.firebaseapp.com",
+            projectId: "haris-estoque",
+            messagingSenderId: "526155106830",
+            appId: "1:526155106830:web:55b4bf4c0d9549ec42ca5f",
+            measurementId: "G-B77P8EZ6BS"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const dbFirebase = firebase.firestore();
+
+        let db = []; // Lista de produtos
+        let listaCategorias = []; // Lista de categorias
+
+        async function initCatalog() {
+            try {
+                // Carregar Produtos
+                const produtosSnapshot = await dbFirebase.collection('produtos').get();
+                db = produtosSnapshot.docs.map(doc => ({ id: doc.id,...doc.data() }));
+                
+                // Atualizar listaCategorias com base nos produtos carregados
+                const categoriasSet = new Set(db.map(p => p.cat).filter(Boolean));
+                listaCategorias = Array.from(categoriasSet).sort();
+                
+                preencherFiltroCategoria();
+                renderCatalog();
+            } catch (error) {
+                console.error("Erro ao carregar dados do Firebase para o catálogo:", error);
+                // Adicionei um alert mais útil aqui
+                alert("Erro ao carregar o catálogo. Verifique sua conexão e as regras de segurança do Firebase. Erro: " + error.message);
+            }
+        }
+
+        function preencherFiltroCategoria() {
+            const selectCat = document.getElementById('catalogFilterCat');
+            selectCat.innerHTML = '<option value="Todos">Todas as Categorias</option>'; // Opção padrão
+            listaCategorias.forEach(cat => {
+                const option = document.createElement('option');
+                option.value = cat;
+                option.textContent = cat;
+                selectCat.appendChild(option);
+            });
+        }
+
+        function renderCatalog() {
+            const vitrine = document.getElementById('catalogVitrine');
+            const termoBusca = document.getElementById('catalogSearchInput').value.toLowerCase();
+            const categoriaFiltro = document.getElementById('catalogFilterCat').value;
+            vitrine.innerHTML = ''; // Limpa a vitrine antes de renderizar
+
+            let produtosExibidos = db.filter(p => {
+                const matchesSearchTerm = p.nome.toLowerCase().includes(termoBusca);
+                const matchesCategory = categoriaFiltro === 'Todos' || p.cat === categoriaFiltro;
+                return matchesSearchTerm && matchesCategory;
+            });
+
+            if (produtosExibidos.length === 0) {
+                vitrine.innerHTML = '<p style="text-align:center; color:var(--subtle-text); grid-column: 1 / -1;">Nenhum produto encontrado para os critérios de busca/filtro.</p>';
+            } else {
+                produtosExibidos.forEach(p => {
+                    vitrine.innerHTML += `
+                        <div class="card">
+                            <div class="card-image-container">
+                                <img src="${p.foto || 'https://via.placeholder.com/120x120?text=Sem+Foto'}" alt="${p.nome || 'Produto sem foto'}" loading="lazy">
+                            </div>
+                            <div class="card-info">
+                                <h3>${p.nome}</h3>
+                                <span class="badge-cat" style="background:${getCorCat(p.cat)}">${p.cat || 'Outros'}</span>
+                                <!-- Informações de estoque removidas para o catálogo -->
+                            </div>
+                        </div>`;
+                });
+            }
+        }
+
+        function getCorCat(cat) {
+            const cores = {
+                'Tinta Hardtop':'#f97316',
+                'Tinta Pilot':'#3b82f6',
+                'Componente B':'#14b8a6',
+                'Jotamastic A':'#facc15',
+                'Jotamastic B':'#8b5cf6',
+                'Solvente':'#ef4444',
+                'Filtros': '#a3e635',
+                'Manilhas': '#ec4899',
+                'Escova Rotativa': '#FF8C00',
+                'Pincel': '#8A2BE2',
+                'Rolo de Pintura': '#00CED1',
+                'Outros':'#6b7280'
+            };
+            return cores[cat] || '#6b7280';
+        }
+
+        // Função de compartilhamento
+        function shareCatalog() {
+            if (navigator.share) {
+                navigator.share({
+                    title: 'Catálogo de Produtos Haris',
+                    text: 'Confira nosso catálogo de produtos!',
+                    url: window.location.href // A URL atual do catálogo
+                })
+              .then(() => console.log('Catálogo compartilhado com sucesso!'))
+              .catch((error) => console.error('Erro ao compartilhar catálogo:', error));
+            } else {
+                alert('A função de compartilhamento não é suportada neste navegador/dispositivo.');
+            }
+        }
+
+        // Garante que a inicialização só aconteça quando o DOM estiver completamente carregado
+        document.addEventListener('DOMContentLoaded', initCatalog);
+    </script>
+</body>
+</html>
