@@ -8,6 +8,8 @@
 <link rel="manifest" href="manifest.json">
 <link rel="icon" href="https://cdn-icons-png.flaticon.com/512/3238/3238058.png">
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<!-- Material Symbols - Outlined style -->
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
 <style>
 :root{
   --primary:#1f2a40; /* Azul escuro quase preto */
@@ -149,6 +151,9 @@ body{
   font-weight:600;
   transition:all 0.3s ease;
   box-shadow:0 2px 8px rgba(59, 130, 246, 0.3);
+  display: flex; /* Adicionado aqui para centralizar ícone/texto em todos os botões primários */
+  align-items: center;
+  justify-content: center;
 }
 .btn-primary:hover{
   background:#2c67d3;
@@ -171,6 +176,79 @@ body{
   border-color:#d0d7e0;
 }
 
+/* Material Symbols Iconography */
+.material-symbols-outlined {
+  font-variation-settings:
+  'FILL' 0,
+  'wght' 400,
+  'GRAD' 0,
+  'opsz' 24 /* Tamanho padrão para botões e textos */
+}
+/* Ajustes para ícones em botões */
+/* Mantido este seletor para ícones em botões específicos, mas a centralização geral agora vem de.btn-primary */
+.backup-group button.material-symbols-outlined,
+.sidebar button.material-symbols-outlined,
+.history-panel-btns button.material-symbols-outlined,
+.modal-actions button.material-symbols-outlined,
+.close-modal-btn-bottom.material-symbols-outlined
+{
+    font-size: 1.1em; /* Levemente maior que o texto do botão */
+    vertical-align: middle; /* Alinhamento vertical - menos importante com flex */
+    margin-right: 5px; /* Espaçamento entre o ícone e o texto */
+    color: inherit; /* Herda a cor do texto do botão */
+}
+/* Ícone da lixeira, por ser Danger, tem cor específica */
+.lixeira.material-symbols-outlined {
+    font-size: 1.2em; /* Um pouco maior */
+    color: var(--danger);
+    margin-right: 0; /* Remove margem extra */
+}
+.lixeira:hover.material-symbols-outlined {
+    color: white; /* Cor branca no hover */
+}
+/* Ícones de editar e deletar nos cards */
+.admin-actions button.material-symbols-outlined {
+    font-size: 1em;
+    vertical-align: middle;
+    margin-right: 0; /* Remove margem extra */
+}
+/* Ícones para os títulos de seção na sidebar e painel de histórico */
+.sidebar-section h3.material-symbols-outlined,
+#historyPanel h2.material-symbols-outlined,
+.cat-filter-wrapper h3.material-symbols-outlined
+{
+    font-size: 1.2em;
+    vertical-align: middle;
+    margin-right: 8px;
+    color: var(--primary);
+}
+/* Ícones do toggle de senha */
+.toggle-password.material-symbols-outlined {
+    font-size: 1.2em; /* Um pouco maior para o olho */
+    color: var(--subtle-text);
+}
+.toggle-password:hover.material-symbols-outlined {
+    color: var(--primary);
+}
+/* Estilo para os ícones de alerta/crítico nos cards */
+/* A span.alerta-icon-inline é a que contém o ícone do Material Symbols */
+/* A cor deve ser aplicada diretamente ao span.material-symbols-outlined que está DENTRO de p.estoque-label */
+.card p.estoque-label.alerta-icon-inline.material-symbols-outlined { /* Corrigido o seletor */
+    font-size: 1.1em; /* Tamanho do ícone */
+    vertical-align: middle; /* Alinha com o texto */
+    margin-left: 4px; /* Espaçamento do número */
+}
+/* Cores do texto e ícone baseadas nas classes do CARD */
+/* Aplica a cor ao `b` e ao ícone dentro de `alerta-icon-inline` */
+.card.estoque-alerta p.estoque-label b,
+.card.estoque-alerta p.estoque-label.alerta-icon-inline.material-symbols-outlined { /* Seletores mais específicos */
+    color: var(--warning); /* Cor laranja para a quantidade e ícone em alerta */
+}
+.card.estoque-critico p.estoque-label b,
+.card.estoque-critico p.estoque-label.alerta-icon-inline.material-symbols-outlined { /* Seletores mais específicos */
+    color: var(--danger); /* Cor vermelha para a quantidade e ícone crítico */
+}
+
 /* Categoria Filters */
 .cat-filter-wrapper{
   background:var(--card-bg);
@@ -183,6 +261,8 @@ body{
   margin-top:0;
   margin-bottom:10px;
   color:var(--primary);
+  display: flex;
+  align-items: center;
 }
 /* Estilo para a nova div de grid dos botões de categoria - AJUSTADO NOVAMENTE */
 .cat-buttons-grid {
@@ -328,6 +408,10 @@ input:focus,select:focus,textarea:focus{
   padding:8px 15px;
   border-radius:20px;
   font-size:0.8rem;
+  /* Estas propriedades já vêm de.btn-primary agora, então este seletor pode ser mais simples */
+  /* display: flex;
+  align-items: center;
+  justify-content: center; */
 }
 
 /* History Panel */
@@ -386,8 +470,8 @@ input:focus,select:focus,textarea:focus{
 /* Vitrine Grid */
 .grid{
   display:grid;
-  /* MODIFICADO: Min-width dos cards para 150px e até 6 colunas */
-  grid-template-columns:repeat(auto-fill, minmax(150px, 1fr));
+  /* MODIFICADO: Min-width dos cards para 180px para tentar ter 5 colunas em telas grandes */
+  grid-template-columns:repeat(auto-fill, minmax(180px, 1fr)); /* Ajustado para 180px */
   gap:20px;
 }
 .card{
@@ -462,6 +546,9 @@ input:focus,select:focus,textarea:focus{
   cursor:pointer;
   color:var(--primary);
   transition:all 0.2s ease;
+  display: flex; /* Para alinhar o ícone com o texto */
+  align-items: center;
+  justify-content: center;
 }
 .btn-edit-card:hover{background:#e0e7ee;}
 .btn-delete-card{
@@ -521,7 +608,6 @@ input:focus,select:focus,textarea:focus{
   display:block;
 }
 .modal-content input,.modal-content select,.modal-content textarea{
-  width:100%;
   padding:10px 12px;
   border:1px solid var(--border-color);
   border-radius:8px;
@@ -733,16 +819,13 @@ input:focus,select:focus,textarea:focus{
     background-color: rgba(0, 0, 0, 0.05); /* Fundo sutil no hover */
 }
 
-/* Estilo para os ícones SVG dentro do botão */
-.toggle-password svg {
-    width: 20px; /* Tamanho do ícone SVG */
-    height: 20px;
-    /* fill: var(--subtle-text); REMOVIDO pois o SVG já define stroke="currentColor" */
-    transition: stroke 0.2s ease; /* Transição para a cor do traçado */
+/* Estilo para os ícones Material Symbols dentro do botão */
+.toggle-password.material-symbols-outlined {
+    font-size: 1.2em; /* Um pouco maior para o olho */
+    color: var(--subtle-text);
 }
-
-.toggle-password:hover svg {
-    stroke: var(--primary); /* Escurece o ícone no hover */
+.toggle-password:hover.material-symbols-outlined {
+    color: var(--primary);
 }
 
 /* Adicione um padding à direita no input para não cobrir o ícone */
@@ -1151,21 +1234,28 @@ input:focus,select:focus,textarea:focus{
     color: var(--primary); /* Cor padrão do número */
 }
 
-/* Estilo para o ícone de alerta INLINE (agora uma imagem) */
-.alerta-icon-inline img {
-    width: 16px; /* Tamanho pequeno para o ícone */
-    height: 16px;
-    margin-left: 4px; /* Pequena margem à esquerda para separar do número */
-    vertical-align: middle; /* Ajuda no alinhamento vertical com o texto */
+/* Estilo para o ícone de alerta INLINE (agora um Material Symbol) */
+/* O seletor foi ajustado para pegar o span do Material Symbols corretamente */
+.card p.estoque-label.alerta-icon-inline.material-symbols-outlined {
+    font-size: 1.1em; /* Tamanho do ícone */
+    vertical-align: middle; /* Alinha com o texto */
+    margin-left: 4px; /* Espaçamento do número */
+}
+/* Cores do texto e ícone baseadas nas classes do CARD */
+/* Aplica a cor ao `b` e ao ícone dentro de `alerta-icon-inline` */
+.card.estoque-alerta p.estoque-label b,
+.card.estoque-alerta p.estoque-label.alerta-icon-inline.material-symbols-outlined { /* Seletores mais específicos */
+    color: var(--warning); /* Cor laranja para a quantidade e ícone em alerta */
+}
+.card.estoque-critico p.estoque-label b,
+.card.estoque-critico p.estoque-label.alerta-icon-inline.material-symbols-outlined { /* Seletores mais específicos */
+    color: var(--danger); /* Cor vermelha para a quantidade e ícone crítico */
 }
 
-/* Cores do texto baseadas nas classes do CARD */
-.card.estoque-alerta p.estoque-label b {
-    color: var(--warning); /* Cor laranja para a quantidade em alerta */
-}
-.card.estoque-critico p.estoque-label b {
-    color: var(--danger); /* Cor vermelha para a quantidade crítica */
-}
+/* Removido o seletor.sidebar-action-group.btn-primary */
+/* e movido o display: flex; align-items: center; justify-content: center; */
+/* diretamente para a definição de.btn-primary para aplicar a todos os botões primários */
+
 </style>
 <!-- Firebase SDK -->
 <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
@@ -1211,16 +1301,20 @@ input:focus,select:focus,textarea:focus{
       <!-- Header do App -->
       <div class="header no-print">
         <h1><img src="https://cdn-icons-png.flaticon.com/512/3238/3238058.png" alt="Logo" style="height:30px;"> Haris <span>Estoque</span></h1>
+        <!-- Ícone do cabeçalho original foi removido para evitar duplicação -->
       </div>
 
       <!-- Stats Bar -->
       <div class="stats-bar no-print">
         <div class="backup-group" id="backupGroup">
-          <button class="btn-secondary" id="btnAdmin" onclick="toggleAdmin()">🔑 Admin</button>
-          <button class="btn-primary" style="background:#1c74d0;" onclick="imprimirProdutos()">📄 PDF</button>
-          <button class="btn-secondary" onclick="toggleHistory()">📋 Histórico</button>
-          <button class="btn-primary" style="background:#1c74d0;" onclick="exportarBackup()">📥 Exportar</button>
-          <button class="btn-secondary" style="background:#1c74d0; color:white;" onclick="document.getElementById('importInput').click()">📤 Importar</button>
+          <!-- BOTÃO ADMIN: alterado para btn-primary -->
+          <button class="btn-primary" id="btnAdmin" onclick="toggleAdmin()"><span class="material-symbols-outlined">key</span> Admin</button>
+          <button class="btn-primary" style="background:#1c74d0;" onclick="imprimirProdutos()"><span class="material-symbols-outlined">description</span> PDF</button>
+          <!-- BOTÃO HISTÓRICO: alterado para btn-primary -->
+          <button class="btn-primary" onclick="toggleHistory()"><span class="material-symbols-outlined">history</span> Histórico</button>
+          <button class="btn-primary" style="background:#1c74d0;" onclick="exportarBackup()"><span class="material-symbols-outlined">download</span> Exportar</button>
+          <!-- BOTÃO IMPORTAR: alterado para btn-primary, removido estilo inline para cor padrao -->
+          <button class="btn-primary" onclick="document.getElementById('importInput').click()"><span class="material-symbols-outlined">upload</span> Importar</button>
           <input type="file" id="importInput" style="display:none" onchange="importarBackup(event)">
         </div>
       </div>
@@ -1239,12 +1333,12 @@ input:focus,select:focus,textarea:focus{
       </div>
 
       <div id="historyPanel" class="no-print">
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; flex-wrap:wrap; gap:10px;">
-          <h2>📋 Histórico de Movimentações</h2>
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; flex-wrap:wrap; gap:10px;" class="history-panel-btns">
+          <h2><span class="material-symbols-outlined">history</span> Histórico de Movimentações</h2>
           <div style="display:flex; gap:10px; flex-wrap:wrap;">
             <!-- AQUI FOI FEITA A CORREÇÃO NO ONCLICK -->
-            <button class="btn-primary" onclick="imprimirHistorico()">📄 PDF Histórico</button>
-            <button class="btn-secondary" onclick="limparHistorico()">Limpar Histórico</button>
+            <button class="btn-primary" onclick="imprimirHistorico()"><span class="material-symbols-outlined">description</span> PDF Histórico</button>
+            <button class="btn-secondary" onclick="limparHistorico()"><span class="material-symbols-outlined">delete_sweep</span> Limpar Histórico</button>
           </div>
         </div>
         <div style="display:flex; gap:10px; margin-bottom:15px; flex-wrap:wrap;">
@@ -1291,7 +1385,8 @@ input:focus,select:focus,textarea:focus{
               <option value="qtd-desc">Estoque ↑</option>
               <option value="qtd-asc">Estoque ↓</option>
             </select>
-            <button class="btn-secondary" style="padding:8px 12px; font-size:0.75rem; white-space:nowrap;" onclick="uploadSidebarImage(event)">Mudar Imagem</button>
+            <!-- BOTÃO MUDAR IMAGEM: removido o estilo inline para usar a classe btn-primary -->
+            <button class="btn-primary" onclick="uploadSidebarImage(event)"><span class="material-symbols-outlined">image</span> Mudar Imagem</button>
             <input type="file" id="sidebarImageUploadHidden" accept="image/*" style="display:none;" onchange="handleSidebarFileSelection(event)">
           </div>
         </div>
@@ -1301,7 +1396,7 @@ input:focus,select:focus,textarea:focus{
 
       <!-- Conteúdo da Sidebar Esquerda visível no Mobile -->
       <div class="cat-filter-wrapper">
-        <h3>Filtrar por Categoria</h3>
+        <h3><span class="material-symbols-outlined">filter_list</span> Filtrar por Categoria</h3>
         <div class="cat-filter" id="catFiltros">
           <div class="cat-buttons-grid">
             <!-- Os botões serão gerados aqui pelo JS -->
@@ -1318,7 +1413,7 @@ input:focus,select:focus,textarea:focus{
     <!-- Right Sidebar -->
     <div class="sidebar right no-print">
       <div class="sidebar-section">
-        <h3>📊 Visão Geral do Estoque</h3>
+        <h3><span class="material-symbols-outlined">insights</span> Visão Geral do Estoque</h3>
         <div class="sidebar-info-item">
           <span class="label"><b>Produtos Cadastrados:</b></span>
           <span class="value" id="rightSidebarTotalProdutos" style="color: var(--accent); font-weight: bold;">0</span>
@@ -1330,7 +1425,7 @@ input:focus,select:focus,textarea:focus{
       </div>
 
       <div class="sidebar-section">
-        <h3>🔍 Relatório Rápido</h3>
+        <h3><span class="material-symbols-outlined">search</span> Relatório Rápido</h3>
         <div class="input-group" style="margin-bottom: 10px;">
           <label for="relatorioRapidoCat">Filtrar por Categoria</label>
           <!-- Aumentei o width para caber o texto -->
@@ -1352,7 +1447,7 @@ input:focus,select:focus,textarea:focus{
 
       <!-- Seção para Itens com MENOR Estoque -->
       <div class="sidebar-section sidebar-stock-list">
-        <h3>📉 Itens com Menor Estoque</h3>
+        <h3><span class="material-symbols-outlined">south_east</span> Itens com Menor Estoque</h3>
         <ul id="listaMenorEstoque">
           <!-- Produtos com menor estoque serão listados aqui -->
           <li class="placeholder">Nenhum item encontrado nesta categoria.</li>
@@ -1361,7 +1456,7 @@ input:focus,select:focus,textarea:focus{
 
       <!-- Seção para Itens com MAIOR Estoque -->
       <div class="sidebar-section sidebar-stock-list">
-        <h3>📈 Itens com Maior Estoque</h3>
+        <h3><span class="material-symbols-outlined">north_east</span> Itens com Maior Estoque</h3>
         <ul id="listaMaiorEstoque">
           <!-- Produtos com maior estoque serão listados aqui -->
           <li class="placeholder">Nenhum item encontrado nesta categoria.</li>
@@ -1369,8 +1464,8 @@ input:focus,select:focus,textarea:focus{
       </div>
 
       <div class="sidebar-action-buttons">
-        <button class="btn-secondary" onclick="alert('Funcionalidade em desenvolvimento!')">⚙️ Configurações</button>
-        <button class="btn-secondary" onclick="alert('Funcionalidade em desenvolvimento!')">🔔 Notificações</button>
+        <button class="btn-secondary" onclick="alert('Funcionalidade em desenvolvimento!')"><span class="material-symbols-outlined">settings</span> Configurações</button>
+        <button class="btn-secondary" onclick="alert('Funcionalidade em desenvolvimento!')"><span class="material-symbols-outlined">notifications</span> Notificações</button>
       </div>
     </div>
   </div>
@@ -1424,10 +1519,10 @@ input:focus,select:focus,textarea:focus{
     </div>
 
     <div class="modal-actions">
-      <button class="btn-entry" onclick="movimentar('add')">ENTRADA</button>
-      <button class="btn-exit" onclick="movimentar('sub')">SAÍDA</button>
+      <button class="btn-entry" onclick="movimentar('add')"><span class="material-symbols-outlined">add_box</span> ENTRADA</button>
+      <button class="btn-exit" onclick="movimentar('sub')"><span class="material-symbols-outlined">remove_box</span> SAÍDA</button>
     </div>
-    <button class="close-modal-btn-bottom" onclick="fecharModal()">SALVAR E FECHAR</button>
+    <button class="close-modal-btn-bottom" onclick="fecharModal()"><span class="material-symbols-outlined">save</span> SALVAR E FECHAR</button>
   </div>
 </div>
 
@@ -1692,20 +1787,15 @@ async function customPasswordPrompt(message, correctPassword) {
             }
         });
 
-        // Ícones SVG para olho aberto e fechado (NOVOS ÍCONES DE TRAÇO FINO)
-        // Olho fechado (estilo traço fino)
-        const eyeClosedSVG = '<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-6 h-6"><path stroke-linecap="round" stroke-linejoin="round" d="M13.875 18.04C11.31 18.667 9 17.5 9 17.5s-2.25-1.167-2.25-3c0-.86.75-2 2.25-2m.917-2.45c-1.35.34-2.417.893-2.417.893s-1.067.553-2.417 1.27m3.333-5.22c1.35-.34 2.417-.893 2.417-.893s1.067-.553 2.417-1.27M12 9a3 3 0 100 6 3 3 0 000-6zM12 6.5C7.5 6.5 3.1 9.07 1 12c2.1 3.09 6.5 5.5 11 5.5s8.9-2.41 11-5.5c-2.1-3.09-6.5-5.5-11-5.5z"/></svg>';
-        // Olho aberto (estilo traço fino)
-        const eyeOpenSVG = '<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-6 h-6"><path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0.639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z" /><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /></svg>';
-
+        // Material Symbols para olho aberto e fechado
         const toggleBtn = document.createElement('button');
         toggleBtn.className = 'toggle-password';
-        toggleBtn.innerHTML = eyeClosedSVG; // Ícone de olho fechado por padrão
+        toggleBtn.innerHTML = '<span class="material-symbols-outlined">visibility_off</span>'; // Ícone de olho fechado por padrão
         let isPasswordVisible = false;
         toggleBtn.addEventListener('click', () => {
             isPasswordVisible =!isPasswordVisible;
             passwordInput.type = isPasswordVisible? 'text' : 'password';
-            toggleBtn.innerHTML = isPasswordVisible? eyeOpenSVG : eyeClosedSVG;
+            toggleBtn.innerHTML = isPasswordVisible? '<span class="material-symbols-outlined">visibility</span>' : '<span class="material-symbols-outlined">visibility_off</span>';
             passwordInput.focus(); // Mantém o foco no input
         });
 
@@ -1941,8 +2031,8 @@ async function limparHistorico(){
   if(confirm('Deseja limpar todo o histórico? Essa ação é irreversível!')){
     try {
       // Deleta todos os documentos do histórico um por um
-      const deletePromises = historico.map(h => deletarHistoricoFirebase(h.id));
-      await Promise.all(deletePromises);
+      const deleteProdPromises = historico.map(h => deletarHistoricoFirebase(h.id));
+      await Promise.all(deleteProdPromises);
       historico = []; // Limpa o array local
       renderHistory();
       alert("Histórico limpo com sucesso!");
@@ -2158,33 +2248,36 @@ function render(){
   produtosExibidos.forEach(p=>{
     cProd++; cEst+=parseInt(p.qtd);
     
-    // NOVO: Lógica de alerta e classes (com ícones inline e discretos, agora usando PNGs)
+    // NOVO: Lógica de alerta e classes (com ícones inline e discretos, agora usando Material Symbols)
     let estoqueClass = '';
-    let alertaIconInline = ''; // Agora o ícone será inline (imagem)
-    // Suas URLs dos ícones PNG no Cloudinary
-    const urlIconAlerta = 'https://res.cloudinary.com/dqp57nr5g/image/upload/v1771459662/icone_amarelo_alerta_ykelar.png'; // Ícone amarelo de alerta
-    const urlIconCritico = 'https://res.cloudinary.com/dqp57nr5g/image/upload/v1771459681/icone_vermelho_critico_zsxrwm.png'; // Ícone vermelho de crítico
+    let alertaIconInline = ''; 
+    let iconName = ''; // Nome do ícone Material Symbols
 
     if (p.qtdMin > 0) { // Só aplica alerta se houver estoque mínimo definido
         if (p.qtd < p.qtdMin) { // Abaixo do mínimo: crítico (vermelho)
             estoqueClass = 'estoque-critico';
-            alertaIconInline = `<span class="alerta-icon-inline"><img src="${urlIconCritico}" alt="Crítico"></span>`;
+            iconName = 'error'; // Ícone de erro/crítico
         } else if (p.qtd === p.qtdMin) { // Igual ao mínimo: alerta (laranja/amarelo)
             estoqueClass = 'estoque-alerta';
-            alertaIconInline = `<span class="alerta-icon-inline"><img src="${urlIconAlerta}" alt="Alerta"></span>`;
+            iconName = 'notification_important'; // Ícone de alerta
         }
+    }
+    
+    // Adiciona o span do ícone apenas se houver um nome de ícone definido
+    if (iconName) {
+        alertaIconInline = `<span class="alerta-icon-inline material-symbols-outlined">${iconName}</span>`; // Adicionei a classe material-symbols-outlined aqui
     }
 
     v.innerHTML+=`
       <div class="card ${estoqueClass}"> <!-- Aplicar classes de estoque no card -->
-      <img src="${p.foto || 'https://via.placeholder.com/120x120?text=Sem+Foto'}">
+      <img src="${p.foto || 'https://via.placeholder.com/120x120?text=Sem+Foto'}" alt="${p.nome || 'Produto sem foto'}" loading="lazy">
       <div class="card-info">
         <h3>${p.nome}</h3>
         <span class="badge-cat" style="background:${getCorCat(p.cat)}">${p.cat||'Outros'}</span>
         <p class="estoque-label">Estoque: <b>${p.qtd}</b>${alertaIconInline}</p> <!-- Ícone agora está aqui, inline com o texto -->
         ${isAdmin?`<div class="admin-actions">
-         <button class="btn-edit-card" onclick="abrirModal('${p.id}')">✏️</button>
-          <button class="btn-delete-card" onclick="deletarProduto('${p.id}')">🗑️</button>
+         <button class="btn-edit-card" onclick="abrirModal('${p.id}')"><span class="material-symbols-outlined">edit</span></button>
+          <button class="btn-delete-card" onclick="deletarProduto('${p.id}')"><span class="material-symbols-outlined">delete</span></button>
         </div>`:''}
       </div>
       </div>`;
@@ -2257,7 +2350,7 @@ function renderHistory(){
         <td>${tipoDisplay}</td>
         <td>${h.qtd}</td>
         <td>${h.motivo}</td>
-        <td><button class="lixeira" onclick="deletarHist('${h.id}')">🗑️</button></td>
+        <td><button class="lixeira" onclick="deletarHist('${h.id}')"><span class="material-symbols-outlined">delete</span></button></td>
       </tr>`;
   });
 
@@ -2374,11 +2467,12 @@ function imprimirHistorico(){
         <td>${tipoDisplay}</td>
         <td>${h.qtd}</td>
         <td>${h.motivo}</td>
-      </tr>`; // Removido o botão de lixeira para impressão
+        <td><button class="lixeira" onclick="deletarHist('${h.id}')"><span class="material-symbols-outlined">delete</span></button></td>
+      </tr>`;
   });
 
   if (totalMovimentacoesImpressao === 0) {
-      tbodyContent += `<tr><td colspan="5" style="text-align:center; color:#64748b;">Nenhuma movimentação encontrada para o filtro atual.</td></tr>`;
+      tbodyContent += `<tr><td colspan="6" style="text-align:center; color:var(--subtle-text);">Nenhuma movimentação encontrada.</td></tr>`;
   }
 
   // Adicionar o conteúdo do tbody ao HTML final
@@ -2462,7 +2556,7 @@ function atualizarListasDeEstoque(produtosParaListar) {
 
     // --- Lógica para Maior Estoque (pelo menos 4 valores distintos, excluindo itens de menor estoque) ---
     const produtosOrdenadosDesc = [...produtosParaListar].filter(p =>!idsMenorEstoque.has(p.id)) // Exclui itens de menor estoque
-                 .sort((a, b) => b.qtd - a.qtd);
+          .sort((a, b) => b.qtd - a.qtd);
     const topQuantities = new Set();
     const produtosParaMaiorEstoque = [];
     const maxItems = 5; // Limite de itens a serem exibidos
@@ -2472,7 +2566,7 @@ function atualizarListasDeEstoque(produtosParaListar) {
             topQuantities.add(p.qtd);
             // Adiciona todos os produtos com essa quantidade
             produtosOrdenadosDesc.filter(item => item.qtd === p.qtd)
-         .forEach(prod => {
+   .forEach(prod => {
                 if (!produtosParaMaiorEstoque.some(existing => existing.id === prod.id)) {
                     produtosParaMaiorEstoque.push(prod);
                 }
@@ -2518,4 +2612,3 @@ if ('serviceWorker' in navigator) {
 </script>
 </body>
 </html>
-
