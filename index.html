@@ -1030,7 +1030,7 @@ input:focus,select:focus,textarea:focus{
     font-size:0.75rem;
   }
   /* Esconde a coluna de ação da lixeira na tabela para economizar espaço */
-.hist-table th:last-child,.hist-table th:nth-last-child(2),.hist-table td:last-child,.hist-table td:nth-last-child(2){
+.hist-table th:last-child,.hist-table th:nth-last-child(2),.hist-table td:last-child,.hist-table th:nth-last-child(2){
     display: none;
   }
 
@@ -2035,7 +2035,7 @@ async function importarBackup(event){
                   const fotoURL = await uploadImagemCloudinary(fakeFile); // <<< UPLOAD PARA CLOUDINARY
                   data.foto = fotoURL; // Atualiza a foto no objeto de dados
               } else if (data.foto && data.foto.startsWith('https://firebasestorage.googleapis.com/')) {
-                  console.warn("Imagem do Firebase Storage detectada para ${data.nome}. Tentando re-upload para Cloudinary.");
+                  console.warn(`Foto do Firebase Storage detectada para ${data.nome}. Tentando re-upload para Cloudinary.`);
                   try {
                     const response = await fetch(data.foto);
                     if (response.ok) {
@@ -2157,11 +2157,12 @@ function render(){
   produtosExibidos.forEach(p=>{
     cProd++; cEst+=parseInt(p.qtd);
     
-    // NOVO: Lógica de alerta e classes (com ícones inline e discretos, usando PNGs)
+    // NOVO: Lógica de alerta e classes (com ícones inline e discretos, agora usando PNGs)
     let estoqueClass = '';
     let alertaIconInline = ''; // Agora o ícone será inline (imagem)
-    const urlIconAlerta = 'https://res.cloudinary.com/dqp57nr5g/image/upload/v1709148418/icon_alerta_amarelo.png'; // Ícone amarelo de alerta
-    const urlIconCritico = 'https://res.cloudinary.com/dqp57nr5g/image/upload/v1709148418/icon_critico_vermelho.png'; // Ícone vermelho de crítico
+    // Suas URLs dos ícones PNG no Cloudinary
+    const urlIconAlerta = 'https://res.cloudinary.com/dqp57nr5g/image/upload/v1771459662/icone_amarelo_alerta_ykelar.png'; // Ícone amarelo de alerta
+    const urlIconCritico = 'https://res.cloudinary.com/dqp57nr5g/image/upload/v1771459681/icone_vermelho_critico_zsxrwm.png'; // Ícone vermelho de crítico
 
     if (p.qtdMin > 0) { // Só aplica alerta se houver estoque mínimo definido
         if (p.qtd < p.qtdMin) { // Abaixo do mínimo: crítico (vermelho)
@@ -2455,7 +2456,7 @@ function atualizarListasDeEstoque(produtosParaListar) {
 
     // --- Lógica para Maior Estoque (pelo menos 4 valores distintos, excluindo itens de menor estoque) ---
     const produtosOrdenadosDesc = [...produtosParaListar].filter(p =>!idsMenorEstoque.has(p.id)) // Exclui itens de menor estoque
-                    .sort((a, b) => b.qtd - a.qtd);
+                   .sort((a, b) => b.qtd - a.qtd);
     const topQuantities = new Set();
     const produtosParaMaiorEstoque = [];
     const maxItems = 5; // Limite de itens a serem exibidos
@@ -2465,7 +2466,7 @@ function atualizarListasDeEstoque(produtosParaListar) {
             topQuantities.add(p.qtd);
             // Adiciona todos os produtos com essa quantidade
             produtosOrdenadosDesc.filter(item => item.qtd === p.qtd)
-            .forEach(prod => {
+           .forEach(prod => {
                 if (!produtosParaMaiorEstoque.some(existing => existing.id === prod.id)) {
                     produtosParaMaiorEstoque.push(prod);
                 }
