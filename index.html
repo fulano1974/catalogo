@@ -196,7 +196,7 @@ body{
   padding: 0 10px; /* Padding um pouco maior */
   height: 32px; /* Altura ajustada para caber o texto */
   border-radius: 16px; /* Mais arredondado */
-  font-size: 0.8rem; /* Fonte um pouco menor */
+  font-size: 0.8rem; /* Fonte um pouco maior */
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1115,7 +1115,7 @@ input:focus,select:focus,textarea:focus{
   }
 }
 
-/* --- NOVO CSS PARA ESTOQUE MÍNIMO MAIS PROFISSIONAL E ÍCONE PEQUENO (CORRIGIDO) --- */
+/* --- NOVO CSS PARA ESTOQUE MÍNIMO MAIS PROFISSIONAL E ÍCONE PEQUENO --- */
 .card.estoque-alerta {
     border: 1px solid var(--warning); /* Borda laranja suave */
     box-shadow: 0 0 10px rgba(245, 158, 11, 0.2); /* Sombra laranja */
@@ -1316,69 +1316,98 @@ input:focus,select:focus,textarea:focus{
 
     <!-- Right Sidebar -->
     <div class="sidebar right no-print">
+      <!-- Botões de Navegação do Dashboard -->
       <div class="sidebar-section">
-        <h3>📊 Visão Geral do Estoque</h3>
-        <div class="sidebar-info-item">
-          <span class="label"><b>Produtos Cadastrados:</b></span>
-          <span class="value" id="rightSidebarTotalProdutos" style="color: var(--accent); font-weight: bold;">0</span>
-        </div>
-        <div class="sidebar-info-item">
-          <span class="label"><b>Total Geral:</b></span>
-          <span class="value" id="rightSidebarTotalEstoqueHighlight" style="color: var(--accent); font-weight: bold;">0</span>
+        <h3>Dashboard Rápido</h3>
+        <div style="display:flex; flex-wrap:wrap; gap:8px; margin-top: 10px;">
+          <button class="btn-secondary btn-dashboard-nav active" onclick="mostrarDashboard(event, 'visaoGeral')">Visão Geral</button>
+          <button class="btn-secondary btn-dashboard-nav" onclick="mostrarDashboard(event, 'relatorioRapido')">Por Categoria</button>
+          <button class="btn-secondary btn-dashboard-nav" onclick="mostrarDashboard(event, 'movimentacao')">Movimentação</button>
+          <button class="btn-secondary btn-dashboard-nav" onclick="mostrarDashboard(event, 'statusEstoque')">Status</button>
         </div>
       </div>
 
-      <div class="sidebar-section">
-        <h3>🔍 Relatório Rápido</h3>
-        <div class="input-group" style="margin-bottom: 10px;">
-          <label for="relatorioRapidoCat">Filtrar por Categoria</label>
-          <!-- Aumentei o width para caber o texto -->
-          <select id="relatorioRapidoCat" class="sort-select" style="width: 100%;" onchange="gerarRelatorioRapido()">
-            <!-- Categorias serão preenchidas via JS -->
-          </select>
+      <!-- SEÇÃO: Visão Geral do Estoque (padrão) -->
+      <div id="visaoGeralDashboard" class="dashboard-content" style="display: block;"> <!-- Visível por padrão -->
+        <div class="sidebar-section">
+          <h3>📊 Visão Geral do Estoque</h3>
+          <div class="sidebar-info-item">
+            <span class="label"><b>Produtos Cadastrados:</b></span>
+            <span class="value" id="rightSidebarTotalProdutos" style="color: var(--accent); font-weight: bold;">0</span>
+          </div>
+          <div class="sidebar-info-item">
+            <span class="label"><b>Total Geral:</b></span>
+            <span class="value" id="rightSidebarTotalEstoqueHighlight" style="color: var(--accent); font-weight: bold;">0</span>
+          </div>
         </div>
-        <div id="relatorioDetalhado">
-          <p class="sidebar-info-item">
-            <span class="label" style="color:var(--primary);"><b>Itens nesta Categoria:</b></span>
-            <span class="value" id="itensCategoria" style="color:var(--success);">0</span>
-          </p>
-          <p class="sidebar-info-item">
-            <span class="label" style="color:var(--primary);"><b>Estoque Total da Categoria:</b></span>
-            <span class="value" id="estoqueCategoria" style="color:var(--success);">0</span>
-          </p>
+        <div class="sidebar-section sidebar-stock-list">
+          <h3>📉 Itens com Menor Estoque</h3>
+          <ul id="listaMenorEstoque">
+            <li class="placeholder">Nenhum item encontrado.</li>
+          </ul>
+        </div>
+        <div class="sidebar-section sidebar-stock-list">
+          <h3>📈 Itens com Maior Estoque</h3>
+          <ul id="listaMaiorEstoque">
+            <li class="placeholder">Nenhum item encontrado.</li>
+          </ul>
         </div>
       </div>
 
-      <!-- Seção para Itens com MENOR Estoque -->
-      <div class="sidebar-section sidebar-stock-list">
-        <h3>📉 Itens com Menor Estoque</h3>
-        <ul id="listaMenorEstoque">
-          <!-- Produtos com menor estoque serão listados aqui -->
-          <li class="placeholder">Nenhum item encontrado nesta categoria.</li>
-        </ul>
+      <!-- SEÇÃO: Relatório Rápido por Categoria -->
+      <div id="relatorioRapidoDashboard" class="dashboard-content" style="display: none;">
+        <div class="sidebar-section">
+          <h3>🔍 Relatório Rápido</h3>
+          <div class="input-group" style="margin-bottom: 10px;">
+            <label for="relatorioRapidoCat">Filtrar por Categoria</label>
+            <select id="relatorioRapidoCat" class="sort-select" style="width: 100%;" onchange="gerarRelatorioRapido()">
+              <!-- Categorias serão preenchidas via JS -->
+            </select>
+          </div>
+          <div id="relatorioDetalhado">
+            <p class="sidebar-info-item">
+              <span class="label" style="color:var(--primary);"><b>Itens nesta Categoria:</b></span>
+              <span class="value" id="itensCategoria" style="color:var(--success);">0</span>
+            </p>
+            <p class="sidebar-info-item">
+              <span class="label" style="color:var(--primary);"><b>Estoque Total da Categoria:</b></span>
+              <span class="value" id="estoqueCategoria" style="color:var(--success);">0</span>
+            </p>
+          </div>
+        </div>
       </div>
 
-      <!-- Seção para Itens com MAIOR Estoque -->
-      <div class="sidebar-section sidebar-stock-list">
-        <h3>📈 Itens com Maior Estoque</h3>
-        <ul id="listaMaiorEstoque">
-          <!-- Produtos com maior estoque serão listados aqui -->
-          <li class="placeholder">Nenhum item encontrado nesta categoria.</li>
-        </ul>
+      <!-- SEÇÃO: Top 5 Movimentações -->
+      <div id="movimentacaoDashboard" class="dashboard-content" style="display: none;">
+        <div class="sidebar-section sidebar-stock-list">
+          <h3>📊 Top 5 Movimentações (Últimos 30 dias)</h3>
+          <p style="font-size: 0.8rem; color: var(--subtle-text); margin-bottom: 10px;">Produtos com mais e menos entradas/saídas.</p>
+          <h4>Maior Movimentação:</h4>
+          <ul id="listaMaiorMovimentacao">
+            <li class="placeholder">Nenhuma movimentação.</li>
+          </ul>
+          <h4 style="margin-top: 15px;">Menor Movimentação:</h4>
+          <ul id="listaMenorMovimentacao">
+            <li class="placeholder">Nenhuma movimentação.</li>
+          </ul>
+        </div>
       </div>
 
-      <!-- NOVA Seção para Top 5 Movimentações -->
-      <div class="sidebar-section sidebar-stock-list">
-        <h3>📊 Top 5 Movimentações (Últimos 30 dias)</h3>
-        <p style="font-size: 0.8rem; color: var(--subtle-text); margin-bottom: 10px;">Produtos com mais e menos entradas/saídas.</p>
-        <h4>Maior Movimentação:</h4>
-        <ul id="listaMaiorMovimentacao">
-          <li class="placeholder">Nenhuma movimentação.</li>
-        </ul>
-        <h4 style="margin-top: 15px;">Menor Movimentação:</h4>
-        <ul id="listaMenorMovimentacao">
-          <li class="placeholder">Nenhuma movimentação.</li>
-        </ul>
+      <!-- SEÇÃO: Status do Estoque (Normal, Alerta, Crítico) -->
+      <div id="statusEstoqueDashboard" class="dashboard-content" style="display: none;">
+        <div class="sidebar-section">
+          <h3>🚦 Status do Estoque</h3>
+          <p style="font-size: 0.8rem; color: var(--subtle-text); margin-bottom: 10px;">Visualização da proporção de produtos por estado.</p>
+          <div id="statusEstoqueChart" style="width: 100%; height: auto; display:flex; flex-direction:column; align-items:center; justify-content:center; color: var(--subtle-text);">
+              <!-- O gráfico será renderizado aqui. Por enquanto, só texto. -->
+              <p>Carregando status...</p>
+          </div>
+          <ul id="statusEstoqueTextual" style="list-style: none; padding: 0; margin-top: 15px;">
+            <li style="display:flex; justify-content:space-between; padding: 5px 0;"><span>Normal:</span> <b style="color: var(--success);" id="statusNormalCount">0</b></li>
+            <li style="display:flex; justify-content:space-between; padding: 5px 0;"><span>Alerta:</span> <b style="color: var(--warning);" id="statusAlertaCount">0</b></li>
+            <li style="display:flex; justify-content:space-between; padding: 5px 0;"><span>Crítico:</span> <b style="color: var(--danger);" id="statusCriticoCount">0</b></li>
+          </ul>
+        </div>
       </div>
 
       <div class="sidebar-action-buttons">
@@ -1488,7 +1517,11 @@ async function initFirebase() {
     renderHistory();
     // Atualiza o relatório rápido
     gerarRelatorioRapido();
-    gerarRelatorioMovimentacao(); // <<< NOVO: Chamar o relatório de movimentação
+    gerarRelatorioMovimentacao(); // Chamar o relatório de movimentação
+    gerarStatusEstoqueDashboard(); // Chamar o dashboard de status
+
+    // Mostrar o dashboard de Visão Geral por padrão
+    mostrarDashboard(null, 'visaoGeral'); // Chamada inicial para mostrar o primeiro dashboard
   } catch (error) {
     console.error("Erro ao carregar dados do Firebase:", error);
     alert("Erro ao carregar dados do Firebase. Verifique sua conexão ou configurações de segurança do Firestore.");
@@ -1828,6 +1861,8 @@ async function cadastrar(){
     render();
     gerarRelatorioRapido(); // ATUALIZAR RELATORIO RÁPIDO
     preencherSelectsDeCategoria(); // Atualiza as categorias nos selects
+    gerarRelatorioMovimentacao(); // Chamar o relatório de movimentação
+    gerarStatusEstoqueDashboard(); // Chamar o dashboard de status
     document.getElementById('nome').value='';
     document.getElementById('qtd').value='0';
     document.getElementById('qtdMin').value='0'; // <<< NOVO: Resetar estoque mínimo
@@ -1874,7 +1909,8 @@ async function fecharModal(){
     render();
     gerarRelatorioRapido(); // ATUALIZAR RELATORIO RÁPIDO
     preencherSelectsDeCategoria(); // Atualiza as categorias nos selects
-    gerarRelatorioMovimentacao(); // <<< NOVO: Chamar o relatório de movimentação
+    gerarRelatorioMovimentacao(); // Chamar o relatório de movimentação
+    gerarStatusEstoqueDashboard(); // Chamar o dashboard de status
   } catch (error) {
     console.error("Erro ao salvar alterações do produto:", error);
     alert("Erro ao salvar alterações. Verifique o console para mais detalhes.");
@@ -1924,7 +1960,8 @@ async function movimentar(tipo){
     render();
     renderHistory();
     gerarRelatorioRapido(); // ATUALIZAR RELATORIO RÁPIDO
-    gerarRelatorioMovimentacao(); // <<< NOVO: Chamar o relatório de movimentação
+    gerarRelatorioMovimentacao(); // Chamar o relatório de movimentação
+    gerarStatusEstoqueDashboard(); // Chamar o dashboard de status
 
     document.getElementById('mQtd').innerText=p.qtd;
     document.getElementById('valMov').value=0;
@@ -1946,7 +1983,8 @@ async function deletarProduto(productId){
       render();
       gerarRelatorioRapido(); // ATUALIZAR RELATORIO RÁPIDO
       preencherSelectsDeCategoria(); // Atualiza as categorias nos selects
-      gerarRelatorioMovimentacao(); // <<< NOVO: Chamar o relatório de movimentação
+      gerarRelatorioMovimentacao(); // Chamar o relatório de movimentação
+      gerarStatusEstoqueDashboard(); // Chamar o dashboard de status
     } catch (error) {
       console.error("Erro ao deletar produto:", error);
       alert("Erro ao deletar produto. Verifique o console para mais detalhes.");
@@ -1963,7 +2001,8 @@ async function limparHistorico(){
       historico = []; // Limpa o array local
       renderHistory();
       alert("Histórico limpo com sucesso!");
-      gerarRelatorioMovimentacao(); // <<< NOVO: Chamar o relatório de movimentação
+      gerarRelatorioMovimentacao(); // Chamar o relatório de movimentação
+      gerarStatusEstoqueDashboard(); // Chamar o dashboard de status
     } catch (error) {
       console.error("Erro ao limpar histórico:", error);
       alert("Erro ao limpar histórico. Verifique o console para mais detalhes.");
@@ -1980,7 +2019,8 @@ async function deletarHist(historicoId){
         historico.splice(indexToDelete, 1);
       }
       renderHistory();
-      gerarRelatorioMovimentacao(); // <<< NOVO: Chamar o relatório de movimentação
+      gerarRelatorioMovimentacao(); // Chamar o relatório de movimentação
+      gerarStatusEstoqueDashboard(); // Chamar o dashboard de status
     } catch (error) {
       console.error("Erro ao deletar item do histórico:", error);
       alert("Erro ao deletar item do histórico. Verifique o console para mais detalhes.");
@@ -2147,6 +2187,41 @@ async function importarBackup(event){
 }
 
 // === FUNÇÕES AUXILIARES DE RENDERIZAÇÃO E RELATÓRIOS ===
+
+// Função para alternar entre os dashboards na sidebar direita
+function mostrarDashboard(event, dashboardId) {
+    // Esconde todos os dashboards
+    document.querySelectorAll('.dashboard-content').forEach(div => {
+        div.style.display = 'none';
+    });
+    // Remove a classe 'active' de todos os botões
+    document.querySelectorAll('.btn-dashboard-nav').forEach(btn => {
+        btn.classList.remove('active');
+    });
+
+    // Mostra o dashboard selecionado
+    document.getElementById(dashboardId + 'Dashboard').style.display = 'block';
+    
+    // Adiciona a classe 'active' ao botão clicado, se o evento existir
+    if (event && event.target) {
+        event.target.classList.add('active');
+    } else { // Caso seja chamada sem evento (ex: na inicialização)
+        const activeBtn = document.querySelector(`.btn-dashboard-nav[onclick*="${dashboardId}"]`);
+        if (activeBtn) activeBtn.classList.add('active');
+    }
+
+    // Chamar as funções de renderização específicas se necessário (para garantir que estejam atualizadas)
+    if (dashboardId === 'visaoGeral') {
+        render(); // render() já atualiza os dados de Visão Geral (maior/menor estoque)
+    } else if (dashboardId === 'relatorioRapido') {
+        preencherSelectsDeCategoria(); // Garante que as categorias do select estejam atualizadas
+        gerarRelatorioRapido(); // Re-gera o relatório para a categoria atual
+    } else if (dashboardId === 'movimentacao') {
+        gerarRelatorioMovimentacao();
+    } else if (dashboardId === 'statusEstoque') {
+        gerarStatusEstoqueDashboard();
+    }
+}
 
 function render(){
   const v=document.getElementById('vitrine');
@@ -2476,7 +2551,7 @@ function atualizarListasDeEstoque(produtosParaListar) {
 
     // --- Lógica para Maior Estoque (pelo menos 4 valores distintos, excluindo itens de menor estoque) ---
     const produtosOrdenadosDesc = [...produtosParaListar].filter(p =>!idsMenorEstoque.has(p.id)) // Exclui itens de menor estoque
-                  .sort((a, b) => b.qtd - a.qtd);
+                 .sort((a, b) => b.qtd - a.qtd);
     const topQuantities = new Set();
     const produtosParaMaiorEstoque = [];
     const maxItems = 5; // Limite de itens a serem exibidos
@@ -2515,12 +2590,20 @@ function atualizarListasDeEstoque(produtosParaListar) {
 
 // NOVO: Função para gerar o relatório de movimentação (Top 5)
 function gerarRelatorioMovimentacao() {
+    console.log("Executando gerarRelatorioMovimentacao()");
     const hoje = new Date();
     const trintaDiasAtras = new Date(hoje);
     trintaDiasAtras.setDate(hoje.getDate() - 30);
 
     const movimentacoesRecentes = historico.filter(item => {
-        const itemDate = new Date(item.data); // Assumindo que item.data é uma string compatível com Date
+        let itemDate;
+        if (item.dataTimestamp && item.dataTimestamp.toDate) { // Se for Timestamp do Firebase
+            itemDate = item.dataTimestamp.toDate();
+        } else if (item.data) { // Se for string (backup JSON antigo)
+            itemDate = new Date(item.data);
+        } else {
+            return false; // Ignora itens sem data válida
+        }
         return itemDate >= trintaDiasAtras;
     });
 
@@ -2559,10 +2642,13 @@ function gerarRelatorioMovimentacao() {
         ulMaior.innerHTML = '<li class="placeholder">Nenhuma movimentação.</li>';
     }
 
-    // Top 5 Menor Movimentação (produtos que foram movimentados, mas menos vezes)
+    // Top 5 Menor Movimentação (produtos que foram movimentados, mas menos vezes, entre os movimentados)
     const ulMenor = document.getElementById('listaMenorMovimentacao');
     ulMenor.innerHTML = ''; // Limpa a lista existente
     if (produtosMovimentados.length > 0) {
+        // Para "menor movimentação", queremos os produtos que TIVERAM movimentação, mas em menor quantidade.
+        // Se quisermos os que "quase não se movem", poderíamos olhar movimentações mais antigas ou 0 movimentações
+        // Mas por enquanto, vamos pegar os com menor totalQtd entre os que foram movimentados.
         const top5Menor = [...produtosMovimentados].sort((a, b) => a.totalQtd - b.totalQtd).slice(0, 5);
         top5Menor.forEach(p => {
             const li = document.createElement('li');
@@ -2572,6 +2658,39 @@ function gerarRelatorioMovimentacao() {
     } else {
         ulMenor.innerHTML = '<li class="placeholder">Nenhuma movimentação.</li>';
     }
+}
+
+// NOVA FUNÇÃO: Gera o dashboard de status do estoque (Normal, Alerta, Crítico)
+function gerarStatusEstoqueDashboard() {
+    console.log("Executando gerarStatusEstoqueDashboard()");
+    let normalCount = 0;
+    let alertaCount = 0;
+    let criticoCount = 0;
+
+    db.forEach(p => {
+        if (p.qtdMin > 0) {
+            if (p.qtd < p.qtdMin) {
+                criticoCount++;
+            } else if (p.qtd === p.qtdMin) {
+                alertaCount++;
+            } else {
+                normalCount++;
+            }
+        } else {
+            normalCount++; // Se não tem min definido, consideramos normal
+        }
+    });
+
+    document.getElementById('statusNormalCount').innerText = normalCount;
+    document.getElementById('statusAlertaCount').innerText = alertaCount;
+    document.getElementById('statusCriticoCount').innerText = criticoCount;
+
+    // TODO: Aqui podemos integrar uma biblioteca de gráficos para desenhar um gráfico de pizza/donut
+    // Por enquanto, apenas o texto com os números
+    const chartDiv = document.getElementById('statusEstoqueChart');
+    chartDiv.innerHTML = `<p>Normal: ${normalCount}, Alerta: ${alertaCount}, Crítico: ${criticoCount}</p>`;
+    // Futuramente, pode ser algo como:
+    // renderizarGraficoDePizza(normalCount, alertaCount, criticoCount);
 }
 
 // Inicialização
