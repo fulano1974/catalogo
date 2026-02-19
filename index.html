@@ -187,6 +187,7 @@ body{
 /* Estilo para a nova div de grid dos botões de categoria - AJUSTADO NOVAMENTE */
 .cat-buttons-grid {
   display: grid;
+  /* Min-width maior para caber o texto */
   grid-template-columns: repeat(auto-fit, minmax(90px, 1fr));
   gap: 8px; /* Espaço entre os botões */
 }
@@ -1165,71 +1166,6 @@ input:focus,select:focus,textarea:focus{
 .card.estoque-critico p.estoque-label b {
     color: var(--danger); /* Cor vermelha para a quantidade crítica */
 }
-/* --- Estilos para o Dashboard da Sidebar --- */
-/* Certifique-se que o display flex esteja correto para os botões */
-.sidebar-section > div[style*="display:flex"] { /* Seleciona a div que contém os botões */
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  margin-top: 10px;
-}
-
-.btn-dashboard-nav {
-  padding: 8px 12px;
-  border-radius: 20px;
-  font-size: 0.75rem;
-  font-weight: 600;
-  border: 1px solid var(--border-color);
-  background: var(--bg);
-  color: var(--subtle-text);
-  cursor: pointer;
-  transition: all 0.2s ease;
-  flex-shrink: 0; /* Impede que os botões encolham muito */
-}
-.btn-dashboard-nav:hover {
-  background: var(--accent);
-  color: white;
-  border-color: var(--accent);
-}
-.btn-dashboard-nav.active {
-  background: var(--accent);
-  color: white;
-  border-color: var(--accent);
-  box-shadow: 0 2px 8px rgba(59, 130, 246, 0.2);
-}
-
-.dashboard-content {
-  /* Por padrão, escondido. JS vai controlar qual mostrar */
-  display: none;
-}
-/* A primeira seção visível por padrão precisa estar marcada diretamente no HTML ou via JS no início */
-#visaoGeralDashboard {
-  display: block; /* Garante que a Visão Geral seja a primeira a aparecer */
-}
-
-/* Estilo para garantir que o conteúdo da lista Menor/Maior Estoque esteja visível */
-.sidebar-stock-list ul {
-  list-style: none;
-  padding: 0;
-  margin: 10px 0 0 0;
-}
-.sidebar-stock-list li {
-  font-size: 0.85rem;
-  padding: 5px 0;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  border-bottom: 1px dotted var(--border-color);
-}
-.sidebar-stock-list li:last-child {
-  border-bottom: none;
-}
-.sidebar-stock-list li.placeholder {
-  color: var(--subtle-text);
-  text-align: center;
-  justify-content: center;
-}
-/* --- FIM DO CSS PARA DASHBOARD --- */
 </style>
 <!-- Firebase SDK -->
 <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
@@ -1585,8 +1521,7 @@ async function initFirebase() {
     gerarStatusEstoqueDashboard(); // Chamar o dashboard de status
 
     // Mostrar o dashboard de Visão Geral por padrão
-    // Passamos null para o evento porque não há um clique de botão real na inicialização
-    mostrarDashboard(null, 'visaoGeral'); 
+    mostrarDashboard(null, 'visaoGeral'); // Chamada inicial para mostrar o primeiro dashboard
   } catch (error) {
     console.error("Erro ao carregar dados do Firebase:", error);
     alert("Erro ao carregar dados do Firebase. Verifique sua conexão ou configurações de segurança do Firestore.");
@@ -2167,20 +2102,63 @@ async function importarBackup(event){
                         const blob = await response.blob();
                         const fakeFile = new File([blob], `image_fs_${Date.now()}.png`, { type: blob.type });
                         const fotoURL = await uploadImagemCloudinary(fakeFile);
+                        if (fotoURL) data.foto = fotoURL;
+                        else data.foto = 'https://via.placeholder.com/120x120?text=Import+Error'; // Fallback
+                    } else {
+                        data.foto = 'https://via.placeholder.com/120x120?text=FS+Error'; // Fallback
+                    }
+                  } catch (fetchError) {
+                      console.error("Erro ao tentar baixar imagem do Firebase Storage:", fetchError);
+                      data.foto = 'https://via.placeholder.com/120x120?text=Fetch+Error'; // Fallback
+                  }
+              }
+              const savedProd = await salvarProdutoFirebase(data);
+              db.push(savedProd);
+            }
+
+            // Importar histórico
+            console.log("Importando histórico do backup...");
+            for (const histItem of importedData.historico) {
+              const { id,...data } = histItem; // Firestore gera IDs, ignore o ID do backup
+              // Adiciona um timestamp de servidor para manter a ordem se data fosse apenas string
+              data.dataTimestamp = firebase.firestore.FieldValue.serverTimestamp();
+              const savedHist = await adicionarHistoricoFirebase(data);
+              historico.push(savedHist);
+            }
+
+            // Importar imagem da sidebar
+            if (importedData.sidebarImage) {
+              if (importedData.sidebarImage.startsWith('data:image')) {
+                  const blob = await (await fetch(importedData.sidebarImage)).blob();
+                  const fakeFile = new File([blob], `sidebar_image_${Date.now()}.png`, { type: blob.type });
+                  const fotoURL = await uploadImagemCloudinary(fakeFile); // <<< UPLOAD PARA CLOUDINARY
+                  if (fotoURL) {
+                    sidebarImageUrl = fotoURL;
+                    document.getElementById('sidebarImage').src = sidebarImageUrl;
+                    await salvarSidebarImageFirebase(sidebarImageUrl);
+                  }
+              } else if (importedData.sidebarImage.startsWith('https://firebasestorage.googleapis.com/')) {
+                  console.warn("Imagem da sidebar do Firebase Storage detectada. Tentando re-upload para Cloudinary.");
+                  try {
+                    const response = await fetch(importedData.sidebarImage);
+                    if (response.ok) {
+                        const blob = await response.blob();
+                        const fakeFile = new File([blob], `sidebar_image_fs_${Date.now()}.png`, { type: blob.type });
+                        const fotoURL = await uploadImagemCloudinary(fakeFile);
                         if (fotoURL) {
                           sidebarImageUrl = fotoURL;
                           document.getElementById('sidebarImage').src = sidebarImageUrl;
                           await salvarSidebarImageFirebase(sidebarImageUrl);
                         } else {
-                          sidebarImageUrl = 'https://via.placeholder.com/120x120?text=Import+Error';
+                          sidebarImageUrl = 'https://via.placeholder.com/280x150?text=Import+Error';
                           document.getElementById('sidebarImage').src = sidebarImageUrl;
                         }
                     } else {
-                        sidebarImageUrl = 'https://via.placeholder.com/120x120?text=FS+Error';
+                        sidebarImageUrl = 'https://via.placeholder.com/280x150?text=FS+Error';
                         document.getElementById('sidebarImage').src = sidebarImageUrl;
                     }
                   } catch (fetchError) {
-                      console.error("Erro ao tentar baixar imagem do Firebase Storage:", fetchError);
+                      console.error("Erro ao tentar baixar imagem da sidebar do Firebase Storage:", fetchError);
                       sidebarImageUrl = 'https://via.placeholder.com/280x150?text=Fetch+Error';
                       document.getElementById('sidebarImage').src = sidebarImageUrl;
                   }
@@ -2420,132 +2398,317 @@ function imprimirProdutos(){
 }
 
 function imprimirHistorico(){
-  let novaJan = window.open('', '_blank'); // Abre em uma nova aba
+  let novaJan=window.open('','_blank'); // Abre em uma nova aba
   if (!novaJan) {
       alert('Seu navegador bloqueou a abertura da janela de impressão. Por favor, desative o bloqueador de pop-ups para este site.');
       return;
   }
-
   let currentDateTime = new Date().toLocaleString();
 
-  let htmlContent = `
-    <html>
-    <head>
-        <title>Histórico de Movimentações</title>
-        <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-        <style>
-            body { font-family: 'Poppins', sans-serif; padding: 0; margin: 0; min-height: 100vh; display: flex; flex-direction: column; }
-           .content-wrapper { flex-grow: 1; padding: 15mm; }
-            h1 { text-align: center; font-size: 24px; font-weight: bold; margin-bottom: 20px; color: #1f2a40; }
-            table { width: 100%; border-collapse: collapse; font-size: 12px; margin-top: 15px; }
-            th, td { padding: 8px; border: 1px solid #e0e7ee; text-align: left; page-break-inside: avoid; }
-            th { font-weight: 600; background-color: #f0f4f8; color: #334155; }
-            tr:nth-child(even) { background-color: #f9fbfc!important; }
-            tr:nth-child(odd) { background-color: #ffffff!important; }
-            table tbody tr { page-break-inside: avoid; page-break-after: auto; }
-           .tag-add { color: #10b8a6; font-weight: bold; }
-           .tag-sub { color: #ef4444; font-weight: bold; }
+  let html=`<html><head><title>Histórico de Movimentações</title><style>
+    body{font-family:'Poppins', sans-serif;padding:0; margin: 0; min-height: 100vh; display: flex; flex-direction: column;}
+.content-wrapper { flex-grow: 1; padding: 15mm; }
+    h1{text-align:center;font-size:24px;font-weight:bold;margin-bottom:20px; color:#1f2a40;}
+    table{width:100%;border-collapse:collapse;font-size:12px; margin-top: 15px;}
+    th,td{padding:8px;border:1px solid #e0e7ee;text-align:left; page-break-inside: avoid;}
+    th{font-weight:600; background-color: #f0f4f8; color:#334155;}
+    tr:nth-child(even){background-color:#f9fbfc!important;}
+    tr:nth-child(odd){background-color:#ffffff!important;}
+    table tbody tr { page-break-inside: avoid; page-break-after: auto;}
+.tag-add{color:#10b8a6;font-weight:bold;}
+.tag-sub{color:#ef4444;font-weight:bold;}
 
-           .report-footer {
-                position: fixed;
-                bottom: 0;
-                left: 0;
-                right: 0;
-                display: flex;
-                justify-content: space-between;
-                align-items: center;
-                font-size: 10px;
-                border-top: 1px solid #000;
-                padding: 5mm 15mm;
-                background: white;
-                box-sizing: border-box;
-                page-break-before: avoid;
-            }
-           .report-footer.datetime-info { flex-grow: 1; text-align: center; order: 2; }
-           .report-footer.count-info { flex-grow: 1; text-align: right; order: 3; }
-           .report-footer.flex-spacer-left { flex-grow: 1; order: 1; }
+.report-footer{
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        font-size: 10px;
+        border-top: 1px solid #000;
+        padding: 5mm 15mm;
+        background: white;
+        box-sizing: border-box;
+        page-break-before: avoid;
+      }
+.report-footer.datetime-info { flex-grow: 1; text-align: center; order: 2; }
+.report-footer.count-info { flex-grow: 1; text-align: right; order: 3; }
+.report-footer.flex-spacer-left { flex-grow: 1; order: 1; }
 
-            @page { margin: 15mm; }
-            table th:nth-child(1), table td:nth-child(1) { width: 18%; }
-            table th:nth-child(2), table td:nth-child(2) { width: 30%; }
-            table th:nth-child(3), table td:nth-child(3) { width: 12%; }
-            table th:nth-child(4) { width: 8%; }
-            table td:nth-child(4) { width: 8%; text-align: center; }
-            table th:nth-child(5), table td:nth-child(5) { width: 32%; }
-            /* Esconde a coluna de ação (lixeira) na impressão */
-            table th:last-child, table td:last-child { display: none; }
-        </style>
-    </head>
-    <body>
-        <div class="content-wrapper">
-            <h1>Histórico de Movimentações Haris</h1>
-            <table>
-                <thead>
-                    <tr>
-                        <th>Data</th>
-                        <th>Produto</th>
-                        <th>Tipo</th>
-                        <th>Qtd</th>
-                        <th>Motivo</th>
-                        <th>Ação</th> <!-- Mantido para correspondência, mas será escondido pelo CSS -->
-                    </tr>
-                </thead>
-                <tbody>
-  `;
+    @page { margin: 15mm; }
+    table th:nth-child(1), table td:nth-child(1) { width: 18%; }
+    table th:nth-child(2), table td:nth-child(2) { width: 30%; }
+    table th:nth-child(3), table td:nth-child(3) { width: 12%; }
+    table th:nth-child(4) { width: 8%; }
+    table td:nth-child(4) { width: 8%; text-align: center; }
+    table th:nth-child(5), table td:nth-child(5) { width: 32%; }
+  </style></head><body>`;
+
+  html+=`<div class="content-wrapper"><h1>Histórico de Movimentações Haris</h1><table><thead><tr><th>Data</th><th>Produto</th><th>Tipo</th><th>Qtd</th><th>Motivo</th></tr></thead><tbody>`;
 
   let totalMovimentacoesImpressao = 0;
-  const termo = document.getElementById('inputBuscaHist').value.toLowerCase();
-  const filtro = document.getElementById('filtroCatHist').value;
+  const termo=document.getElementById('inputBuscaHist').value.toLowerCase();
+  const filtro=document.getElementById('filtroCatHist').value;
   const historicoParaImprimir = historico.filter(h =>
-      (h.produto.toLowerCase().includes(termo) || h.motivo.toLowerCase().includes(termo)) &&
-      (filtro === 'Todos' || h.cat === filtro)
-  );
+      (h.produto.toLowerCase().includes(termo)||h.motivo.toLowerCase().includes(termo)) &&
+      (filtro==='Todos'||h.cat===filtro)
+  ); // Não precisa reverter, o Firebase já ordenou
 
-  historicoParaImprimir.forEach(h => {
+  historicoParaImprimir.forEach(h=>{
     totalMovimentacoesImpressao++;
     let tipoDisplay = h.tipo === 'Entrada'? `<span class="tag-add">${h.tipo}</span>` : `<span class="tag-sub">${h.tipo}</span>`;
-    htmlContent += `
+    tbody.innerHTML+=`
       <tr>
         <td>${h.data}</td>
         <td>${h.produto}</td>
         <td>${tipoDisplay}</td>
         <td>${h.qtd}</td>
         <td>${h.motivo}</td>
-        <td></td> <!-- Coluna vazia para a lixeira, que será escondida -->
+        <td><button class="lixeira" onclick="deletarHist('${h.id}')">🗑️</button></td>
       </tr>`;
   });
 
   if (totalMovimentacoesImpressao === 0) {
-      htmlContent += `<tr><td colspan="6" style="text-align:center; color:#64748b;">Nenhuma movimentação encontrada para o filtro atual.</td></tr>`;
+      tbody.innerHTML += `<tr><td colspan="5" style="text-align:center; color:var(--subtle-text);">Nenhuma movimentação encontrada para o filtro atual.</td></tr>`;
   }
 
-  htmlContent += `
-                </tbody>
-            </table>
-        </div>
-        <div class="report-footer">
-            <span class="flex-spacer-left"></span>
-            <span class="datetime-info">Data de Emissão: ${currentDateTime}</span>
-            <span class="count-info">QTD Movimentações: ${totalMovimentacoesImpressao}</span>
-        </div>
-        <script>
-            // Garante que as fontes do Google Fonts sejam carregadas antes de imprimir
-            // Isso ajuda a evitar que a impressão seja feita com fontes padrão antes do estilo carregar
-            document.fonts.ready.then(() => {
-                window.print();
-                // Opcional: fechar a janela depois de um tempo, se a impressão for cancelada ou concluída
-                // setTimeout(() => { window.close(); }, 5000); 
-            });
-            // Em alguns navegadores, um pequeno atraso pode ser necessário se fonts.ready não for suficiente
-            // setTimeout(() => { window.print(); }, 500); 
-        </script>
-    </body>
-    </html>
-  `;
+  html+=`</tbody></table></div>`;
+  html+=`<div class="report-footer">
+    <span class="flex-spacer-left"></span>
+    <span class="datetime-info">Data de Emissão: ${currentDateTime}</span>
+    <span class="count-info">QTD Movimentações: ${totalMovimentacoesImpressao}</span>
+  </div></body></html>`;
 
-  novaJan.document.open(); // Abre o documento para escrita
-  novaJan.document.write(htmlContent);
-  novaJan.document.close(); // Fecha o documento para renderização
+  novaJan.document.write(html);
+  novaJan.document.close(); // Fecha o document para garantir que o conteúdo está pronto
 
-  // Foco e acionamento da impressão é feito no script da nova janela
+  novaJan.focus(); // Foca na nova janela para exibir o diálogo de impressão
+  setTimeout(() => { // Adiciona um pequeno atraso antes de chamar print()
+    try {
+        novaJan.print();
+    } catch (e) {
+        console.error("Erro ao tentar imprimir o histórico:", e);
+    }
+  }, 1000); // Aumentado para 1 segundo para dar mais tempo para renderizar em dispositivos mais lentos
 }
+
+// ATUALIZADO: Função para gerar o relatório rápido e as listas de estoque na sidebar direita
+function gerarRelatorioRapido() {
+    const selectedCat = document.getElementById('relatorioRapidoCat').value;
+
+    let produtosFiltrados = db;
+    if (selectedCat!== 'Todos') {
+        produtosFiltrados = db.filter(p => p.cat === selectedCat);
+    }
+
+    const totalItensCat = produtosFiltrados.length;
+    const totalQtdCat = produtosFiltrados.reduce((sum, p) => sum + p.qtd, 0);
+
+    // Atualizar os elementos individuais do relatório por categoria
+    document.getElementById('itensCategoria').innerHTML = `<b>${totalItensCat}</b>`; // Quantidade em negrito e verde
+    document.getElementById('estoqueCategoria').innerHTML = `<b>${totalQtdCat}</b>`; // Quantidade em negrito e verde
+
+    // Atualizar o "Produtos Cadastrados" e "Total em Estoque Geral" na sidebar direita
+    document.getElementById('rightSidebarTotalProdutos').innerText = db.length;
+    document.getElementById('rightSidebarTotalEstoqueHighlight').innerText = db.reduce((sum, p) => sum + p.qtd, 0);
+
+    // Chamar a função para atualizar as listas de estoque (menor e maior)
+    atualizarListasDeEstoque(produtosFiltrados);
+}
+
+// ATUALIZADA: Função para atualizar as listas de itens com menor e maior estoque
+function atualizarListasDeEstoque(produtosParaListar) {
+    const listaMenorEstoqueUl = document.getElementById('listaMenorEstoque');
+    const listaMaiorEstoqueUl = document.getElementById('listaMaiorEstoque');
+
+    listaMenorEstoqueUl.innerHTML = ''; // Limpa a lista existente
+    listaMaiorEstoqueUl.innerHTML = ''; // Limpa a lista existente
+
+    if (produtosParaListar.length === 0) {
+        listaMenorEstoqueUl.innerHTML = '<li class="placeholder">Nenhum item encontrado nesta categoria.</li>';
+        listaMaiorEstoqueUl.innerHTML = '<li class="placeholder">Nenhum item encontrado nesta categoria.</li>';
+        return;
+    }
+
+    // --- Lógica para Menor Estoque (pegando todos com a menor QTD) ---
+    const produtosOrdenadosAsc = [...produtosParaListar].sort((a, b) => a.qtd - b.qtd);
+    let menorQuantidade = produtosOrdenadosAsc.length > 0? produtosOrdenadosAsc[0].qtd : -1;
+    let produtosComMenorEstoque = produtosOrdenadosAsc.filter(p => p.qtd === menorQuantidade);
+
+    const idsMenorEstoque = new Set(); // Para rastrear os IDs dos produtos com menor estoque
+    if (produtosComMenorEstoque.length > 0) {
+        produtosComMenorEstoque.slice(0, 5).forEach(p => { // Exibe no máximo 5 itens
+            idsMenorEstoque.add(p.id); // Adiciona o ID para exclusão posterior
+            const li = document.createElement('li');
+            li.innerHTML = `<span class="product-name">${p.nome}</span> <span class="stock-count" style="color: var(--danger);"><b>${p.qtd}</b></span>`;
+            listaMenorEstoqueUl.appendChild(li);
+        });
+    } else {
+        listaMenorEstoqueUl.innerHTML = '<li class="placeholder">Nenhum item encontrado nesta categoria.</li>';
+    }
+
+    // --- Lógica para Maior Estoque (pelo menos 4 valores distintos, excluindo itens de menor estoque) ---
+    const produtosOrdenadosDesc = [...produtosParaListar].filter(p =>!idsMenorEstoque.has(p.id)) // Exclui itens de menor estoque
+                 .sort((a, b) => b.qtd - a.qtd);
+    const topQuantities = new Set();
+    const produtosParaMaiorEstoque = [];
+    const maxItems = 5; // Limite de itens a serem exibidos
+
+    for (const p of produtosOrdenadosDesc) {
+        if (!topQuantities.has(p.qtd)) {
+            topQuantities.add(p.qtd);
+            // Adiciona todos os produtos com essa quantidade
+            produtosOrdenadosDesc.filter(item => item.qtd === p.qtd)
+          .forEach(prod => {
+                if (!produtosParaMaiorEstoque.some(existing => existing.id === prod.id)) {
+                    produtosParaMaiorEstoque.push(prod);
+                }
+            });
+        }
+        // Se já temos itens suficientes para preencher a lista E pelo menos 4 valores distintos, podemos parar
+        // ou se já temos 5 itens, paramos também
+        if ((produtosParaMaiorEstoque.length >= maxItems && topQuantities.size >= 4) || produtosParaMaiorEstoque.length >= maxItems) {
+             break;
+        }
+    }
+
+    // Ordena o array final para exibição e limita a 'maxItems'
+    produtosParaMaiorEstoque.sort((a, b) => b.qtd - a.qtd);
+
+    if (produtosParaMaiorEstoque.length > 0) {
+        produtosParaMaiorEstoque.slice(0, maxItems).forEach(p => {
+            const li = document.createElement('li');
+            li.innerHTML = `<span class="product-name">${p.nome}</span> <span class="stock-count" style="color: var(--success);"><b>${p.qtd}</b></span>`;
+            listaMaiorEstoqueUl.appendChild(li);
+        });
+    } else {
+        listaMaiorEstoqueUl.innerHTML = '<li class="placeholder">Nenhum item encontrado nesta categoria.</li>';
+    }
+}
+
+// NOVO: Função para gerar o relatório de movimentação (Top 5)
+function gerarRelatorioMovimentacao() {
+    console.log("Executando gerarRelatorioMovimentacao()");
+    const hoje = new Date();
+    const trintaDiasAtras = new Date(hoje);
+    trintaDiasAtras.setDate(hoje.getDate() - 30);
+
+    const movimentacoesRecentes = historico.filter(item => {
+        let itemDate;
+        if (item.dataTimestamp && item.dataTimestamp.toDate) { // Se for Timestamp do Firebase
+            itemDate = item.dataTimestamp.toDate();
+        } else if (item.data) { // Se for string (backup JSON antigo)
+            itemDate = new Date(item.data);
+        } else {
+            return false; // Ignora itens sem data válida
+        }
+        return itemDate >= trintaDiasAtras;
+    });
+
+    const movimentacoesPorProduto = {};
+
+    movimentacoesRecentes.forEach(item => {
+        if (!movimentacoesPorProduto[item.produto]) {
+            movimentacoesPorProduto[item.produto] = { totalQtd: 0, entradas: 0, saidas: 0 };
+        }
+        movimentacoesPorProduto[item.produto].totalQtd += item.qtd;
+        if (item.tipo === 'Entrada') {
+            movimentacoesPorProduto[item.produto].entradas += item.qtd;
+        } else if (item.tipo === 'Saída') {
+            movimentacoesPorProduto[item.produto].saidas += item.qtd;
+        }
+    });
+
+    const produtosMovimentados = Object.keys(movimentacoesPorProduto).map(nomeProduto => ({
+        nome: nomeProduto,
+        totalQtd: movimentacoesPorProduto[nomeProduto].totalQtd,
+        entradas: movimentacoesPorProduto[nomeProduto].entradas,
+        saidas: movimentacoesPorProduto[nomeProduto].saidas
+    }));
+
+    // Top 5 Maior Movimentação
+    const ulMaior = document.getElementById('listaMaiorMovimentacao');
+    ulMaior.innerHTML = ''; // Limpa a lista existente
+    if (produtosMovimentados.length > 0) {
+        const top5Maior = [...produtosMovimentados].sort((a, b) => b.totalQtd - a.totalQtd).slice(0, 5);
+        top5Maior.forEach(p => {
+            const li = document.createElement('li');
+            li.innerHTML = `<span class="product-name">${p.nome}</span> <span class="stock-count"><b>${p.totalQtd}</b></span>`;
+            ulMaior.appendChild(li);
+        });
+    } else {
+        ulMaior.innerHTML = '<li class="placeholder">Nenhuma movimentação.</li>';
+    }
+
+    // Top 5 Menor Movimentação (produtos que foram movimentados, mas menos vezes, entre os movimentados)
+    const ulMenor = document.getElementById('listaMenorMovimentacao');
+    ulMenor.innerHTML = ''; // Limpa a lista existente
+    if (produtosMovimentados.length > 0) {
+        // Para "menor movimentação", queremos os produtos que TIVERAM movimentação, mas em menor quantidade.
+        // Se quisermos os que "quase não se movem", poderíamos olhar movimentações mais antigas ou 0 movimentações
+        // Mas por enquanto, vamos pegar os com menor totalQtd entre os que foram movimentados.
+        const top5Menor = [...produtosMovimentados].sort((a, b) => a.totalQtd - b.totalQtd).slice(0, 5);
+        top5Menor.forEach(p => {
+            const li = document.createElement('li');
+            li.innerHTML = `<span class="product-name">${p.nome}</span> <span class="stock-count"><b>${p.totalQtd}</b></span>`;
+            ulMenor.appendChild(li);
+        });
+    } else {
+        ulMenor.innerHTML = '<li class="placeholder">Nenhuma movimentação.</li>';
+    }
+}
+
+// NOVA FUNÇÃO: Gera o dashboard de status do estoque (Normal, Alerta, Crítico)
+function gerarStatusEstoqueDashboard() {
+    console.log("Executando gerarStatusEstoqueDashboard()");
+    let normalCount = 0;
+    let alertaCount = 0;
+    let criticoCount = 0;
+
+    db.forEach(p => {
+        if (p.qtdMin > 0) {
+            if (p.qtd < p.qtdMin) {
+                criticoCount++;
+            } else if (p.qtd === p.qtdMin) {
+                alertaCount++;
+            } else {
+                normalCount++;
+            }
+        } else {
+            normalCount++; // Se não tem min definido, consideramos normal
+        }
+    });
+
+    document.getElementById('statusNormalCount').innerText = normalCount;
+    document.getElementById('statusAlertaCount').innerText = alertaCount;
+    document.getElementById('statusCriticoCount').innerText = criticoCount;
+
+    // TODO: Aqui podemos integrar uma biblioteca de gráficos para desenhar um gráfico de pizza/donut
+    // Por enquanto, apenas o texto com os números
+    const chartDiv = document.getElementById('statusEstoqueChart');
+    chartDiv.innerHTML = `<p>Normal: ${normalCount}, Alerta: ${alertaCount}, Crítico: ${criticoCount}</p>`;
+    // Futuramente, pode ser algo como:
+    // renderizarGraficoDePizza(normalCount, alertaCount, criticoCount);
+}
+
+// Inicialização
+initFirebase();
+
+// >>>>>>>>>>> CÓDIGO DE REGISTRO DO SERVICE WORKER ADICIONADO AQUI <<<<<<<<<<<
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/service-worker.js')
+.then(registration => {
+        console.log('Service Worker registered:', registration);
+      })
+.catch(error => {
+        console.error('Service Worker registration failed:', error);
+      });
+  });
+}
+// >>>>>>>>>>> FIM DO CÓDIGO DO SERVICE WORKER <<<<<<<<<<<
+</script>
+</body>
+</html>
