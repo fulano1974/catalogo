@@ -59,7 +59,6 @@ body{
   flex-direction:column;
   gap:10px; /* Reduzindo o gap geral da sidebar */
   flex-shrink:0; /* Não encolher a sidebar */
-  /* NOVAS PROPRIEDADES PARA FIXAR */
   position: sticky;
   top: 20px; /* Alinha com a margem superior do container-wrapper */
   max-height: calc(100vh - 40px); /* Altura máxima da viewport menos as margens */
@@ -78,7 +77,6 @@ body{
   gap:20px;
   order:2; /* Ordem para layout */
 }
-/* MOBILE TOP SECTION - REMOVIDO */
 
 .header{
   display:flex;
@@ -121,8 +119,6 @@ body{
   outline:none;
 }
 .sort-select{
-  /* Removendo largura fixa para permitir que o select se ajuste */
-  /* width:120px; */
   padding:10px;
   border-radius:8px;
   border:1px solid var(--border-color);
@@ -184,19 +180,17 @@ body{
   margin-bottom:10px;
   color:var(--primary);
 }
-/* Estilo para a nova div de grid dos botões de categoria - AJUSTADO NOVAMENTE */
 .cat-buttons-grid {
   display: grid;
-  /* Min-width maior para caber o texto */
   grid-template-columns: repeat(auto-fit, minmax(90px, 1fr));
   gap: 8px; /* Espaço entre os botões */
 }
 
 .btn-cat {
-  padding: 0 10px; /* Padding um pouco maior */
-  height: 32px; /* Altura ajustada para caber o texto */
-  border-radius: 16px; /* Mais arredondado */
-  font-size: 0.8rem; /* Fonte um pouco maior */
+  padding: 0 10px;
+  height: 32px;
+  border-radius: 16px;
+  font-size: 0.8rem;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -222,7 +216,7 @@ body{
   border-color:#d0d7e0;
 }
 
-/* Imagem na sidebar - AJUSTADA PARA MAIOR */
+/* Imagem na sidebar */
 .sidebar-image {
   width: 100%;
   padding: 0;
@@ -233,12 +227,12 @@ body{
   display: flex;
   justify-content: center;
   align-items: center;
-  margin-bottom: 10px; /* Reduzindo margem inferior */
+  margin-bottom: 10px;
 }
 
 .sidebar-image img {
   max-width: 100%;
-  max-height: 250px; /* ALTURA MÁXIMA AUMENTADA */
+  max-height: 250px;
   height: auto;
   object-fit: contain;
   display: block;
@@ -246,14 +240,13 @@ body{
   width: auto;
 }
 
-/* Ajuste para o grupo de input de busca */
-.input-group:not(.file-upload-group) { /* Exclui o file-upload-group para não afetar o modal */
-  flex: none; /* Remover o flex-grow */
+.input-group:not(.file-upload-group) {
+  flex: none;
 }
 
 /* Admin Panel */
 #adminPanel{
-  display:none; /* É 'none' por padrão e JS muda para 'grid' */
+  display:none;
   background:var(--card-bg);
   padding:20px;
   border-radius:12px;
@@ -297,7 +290,7 @@ input:focus,select:focus,textarea:focus{
 /* Stats Bar */
 .stats-bar{
   display:flex;
-  justify-content:flex-end; /* Alinha os itens à direita */
+  justify-content:flex-end;
   align-items:center;
   background:var(--card-bg);
   padding:15px 25px;
@@ -305,14 +298,14 @@ input:focus,select:focus,textarea:focus{
   border:1px solid var(--border-color);
   font-size:0.9rem;
   box-shadow:0 2px 8px rgba(0,0,0,0.03);
-  gap:10px; /* Adiciona espaçamento entre os grupos de botões */
-  flex-wrap: wrap; /* Permite quebrar linha em telas menores */
-  margin-bottom: 20px; /* Adicionado para afastar da vitrine */
+  gap:10px;
+  flex-wrap: wrap;
+  margin-bottom: 20px;
 }
-.stats-bar > div{ /* Ajuste para o.backup-group */
+.stats-bar > div{
   display:flex;
   gap:10px;
-  flex-wrap: wrap; /* Permite quebrar linha em telas menores */
+  flex-wrap: wrap;
 }
 .stats-bar b{
   font-weight:700;
@@ -320,9 +313,9 @@ input:focus,select:focus,textarea:focus{
   font-size:1rem;
 }
 .backup-group{
-  display:none; /* É 'none' por padrão e JS muda para 'flex' */
+  display:none;
   gap:10px;
-  flex-wrap: wrap; /* Permite quebrar linha em telas menores */
+  flex-wrap: wrap;
 }
 .backup-group button{
   padding:8px 15px;
@@ -332,7 +325,7 @@ input:focus,select:focus,textarea:focus{
 
 /* History Panel */
 #historyPanel{
-  display:none; /* É 'none' por padrão e JS muda para 'block' */
+  display:none;
   background:var(--card-bg);
   padding:25px;
   border-radius:16px;
@@ -386,7 +379,6 @@ input:focus,select:focus,textarea:focus{
 /* Vitrine Grid */
 .grid{
   display:grid;
-  /* MODIFICADO: Min-width dos cards para 150px e até 6 colunas */
   grid-template-columns:repeat(auto-fill, minmax(150px, 1fr));
   gap:20px;
 }
@@ -407,11 +399,11 @@ input:focus,select:focus,textarea:focus{
 }
 .card img{
   width:100%;
-  height:120px; /* Altura da imagem um pouco menor */
+  height:120px;
   object-fit:contain;
   background:#fefefe;
   border-radius:8px;
-  margin-bottom:8px; /* Margem menor */
+  margin-bottom:8px;
 }
 .card-info{
   padding:8px 0;
@@ -420,30 +412,30 @@ input:focus,select:focus,textarea:focus{
   align-items:center;
 }
 .card h3{
-  margin:4px 0; /* Margem menor */
-  font-size:0.9rem; /* FONTE DO NOME DO PRODUTO REDUZIDA */
-  line-height:1.2; /* Linha um pouco mais justa */
+  margin:4px 0;
+  font-size:0.9rem;
+  line-height:1.2;
   color:var(--primary);
   font-weight:600;
 }
 .badge-cat{
-  font-size:0.6rem; /* FONTE DA CATEGORIA REDUZIDA */
-  padding:3px 8px; /* Padding menor */
+  font-size:0.6rem;
+  padding:3px 8px;
   border-radius:15px;
   color:white;
   font-weight:600;
   text-transform:uppercase;
-  margin-top:4px; /* Margem menor */
-  margin-bottom:8px; /* Margem menor */
-  display:inline-block; /* Para padding funcionar bem */
+  margin-top:4px;
+  margin-bottom:8px;
+  display:inline-block;
 }
 .card p{
   margin:0;
-  font-size:0.75rem; /* FONTE DO TEXTO 'ESTOQUE' REDUZIDA */
+  font-size:0.75rem;
   color:var(--subtle-text);
 }
 .card p b{
-  font-size:1rem; /* FONTE DO NÚMERO DO ESTOQUE REDUZIDA */
+  font-size:1rem;
   color:var(--primary);
 }
 .admin-actions{
@@ -474,7 +466,7 @@ input:focus,select:focus,textarea:focus{
   color:white;
 }
 
-/* Modal Styling - REVISADO */
+/* Modal Styling */
 #modal{
   display:none;
   position:fixed;
@@ -492,24 +484,24 @@ input:focus,select:focus,textarea:focus{
   background:var(--card-bg);
   padding:30px;
   border-radius:20px;
-  width:400px; /* Aumentado para melhor layout */
+  width:400px;
   text-align:center;
   box-shadow:0 10px 30px rgba(0,0,0,0.2);
   transform:scale(0.95);
   animation:modalOpen 0.3s forwards ease-out;
   display:flex;
   flex-direction:column;
-  gap:15px; /* Espaçamento entre os elementos do modal */
+  gap:15px;
 }
 @keyframes modalOpen {
   to { transform:scale(1); opacity:1; }
 }
-.modal-content h2.modal-title{ /* Novo título para o modal */
+.modal-content h2.modal-title{
   font-size:1.4rem;
   margin:0 0 10px 0;
   font-weight:700;
 }
-.modal-content.input-group{ /* Reutilizando estilo de input-group */
+.modal-content.input-group{
   text-align:left;
   margin-bottom:5px;
 }
@@ -538,7 +530,7 @@ input:focus,select:focus,textarea:focus{
   background-color:white;
 }
 
-#mNomeEdit{ /* Estilo específico para o nome do produto */
+#mNomeEdit{
   font-weight:600;
   text-align:center;
   font-size:1.1rem;
@@ -563,7 +555,7 @@ input:focus,select:focus,textarea:focus{
 }
 #valMov{
   text-align:center;
-  width:100px; /* Ajustado para caber no layout */
+  width:100px;
   margin:auto;
   background:var(--bg);
   border-color:var(--border-color);
@@ -609,7 +601,7 @@ input:focus,select:focus,textarea:focus{
   cursor:pointer;
   transition:all 0.3s ease;
 }
-.btn-entry{ /* Botão Entrada */
+.btn-entry{
   background:var(--success);
   color:white;
   border:none;
@@ -617,7 +609,7 @@ input:focus,select:focus,textarea:focus{
 .btn-entry:hover{
   background:#0d9488;
 }
-.btn-exit{ /* Botão Saída */
+.btn-exit{
   background:var(--danger);
   color:white;
   border:none;
@@ -625,13 +617,13 @@ input:focus,select:focus,textarea:focus{
 .btn-exit:hover{
   background:#b91c1c;
 }
-.close-modal-btn-bottom{ /* Botão Salvar e Fechar */
+.close-modal-btn-bottom{
   margin-top:15px;
   padding:12px;
   border-radius:10px;
   font-size:0.9rem;
   font-weight:600;
-  background:var(--primary); /* Cor mais neutra para salvar */
+  background:var(--primary);
   color:white;
   border:none;
   box-shadow:0 2px 10px rgba(0,0,0,0.05);
@@ -651,7 +643,7 @@ input:focus,select:focus,textarea:focus{
 .print-header{text-align:center;font-size:28px;font-weight:bold;border-bottom:2px solid #000;padding-bottom:10px;margin-bottom:20px;}
 .grid{
     display:grid!important;
-    grid-template-columns:repeat(6,1fr)!important; /* Mais colunas para PDF */
+    grid-template-columns:repeat(6,1fr)!important;
     gap:5px!important;
   }
 .card{
@@ -680,7 +672,6 @@ input:focus,select:focus,textarea:focus{
       padding: 5px 15mm;
       background: white;
       box-sizing: border-box;
-      page-break-inside: avoid; /* Evita que o footer seja quebrado entre páginas */
       page-break-before: avoid;
     }
 .report-footer.datetime-info {
@@ -701,63 +692,83 @@ input:focus,select:focus,textarea:focus{
 .hist-table th{font-weight:bold;}
 }
 
-/* --- INÍCIO DO NOVO CSS PARA CAMPO DE SENHA --- */
-/* Estilo para o container do input de senha */
+/* --- NOVO CSS PARA CAMPO DE SENHA --- */
 .password-input-container {
     position: relative;
-    display: flex; /* Garante que o input e o botão fiquem alinhados */
-    align-items: center; /* Centraliza verticalmente o conteúdo */
+    display: flex;
+    align-items: center;
     width: 100%;
 }
-
-/* Estilo para o ícone de olho (botão) */
 .toggle-password {
     position: absolute;
-    right: 1px; /* Ajuste para o canto direito, próximo à borda */
-    height: calc(100% - 2px); /* Altura do botão para cobrir o input, menos borda */
-    width: 38px; /* Largura fixa para o botão */
+    right: 1px;
+    height: calc(100% - 2px);
+    width: 38px;
     cursor: pointer;
-    background: transparent; /* Fundo transparente */
-    border: none; /* Sem borda */
+    background: transparent;
+    border: none;
     padding: 0;
     display: flex;
     align-items: center;
     justify-content: center;
     z-index: 10;
     transition: background-color 0.2s ease;
-    border-top-right-radius: 8px; /* Arredonda as bordas do botão */
-    border-bottom-right-radius: 8px; /* Arredonda as bordas do botão */
+    border-top-right-radius: 8px;
+    border-bottom-right-radius: 8px;
 }
-
 .toggle-password:hover {
-    background-color: rgba(0, 0, 0, 0.05); /* Fundo sutil no hover */
+    background-color: rgba(0, 0, 0, 0.05);
 }
-
-/* Estilo para os ícones SVG dentro do botão */
 .toggle-password svg {
-    width: 20px; /* Tamanho do ícone SVG */
+    width: 20px;
     height: 20px;
-    /* fill: var(--subtle-text); REMOVIDO pois o SVG já define stroke="currentColor" */
-    transition: stroke 0.2s ease; /* Transição para a cor do traçado */
+    transition: stroke 0.2s ease;
 }
-
 .toggle-password:hover svg {
-    stroke: var(--primary); /* Escurece o ícone no hover */
+    stroke: var(--primary);
 }
-
-/* Adicione um padding à direita no input para não cobrir o ícone */
 .password-input-container input {
-    padding-right: 40px; /* Deixa mais espaço para o ícone */
+    padding-right: 40px;
 }
-/* --- FIM DO NOVO CSS PARA CAMPO DE SENHA --- */
 
-/* Estilos para a sidebar direita */
+/* --- ESTILOS DASHBOARD SIDEBAR DIREITA --- */
+.btn-dashboard-nav {
+  padding: 8px 12px;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  border: 1px solid var(--border-color);
+  background: var(--bg);
+  color: var(--subtle-text);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+}
+.btn-dashboard-nav:hover {
+  background: var(--accent);
+  color: white;
+  border-color: var(--accent);
+}
+.btn-dashboard-nav.active {
+  background: var(--accent);
+  color: white;
+  border-color: var(--accent);
+  box-shadow: 0 2px 8px rgba(59, 130, 246, 0.2);
+}
+.dashboard-content {
+  display: none; /* Por padrão, todos escondidos */
+}
+#visaoGeralDashboard {
+  display: block; /* Visão Geral é o padrão inicial */
+}
+
+/* Estilos para as seções da sidebar */
 .sidebar-section {
     background: var(--card-bg);
     padding: 15px;
     border-radius: 12px;
     box-shadow: 0 4px 12px rgba(0,0,0,0.05);
-    margin-bottom: 15px; /* Espaço entre as seções */
+    margin-bottom: 15px;
 }
 .sidebar-section h3 {
     font-size: 1rem;
@@ -774,41 +785,37 @@ input:focus,select:focus,textarea:focus{
     color: var(--text-color);
 }
 .sidebar-highlight {
-    font-size: 1.5rem; /* Fonte maior para destaque */
+    font-size: 1.5rem;
     font-weight: 700;
-    color: var(--accent); /* Cor de destaque */
+    color: var(--accent);
     display: block;
     text-align: center;
     margin: 10px 0;
 }
-/* Estilo para os itens de informação na sidebar direita */
 .sidebar-info-item {
     display: flex;
-    align-items: baseline; /* Alinha pela base do texto para um look mais natural */
-    justify-content: flex-start; /* Alinha o conteúdo à esquerda */
-    gap: 8px; /* Espaçamento entre o label e o valor */
+    align-items: baseline;
+    justify-content: flex-start;
+    gap: 8px;
     padding: 5px 0;
-    /* Removi a borda inferior daqui para ser mais seletivo */
-    font-size: 0.9rem; /* Tamanho base um pouco maior */
+    font-size: 0.9rem;
 }
-/* Estilo para a borda do relatório detalhado - para não afetar os itens de cima */
 .sidebar-section > #relatorioDetalhado >.sidebar-info-item {
     border-bottom: 1px dashed var(--border-color);
 }
-
-.sidebar-info-item:last-of-type { /* O último item não precisa de borda inferior */
+.sidebar-info-item:last-of-type {
     border-bottom: none;
 }
-.sidebar-info-item.label { /* Label dentro do item de informação */
-    font-weight: bold; /* Negrito para o label */
-    color: var(--primary); /* Cor principal */
-    white-space: nowrap; /* Evita quebra de linha do label */
+.sidebar-info-item.label {
+    font-weight: bold;
+    color: var(--primary);
+    white-space: nowrap;
 }
-.sidebar-info-item.value { /* Valor dentro do item de informação */
-    font-weight: bold; /* Negrito para o valor */
-    font-size: 1rem; /* Tamanho do valor um pouco maior */
-    color: var(--accent); /* Cor de destaque para o valor */
-    white-space: nowrap; /* Evita quebra de linha do valor */
+.sidebar-info-item.value {
+    font-weight: bold;
+    font-size: 1rem;
+    color: var(--accent);
+    white-space: nowrap;
 }
 
 .sidebar-stock-list ul {
@@ -827,32 +834,68 @@ input:focus,select:focus,textarea:focus{
 .sidebar-stock-list li:last-child {
     border-bottom: none;
 }
-.sidebar-stock-list li.product-name { /* Adicionado a classe para o span */
-    flex: 1;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    margin-right: 10px;
-}
-.sidebar-stock-list li.stock-count { /* Adicionado a classe para o span */
-    font-weight: 600;
-    min-width: 30px; /* Para alinhar bem o número */
-    text-align: right;
+.sidebar-stock-list li.placeholder {
+    color: var(--subtle-text);
+    text-align: center;
+    justify-content: center;
 }
 .sidebar-action-buttons {
     display: flex;
     flex-direction: column;
     gap: 10px;
-    margin-top: auto; /* Empurra para o final da sidebar */
+    margin-top: auto;
 }
 
-/* Responsive adjustments */
-@media (min-width: 1201px) { /* Apenas para telas grandes */
+/* --- ESTILO ESTOQUE MÍNIMO E ALERTA --- */
+.card.estoque-alerta {
+    border: 1px solid var(--warning);
+    box-shadow: 0 0 10px rgba(245, 158, 11, 0.2);
+}
+.card.estoque-critico {
+    border: 2px solid var(--danger);
+    box-shadow: 0 0 15px rgba(239, 68, 68, 0.3);
+}
+@keyframes pulseSubtle {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.005); }
+    100% { transform: scale(1); }
+}
+.card.estoque-critico {
+    animation: pulseSubtle 2s infinite ease-in-out;
+}
+.card p.estoque-label {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    margin: 0;
+    font-size: 0.75rem;
+    color: var(--subtle-text);
+}
+.card p.estoque-label b {
+    font-weight: 700;
+    font-size: 1rem;
+    color: var(--primary);
+}
+.alerta-icon-inline img {
+    width: 16px;
+    height: 16px;
+    margin-left: 4px;
+    vertical-align: middle;
+}
+.card.estoque-alerta p.estoque-label b {
+    color: var(--warning);
+}
+.card.estoque-critico p.estoque-label b {
+    color: var(--danger);
+}
+
+/* --- Responsive adjustments --- */
+@media (min-width: 1201px) {
 .sidebar-action-group {
-    margin-top: 15px; /* Adiciona um pouco de margem para afastar do conteúdo */
+    margin-top: 15px;
   }
 }
-
 @media (max-width: 1200px) {
 .container-wrapper{
     flex-direction:column;
@@ -862,14 +905,13 @@ input:focus,select:focus,textarea:focus{
   }
 .sidebar{
     width:100%;
-    order:unset; /* Remover ordem para mobile */
-    position: static; /* Remove o sticky em telas pequenas */
+    order:unset;
+    position: static;
     max-height: none;
     overflow-y: visible;
   }
-/* Ações de admin no mobile (sem margin-top: auto) */
 .sidebar-action-group {
-    margin-top: 15px!important; /* Espaçamento padrão para mobile */
+    margin-top: 15px!important;
 }
 .main-content{
     order:unset;
@@ -883,7 +925,7 @@ input:focus,select:focus,textarea:focus{
     width:100%;
     text-align:center;
     justify-content:center;
-    font-size:1.6rem; /* Levemente menor para tablets */
+    font-size:1.6rem;
   }
 .search-container{
     order:3;
@@ -897,11 +939,11 @@ input:focus,select:focus,textarea:focus{
     grid-template-columns:1fr;
   }
 .grid{
-    grid-template-columns:repeat(auto-fill, minmax(140px, 1fr)); /* Ajuste para tablets */
+    grid-template-columns:repeat(auto-fill, minmax(140px, 1fr));
   }
 .modal-content{
     width:90%;
-    max-width:450px; /* Limita um pouco o tamanho em tablets */
+    max-width:450px;
   }
 .stats-bar{
     flex-direction: column;
@@ -918,17 +960,13 @@ input:focus,select:focus,textarea:focus{
   }
 }
 
-/* NOVO PONTO DE RUPTURA: Celulares e telas pequenas (menor que 768px) */
 @media (max-width: 768px) {
-  /* Empilhar itens do container-wrapper */
 .container-wrapper{
     flex-direction:column;
     gap:15px;
     margin:10px auto;
     padding:0 10px;
   }
-
-  /* ORDENAÇÃO NO SMARTPHONE */
 .main-content {
     order: 1;
     background: none;
@@ -943,8 +981,6 @@ input:focus,select:focus,textarea:focus{
 .sidebar.right {
     display: none;
   }
-
-  /* HEADER DENTRO DO MAIN-CONTENT - MOBILE */
 .main-content.header {
     padding: 10px 15px;
     flex-wrap: wrap;
@@ -963,8 +999,6 @@ input:focus,select:focus,textarea:focus{
 .main-content.header h1 img {
     height: 25px;
   }
-
-  /* STATS BAR DENTRO DO MAIN-CONTENT - MOBILE */
 .main-content.stats-bar {
     padding: 10px 15px;
     box-shadow: 0 4px 12px rgba(0,0,0,0.05);
@@ -983,19 +1017,14 @@ input:focus,select:focus,textarea:focus{
     padding: 6px 10px;
     border-radius: 15px;
   }
-
-  /* SIDEBAR ESQUERDA - AJUSTES PARA MOBILE */
-  /* Elementos da sidebar esquerda que devem ser escondidos no mobile */
 .sidebar-desktop-only {
     display: none;
   }
-  /* Filtros de Categoria */
 .sidebar.left.cat-filter-wrapper {
     margin-top: 0;
     border-radius: 12px;
     margin-bottom: 15px;
   }
-  /* Input de Busca */
 .sidebar.left.input-group:has(#inputBusca) {
     margin-top: 0;
     padding: 15px;
@@ -1003,7 +1032,6 @@ input:focus,select:focus,textarea:focus{
     border-radius: 12px;
     box-shadow: 0 4px 12px rgba(0,0,0,0.05);
   }
-  /* Categoria buttons grid */
 .cat-buttons-grid {
     grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
     gap: 5px;
@@ -1014,8 +1042,6 @@ input:focus,select:focus,textarea:focus{
     height: 30px;
     border-radius:15px;
   }
-
-  /* ADMIN PANEL / HISTORY PANEL */
   #adminPanel, #historyPanel{
     padding:15px;
     border-left:none;
@@ -1029,12 +1055,9 @@ input:focus,select:focus,textarea:focus{
     padding:8px;
     font-size:0.75rem;
   }
-  /* Esconde a coluna de ação da lixeira na tabela para economizar espaço */
 .hist-table th:last-child,.hist-table th:nth-last-child(2),.hist-table td:last-child,.hist-table td:nth-last-child(2){
     display: none;
   }
-
-  /* GRID DE PRODUTOS */
 .grid{
     grid-template-columns:repeat(auto-fill, minmax(110px, 1fr));
     gap:8px;
@@ -1063,8 +1086,6 @@ input:focus,select:focus,textarea:focus{
 .card p b{
     font-size:0.9rem;
   }
-
-  /* MODAL */
   #modal{
     padding:0px;
     background: rgba(15,23,42,0.9);
@@ -1093,7 +1114,6 @@ input:focus,select:focus,textarea:focus{
   }
 }
 
-/* Ajustes para telas bem pequenas, como iPhones SE (320px de largura) */
 @media (max-width: 380px) {
 .grid{
     grid-template-columns:repeat(auto-fill, minmax(95px, 1fr));
@@ -1109,69 +1129,14 @@ input:focus,select:focus,textarea:focus{
     width:98%;
     padding:15px;
   }
-  /* Ajuste responsivo para a imagem da sidebar em telas muito pequenas */
 .sidebar-image img {
     max-height: 100px;
   }
-}
-
-/* --- NOVO CSS PARA ESTOQUE MÍNIMO MAIS PROFISSIONAL E ÍCONE PEQUENO --- */
-.card.estoque-alerta {
-    border: 1px solid var(--warning); /* Borda laranja suave */
-    box-shadow: 0 0 10px rgba(245, 158, 11, 0.2); /* Sombra laranja */
-}
-.card.estoque-critico {
-    border: 2px solid var(--danger); /* Borda vermelha mais forte */
-    box-shadow: 0 0 15px rgba(239, 68, 68, 0.3); /* Sombra vermelha */
-}
-
-/* Animação sutil para o card quando em estado crítico */
-@keyframes pulseSubtle {
-    0% { transform: scale(1); }
-    50% { transform: scale(1.005); } /* Reduzindo o scale para ser ainda mais sutil */
-    100% { transform: scale(1); }
-}
-.card.estoque-critico {
-    animation: pulseSubtle 2s infinite ease-in-out;
-}
-
-/* Estilo para o texto de estoque */
-.card p.estoque-label {
-    display: flex; /* Para alinhar o texto "Estoque: BOLD_QTD ICON" */
-    align-items: center;
-    justify-content: center;
-    gap: 4px; /* Espaço entre o ícone e o texto do estoque */
-    margin: 0; /* Garante que não tenha margens indesejadas */
-    font-size: 0.75rem; /* FONTE DO TEXTO 'ESTOQUE' REDUZIDA */
-    color: var(--subtle-text);
-}
-.card p.estoque-label b {
-    font-weight: 700;
-    font-size: 1rem; /* FONTE DO NÚMERO DO ESTOQUE REDUZIDA */
-    color: var(--primary); /* Cor padrão do número */
-}
-
-/* Estilo para o ícone de alerta INLINE (agora uma imagem) */
-.alerta-icon-inline img {
-    width: 16px; /* Tamanho pequeno para o ícone */
-    height: 16px;
-    margin-left: 4px; /* Pequena margem à esquerda para separar do número */
-    vertical-align: middle; /* Ajuda no alinhamento vertical com o texto */
-}
-
-/* Cores do texto baseadas nas classes do CARD */
-.card.estoque-alerta p.estoque-label b {
-    color: var(--warning); /* Cor laranja para a quantidade em alerta */
-}
-.card.estoque-critico p.estoque-label b {
-    color: var(--danger); /* Cor vermelha para a quantidade crítica */
 }
 </style>
 <!-- Firebase SDK -->
 <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
 <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
-<!-- Remover referência a firebase-storage.js pois não será usado para upload -->
-<!-- <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-storage.js"></script> -->
 
 <script>
   // SUA CONFIGURAÇÃO firebaseConfig GERADA PELO CONSOLE DO FIREBASE
@@ -1179,7 +1144,6 @@ input:focus,select:focus,textarea:focus{
     apiKey: "AIzaSyB0dWRSytDSfIAmCtg5pTEIjvwfJPSxb74", // SEU API KEY REAL!
     authDomain: "haris-estoque.firebaseapp.com",
     projectId: "haris-estoque",
-    // storageBucket: "haris-estoque.appspot.com", // REMOVIDO: Não precisamos configurar Storage aqui se não vamos usá-lo
     messagingSenderId: "526155106830",
     appId: "1:526155106830:web:55b4bf4c0d9549ec42ca5f",
     measurementId: "G-B77P8EZ6BS" // Para Analytics, pode ser mantido ou removido se não for usar
@@ -1190,15 +1154,15 @@ input:focus,select:focus,textarea:focus{
 
   // Obtenha a referência para o Firestore
   const dbFirebase = firebase.firestore();
-  // REMOVIDO: Não precisamos da referência ao storageFirebase se não vamos usá-lo
-  // const storageFirebase = firebase.storage();
 
   // CREDENCIAIS DO CLOUDINARY
   const CLOUDINARY_CLOUD_NAME = 'dqp57nr5g'; // SEU CLOUD NAME!
   const CLOUDINARY_UPLOAD_PRESET = 'haris_estoque_preset'; // SEU UPLOAD PRESET!
 
-  // Você pode ignorar o analytics por enquanto, ele não é essencial para o funcionamento do app.
-  // Se quiser usar, seria: const analytics = firebase.analytics();
+  // Ícones PNG para alerta/crítico (VERIFIQUE SE ESTAS SÃO SUAS URLs CORRETAS DO CLOUDINARY!)
+  const URL_ICON_ALERTA_PNG = 'https://res.cloudinary.com/dqp57nr5g/image/upload/v1771459662/icone_amarelo_alerta_ykelar.png';
+  const URL_ICON_CRITICO_PNG = 'https://res.cloudinary.com/dqp57nr5g/image/upload/v1771459681/icone_vermelho_critico_zsxrwm.png';
+
 </script>
 </head>
 <body>
@@ -1233,7 +1197,7 @@ input:focus,select:focus,textarea:focus{
           </select>
         </div>
         <div class="input-group"><label>Quantidade Inicial</label><input type="number" id="qtd" value="0"></div>
-        <div class="input-group"><label>Estoque Mínimo</label><input type="number" id="qtdMin" value="0"></div> <!-- NOVO CAMPO: Estoque Mínimo -->
+        <div class="input-group"><label>Estoque Mínimo</label><input type="number" id="qtdMin" value="0"></div>
         <div class="input-group"><label>Foto do Produto</label><input type="file" id="foto" accept="image/*"></div>
         <button class="btn-primary" style="align-self: flex-end;" onclick="cadastrar()">ADICIONAR PRODUTO</button>
       </div>
@@ -1450,7 +1414,7 @@ input:focus,select:focus,textarea:focus{
         <input type="number" id="valMov" value="0">
     </div>
     
-    <div class="input-group"> <!-- NOVO CAMPO: Estoque Mínimo no modal de edição -->
+    <div class="input-group">
         <label for="mQtdMinEdit">Estoque Mínimo</label>
         <input type="number" id="mQtdMinEdit" value="0">
     </div>
@@ -1474,24 +1438,22 @@ input:focus,select:focus,textarea:focus{
 </div>
 
 <script>
-let isAdmin = false, editIdx = null; // editIdx agora armazena o ID do produto
+let isAdmin = false, editIdx = null;
 let db = [], historico = [];
-let categoriasAtivas = []; // AGORA É UM ARRAY DE CATEGORIAS SELECIONADAS!
+let categoriasAtivas = [];
 let listaCategorias = ["Componente B", "Escova Rotativa", "Filtros", "Jotamastic A", "Jotamastic B", "Manilhas", "Pincel", "Rolo de Pintura", "Solvente", "Tinta Hardtop", "Tinta Pilot", "Outros"];
 
-let sidebarImageUrl = ''; // Nova variável para guardar a URL da imagem da sidebar
+let sidebarImageUrl = '';
 
 // Preenche os selects de categoria
 function preencherSelectsDeCategoria() {
     const selects = document.querySelectorAll('#categoria, #filtroCatHist, #mCategoriaEdit, #relatorioRapidoCat');
     selects.forEach(select => {
         if (select.id === 'filtroCatHist' || select.id === 'relatorioRapidoCat') {
-            // Garante que "Todos" seja a primeira opção nos filtros
             select.innerHTML = '<option value="Todos">Todas as Categorias</option>';
         } else {
-            select.innerHTML = ''; // Limpa para categorias dinâmicas
+            select.innerHTML = '';
         }
-        // Adiciona as categorias da listaCategorias (que é populada do db)
         listaCategorias.forEach(cat => {
             const option = document.createElement('option');
             option.value = cat;
@@ -1506,22 +1468,17 @@ function preencherSelectsDeCategoria() {
 async function initFirebase() {
   console.log("Inicializando Firebase e carregando dados...");
   try {
-    // Carrega produtos e histórico do Firestore
     await carregarDadosFirebase();
-    // Carrega a imagem da sidebar do Firestore
     await carregarSidebarImageFirebase();
-    // Preenche os selects de categoria com as categorias encontradas
     preencherSelectsDeCategoria();
-    // Renderiza a vitrine e o histórico
     render();
     renderHistory();
-    // Atualiza o relatório rápido
     gerarRelatorioRapido();
-    gerarRelatorioMovimentacao(); // Chamar o relatório de movimentação
-    gerarStatusEstoqueDashboard(); // Chamar o dashboard de status
+    gerarRelatorioMovimentacao();
+    gerarStatusEstoqueDashboard();
 
-    // Mostrar o dashboard de Visão Geral por padrão
-    mostrarDashboard(null, 'visaoGeral'); // Chamada inicial para mostrar o primeiro dashboard
+    // Mostrar o dashboard de Visão Geral por padrão na inicialização
+    mostrarDashboard(null, 'visaoGeral'); 
   } catch (error) {
     console.error("Erro ao carregar dados do Firebase:", error);
     alert("Erro ao carregar dados do Firebase. Verifique sua conexão ou configurações de segurança do Firestore.");
@@ -1529,22 +1486,18 @@ async function initFirebase() {
 }
 
 async function carregarDadosFirebase() {
-  // Carregar Produtos
   const produtosSnapshot = await dbFirebase.collection('produtos').get();
   db = produtosSnapshot.docs.map(doc => ({ id: doc.id,...doc.data() }));
   db.forEach(p => {
     p.qtd = Number(p.qtd);
-    p.qtdMin = Number(p.qtdMin || 0); // Garante que qtdMin é número, com padrão 0
+    p.qtdMin = Number(p.qtdMin || 0);
   });
 
-  // Carregar Histórico (ordenado pelo timestamp mais recente)
   const historicoSnapshot = await dbFirebase.collection('historico').orderBy('dataTimestamp', 'desc').get();
   historico = historicoSnapshot.docs.map(doc => ({ id: doc.id,...doc.data() }));
 
-  // Atualizar listaCategorias com base nos produtos carregados
   const categoriasSet = new Set(db.map(p => p.cat).filter(Boolean));
   const defaultCategories = ["Componente B", "Escova Rotativa", "Filtros", "Jotamastic A", "Jotamastic B", "Manilhas", "Pincel", "Rolo de Pintura", "Solvente", "Tinta Hardtop", "Tinta Pilot", "Outros"];
-  // Adiciona categorias padrão se não existirem no Firebase
   defaultCategories.forEach(cat => categoriasSet.add(cat));
 
   listaCategorias = Array.from(categoriasSet).sort();
@@ -1552,14 +1505,14 @@ async function carregarDadosFirebase() {
 
 async function salvarProdutoFirebase(produto) {
   try {
-    if (produto.id) { // Se o produto já tem ID, é uma atualização
-      const { id,...data } = produto; // Separa o ID dos outros dados
+    if (produto.id) {
+      const { id,...data } = produto;
       await dbFirebase.collection('produtos').doc(id).update(data);
       console.log("Produto atualizado no Firestore:", id);
       return produto;
-    } else { // Senão, é um novo produto
+    } else {
       const docRef = await dbFirebase.collection('produtos').add(produto);
-      produto.id = docRef.id; // Atribui o ID gerado pelo Firestore ao objeto local
+      produto.id = docRef.id;
       console.log("Novo produto adicionado ao Firestore:", produto.id);
       return produto;
     }
@@ -1571,9 +1524,9 @@ async function salvarProdutoFirebase(produto) {
 
 async function adicionarHistoricoFirebase(itemHistorico) {
   try {
-    itemHistorico.dataTimestamp = firebase.firestore.FieldValue.serverTimestamp(); // Adiciona timestamp do servidor
+    itemHistorico.dataTimestamp = firebase.firestore.FieldValue.serverTimestamp();
     const docRef = await dbFirebase.collection('historico').add(itemHistorico);
-    itemHistorico.id = docRef.id; // Guarda o ID do histórico também
+    itemHistorico.id = docRef.id;
     console.log("Item de histórico adicionado:", docRef.id);
     return itemHistorico;
   } catch (error) {
@@ -1584,9 +1537,6 @@ async function adicionarHistoricoFirebase(itemHistorico) {
 
 async function deletarProdutoFirebase(productId) {
   try {
-    // As imagens agora são gerenciadas pelo Cloudinary, não precisamos mais deletar do Firebase Storage.
-    // Se quiser deletar do Cloudinary, precisaria implementar a API de exclusão do Cloudinary aqui,
-    // o que exigiria um backend devido à necessidade de API_SECRET.
     await dbFirebase.collection('produtos').doc(productId).delete();
     console.log("Produto deletado do Firestore:", productId);
   } catch (error) {
@@ -1605,9 +1555,6 @@ async function deletarHistoricoFirebase(historicoId) {
   }
 }
 
-// === FUNÇÕES DE INTERAÇÃO COM CLOUDINARY ===
-
-// Função para fazer upload de imagem para o Cloudinary
 async function uploadImagemCloudinary(file) {
   if (!file) return null;
 
@@ -1629,7 +1576,7 @@ async function uploadImagemCloudinary(file) {
 
     const data = await response.json();
     console.log("Imagem uploaded para Cloudinary:", data.secure_url);
-    return data.secure_url; // Retorna a URL segura da imagem no Cloudinary
+    return data.secure_url;
   } catch (error) {
     console.error("Erro geral no upload para Cloudinary:", error);
     throw error;
@@ -1658,8 +1605,6 @@ async function carregarSidebarImageFirebase() {
     } else {
       const initialSrc = imgElement.getAttribute('src');
       if (initialSrc &&!initialSrc.startsWith('data:') &&!initialSrc.startsWith('http')) {
-        // Se a imagem inicial é local e não Data URL, precisa ser carregada para o Cloudinary (para aparecer)
-        // Por simplicidade, vamos usar um placeholder se não houver no Firestore e não for Data URL
         imgElement.src = 'https://via.placeholder.com/280x150?text=Imagem+Nao+Encontrada';
         console.warn("Imagem da sidebar não encontrada no Firestore ou não é uma URL. Usando placeholder.");
       } else {
@@ -1675,7 +1620,6 @@ async function carregarSidebarImageFirebase() {
 
 // === FUNÇÕES DE ADMINISTRAÇÃO E LÓGICA DO APP ===
 
-// Função de prompt de senha customizado
 async function customPasswordPrompt(message, correctPassword) {
     return new Promise((resolve) => {
         const modal = document.createElement('div');
@@ -1721,10 +1665,10 @@ async function customPasswordPrompt(message, correctPassword) {
         inputContainer.className = 'password-input-container';
 
         const passwordInput = document.createElement('input');
-        passwordInput.type = 'password'; // Começa como password (asteriscos)
+        passwordInput.type = 'password';
         passwordInput.placeholder = 'Digite a senha...';
         passwordInput.style.cssText = `
-            padding: 10px 40px 10px 12px; /* Aumenta padding direito para o ícone */
+            padding: 10px 40px 10px 12px;
             border: 1px solid var(--border-color);
             border-radius: 8px;
             width: 100%;
@@ -1739,29 +1683,25 @@ async function customPasswordPrompt(message, correctPassword) {
             }
         });
 
-        // Ícones SVG para olho aberto e fechado (NOVOS ÍCONES DE TRAÇO FINO)
-        // Olho fechado (estilo traço fino)
         const eyeClosedSVG = '<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-6 h-6"><path stroke-linecap="round" stroke-linejoin="round" d="M13.875 18.04C11.31 18.667 9 17.5 9 17.5s-2.25-1.167-2.25-3c0-.86.75-2 2.25-2m.917-2.45c-1.35.34-2.417.893-2.417.893s-1.067.553-2.417 1.27m3.333-5.22c1.35-.34 2.417-.893 2.417-.893s1.067-.553 2.417-1.27M12 9a3 3 0 100 6 3 3 0 000-6zM12 6.5C7.5 6.5 3.1 9.07 1 12c2.1 3.09 6.5 5.5 11 5.5s8.9-2.41 11-5.5c-2.1-3.09-6.5-5.5-11-5.5z"/></svg>';
-        // Olho aberto (estilo traço fino)
         const eyeOpenSVG = '<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-6 h-6"><path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0.639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z" /><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /></svg>';
 
         const toggleBtn = document.createElement('button');
         toggleBtn.className = 'toggle-password';
-        toggleBtn.innerHTML = eyeClosedSVG; // Ícone de olho fechado por padrão
+        toggleBtn.innerHTML = eyeClosedSVG;
         let isPasswordVisible = false;
         toggleBtn.addEventListener('click', () => {
             isPasswordVisible =!isPasswordVisible;
             passwordInput.type = isPasswordVisible? 'text' : 'password';
             toggleBtn.innerHTML = isPasswordVisible? eyeOpenSVG : eyeClosedSVG;
-            passwordInput.focus(); // Mantém o foco no input
+            passwordInput.focus();
         });
 
-        // Oculta o botão se o input estiver vazio
         const updateToggleVisibility = () => {
             toggleBtn.style.display = passwordInput.value.length > 0? 'flex' : 'none';
         };
         passwordInput.addEventListener('input', updateToggleVisibility);
-        updateToggleVisibility(); // Chama na inicialização para estado inicial
+        updateToggleVisibility();
 
         inputContainer.appendChild(passwordInput);
         inputContainer.appendChild(toggleBtn);
@@ -1799,7 +1739,7 @@ async function customPasswordPrompt(message, correctPassword) {
         `;
         cancelBtn.addEventListener('click', () => {
             modal.remove();
-            resolve(false); // Retorna false se o usuário cancelar
+            resolve(false);
         });
 
         buttonGroup.appendChild(cancelBtn);
@@ -1811,20 +1751,19 @@ async function customPasswordPrompt(message, correctPassword) {
         modal.appendChild(modalContent);
         document.body.appendChild(modal);
 
-        passwordInput.focus(); // Foca no campo de senha
+        passwordInput.focus();
     });
 }
 
 function toggleAdmin(){
   if(!isAdmin){
-    // Utiliza o prompt de senha customizado
     customPasswordPrompt("Digite a senha de administrador:", "RebocadorHaris")
-.then(isAuthenticated => { // Usa.then() pois a função customPasswordPrompt retorna uma Promise
+.then(isAuthenticated => {
         if(isAuthenticated){
           isAdmin=true;
           document.getElementById('adminPanel').style.display='grid';
           document.getElementById('backupGroup').style.display='flex';
-          render(); // Atualiza a vitrine para mostrar os botões de admin
+          render();
           alert("Modo Administrador Ativado!");
         } else {
           alert("Senha incorreta ou operação cancelada.");
@@ -1836,7 +1775,7 @@ function toggleAdmin(){
     document.getElementById('adminPanel').style.display='none';
     document.getElementById('backupGroup').style.display='none';
     document.getElementById('historyPanel').style.display='none';
-    render(); // Esconde os botões de admin
+    render();
     alert("Modo Administrador Desativado!");
   }
 }
@@ -1845,27 +1784,27 @@ async function cadastrar(){
   const n=document.getElementById('nome').value;
   const c=document.getElementById('categoria').value;
   const q=parseInt(document.getElementById('qtd').value);
-  const qMin=parseInt(document.getElementById('qtdMin').value); // <<< NOVO: Ler estoque mínimo
+  const qMin=parseInt(document.getElementById('qtdMin').value);
   const f=document.getElementById('foto').files[0];
 
   if(!n||isNaN(q)||!f) return alert('Preencha todos os campos e informe uma quantidade válida!');
 
   try {
-    const fotoURL = await uploadImagemCloudinary(f); // <<< UPLOAD PARA CLOUDINARY
+    const fotoURL = await uploadImagemCloudinary(f);
     if (!fotoURL) throw new Error("Falha ao obter URL da imagem do Cloudinary.");
 
-    const novoProdutoData = { nome: n, cat: c, qtd: q, qtdMin: qMin, foto: fotoURL }; // <<< ADICIONADO qtdMin
-    const produtoComId = await salvarProdutoFirebase(novoProdutoData); // Salva no Firestore
+    const novoProdutoData = { nome: n, cat: c, qtd: q, qtdMin: qMin, foto: fotoURL };
+    const produtoComId = await salvarProdutoFirebase(novoProdutoData);
     
-    db.push(produtoComId); // Adiciona ao array local
+    db.push(produtoComId);
     render();
-    gerarRelatorioRapido(); // ATUALIZAR RELATORIO RÁPIDO
-    preencherSelectsDeCategoria(); // Atualiza as categorias nos selects
-    gerarRelatorioMovimentacao(); // Chamar o relatório de movimentação
-    gerarStatusEstoqueDashboard(); // Chamar o dashboard de status
+    gerarRelatorioRapido();
+    preencherSelectsDeCategoria();
+    gerarRelatorioMovimentacao();
+    gerarStatusEstoqueDashboard();
     document.getElementById('nome').value='';
     document.getElementById('qtd').value='0';
-    document.getElementById('qtdMin').value='0'; // <<< NOVO: Resetar estoque mínimo
+    document.getElementById('qtdMin').value='0';
     document.getElementById('foto').value='';
   } catch (error) {
     console.error("Erro ao cadastrar produto:", error);
@@ -1879,38 +1818,38 @@ async function abrirModal(productId){
     alert("Produto não encontrado para edição.");
     return;
   }
-  editIdx = productId; // Agora editIdx armazena o ID, não o índice
+  editIdx = productId;
   document.getElementById('mNomeEdit').value=p.nome;
   document.getElementById('mQtd').innerText=p.qtd;
-  document.getElementById('mQtdMinEdit').value=p.qtdMin; // <<< NOVO: Preencher estoque mínimo
+  document.getElementById('mQtdMinEdit').value=p.qtdMin;
   document.getElementById('mNota').value='';
   document.getElementById('valMov').value=0;
   document.getElementById('mCategoriaEdit').value=p.cat;
-  document.getElementById('mFoto').value = ''; // Limpa o campo de foto
+  document.getElementById('mFoto').value = '';
   document.getElementById('modal').style.display='flex';
 }
 
 async function fecharModal(){
   const p = db.find(prod => prod.id === editIdx);
-  if (!p) return; // Se o produto não for encontrado, fecha o modal
+  if (!p) return;
 
   p.nome=document.getElementById('mNomeEdit').value;
   p.cat=document.getElementById('mCategoriaEdit').value;
-  p.qtdMin=parseInt(document.getElementById('mQtdMinEdit').value); // <<< NOVO: Salvar estoque mínimo
+  p.qtdMin=parseInt(document.getElementById('mQtdMinEdit').value);
   const f=document.getElementById('mFoto').files[0];
 
   try {
     if(f){
-      const fotoURL = await uploadImagemCloudinary(f); // <<< UPLOAD PARA CLOUDINARY
-      if (fotoURL) p.foto = fotoURL; // Atualiza URL no objeto local
+      const fotoURL = await uploadImagemCloudinary(f);
+      if (fotoURL) p.foto = fotoURL;
       else console.warn("Não foi possível obter URL da imagem do Cloudinary. Mantendo imagem anterior.");
     }
-    await salvarProdutoFirebase(p); // Salva as alterações (nome, categoria, foto, qtdMin) no Firestore
+    await salvarProdutoFirebase(p);
     render();
-    gerarRelatorioRapido(); // ATUALIZAR RELATORIO RÁPIDO
-    preencherSelectsDeCategoria(); // Atualiza as categorias nos selects
-    gerarRelatorioMovimentacao(); // Chamar o relatório de movimentação
-    gerarStatusEstoqueDashboard(); // Chamar o dashboard de status
+    gerarRelatorioRapido();
+    preencherSelectsDeCategoria();
+    gerarRelatorioMovimentacao();
+    gerarStatusEstoqueDashboard();
   } catch (error) {
     console.error("Erro ao salvar alterações do produto:", error);
     alert("Erro ao salvar alterações. Verifique o console para mais detalhes.");
@@ -1945,7 +1884,7 @@ async function movimentar(tipo){
   }
 
   try {
-    await salvarProdutoFirebase(p); // Atualiza o produto no Firestore
+    await salvarProdutoFirebase(p);
     const itemHistorico = {
       data: new Date().toLocaleString(),
       produto: p.nome,
@@ -1954,14 +1893,14 @@ async function movimentar(tipo){
       qtd: val,
       motivo: nota,
     };
-    const savedHist = await adicionarHistoricoFirebase(itemHistorico); // Adiciona ao histórico no Firestore
-    historico.unshift(savedHist); // Adiciona ao array local no início
+    const savedHist = await adicionarHistoricoFirebase(itemHistorico);
+    historico.unshift(savedHist);
 
     render();
     renderHistory();
-    gerarRelatorioRapido(); // ATUALIZAR RELATORIO RÁPIDO
-    gerarRelatorioMovimentacao(); // Chamar o relatório de movimentação
-    gerarStatusEstoqueDashboard(); // Chamar o dashboard de status
+    gerarRelatorioRapido();
+    gerarRelatorioMovimentacao();
+    gerarStatusEstoqueDashboard();
 
     document.getElementById('mQtd').innerText=p.qtd;
     document.getElementById('valMov').value=0;
@@ -1975,16 +1914,16 @@ async function movimentar(tipo){
 async function deletarProduto(productId){
   if(confirm('Deseja deletar este produto?')){
     try {
-      await deletarProdutoFirebase(productId); // Deleta do Firestore
+      await deletarProdutoFirebase(productId);
       const indexToDelete = db.findIndex(p => p.id === productId);
       if (indexToDelete > -1) {
-        db.splice(indexToDelete, 1); // Remove do array local
+        db.splice(indexToDelete, 1);
       }
       render();
-      gerarRelatorioRapido(); // ATUALIZAR RELATORIO RÁPIDO
-      preencherSelectsDeCategoria(); // Atualiza as categorias nos selects
-      gerarRelatorioMovimentacao(); // Chamar o relatório de movimentação
-      gerarStatusEstoqueDashboard(); // Chamar o dashboard de status
+      gerarRelatorioRapido();
+      preencherSelectsDeCategoria();
+      gerarRelatorioMovimentacao();
+      gerarStatusEstoqueDashboard();
     } catch (error) {
       console.error("Erro ao deletar produto:", error);
       alert("Erro ao deletar produto. Verifique o console para mais detalhes.");
@@ -1995,14 +1934,13 @@ async function deletarProduto(productId){
 async function limparHistorico(){
   if(confirm('Deseja limpar todo o histórico? Essa ação é irreversível!')){
     try {
-      // Deleta todos os documentos do histórico um por um
       const deletePromises = historico.map(h => deletarHistoricoFirebase(h.id));
       await Promise.all(deletePromises);
-      historico = []; // Limpa o array local
+      historico = [];
       renderHistory();
       alert("Histórico limpo com sucesso!");
-      gerarRelatorioMovimentacao(); // Chamar o relatório de movimentação
-      gerarStatusEstoqueDashboard(); // Chamar o dashboard de status
+      gerarRelatorioMovimentacao();
+      gerarStatusEstoqueDashboard();
     } catch (error) {
       console.error("Erro ao limpar histórico:", error);
       alert("Erro ao limpar histórico. Verifique o console para mais detalhes.");
@@ -2019,8 +1957,8 @@ async function deletarHist(historicoId){
         historico.splice(indexToDelete, 1);
       }
       renderHistory();
-      gerarRelatorioMovimentacao(); // Chamar o relatório de movimentação
-      gerarStatusEstoqueDashboard(); // Chamar o dashboard de status
+      gerarRelatorioMovimentacao();
+      gerarStatusEstoqueDashboard();
     } catch (error) {
       console.error("Erro ao deletar item do histórico:", error);
       alert("Erro ao deletar item do histórico. Verifique o console para mais detalhes.");
@@ -2028,39 +1966,34 @@ async function deletarHist(historicoId){
   }
 }
 
-// NOVO FLUXO: Primeiro pede a senha, depois abre o seletor de arquivos
 async function uploadSidebarImage(event) {
   const isAuthenticated = await customPasswordPrompt("Digite a senha para alterar a imagem da sidebar:", "meg");
   if (!isAuthenticated) {
     alert("Senha incorreta ou operação cancelada. Imagem da sidebar não alterada.");
-    return; // Não faz mais nada, pois a senha não foi validada
+    return;
   }
-
-  // Se a senha for correta, simula um clique no input de arquivo escondido
   document.getElementById('sidebarImageUploadHidden').click();
-  // O processo de upload continuará em handleSidebarFileSelection() quando o usuário escolher o arquivo
 }
 
-// NOVA FUNÇÃO: Lida com a seleção real do arquivo após a validação da senha
 async function handleSidebarFileSelection(event) {
   const file = event.target.files[0];
   if (file) {
     try {
       const imgElement = document.getElementById('sidebarImage');
-      const fotoURL = await uploadImagemCloudinary(file); // UPLOAD PARA CLOUDINARY
+      const fotoURL = await uploadImagemCloudinary(file);
       if (!fotoURL) throw new Error("Falha ao obter URL da imagem da sidebar do Cloudinary.");
 
       sidebarImageUrl = fotoURL;
       imgElement.src = sidebarImageUrl;
-      await salvarSidebarImageFirebase(sidebarImageUrl); // Salva a URL no Firestore (coleção 'config')
+      await salvarSidebarImageFirebase(sidebarImageUrl);
       alert("Imagem da sidebar atualizada e salva!");
-      event.target.value = null; // Limpa o input file para permitir nova seleção sem acionar o 'change' novamente
+      event.target.value = null;
     } catch (error) {
       console.error("Erro ao atualizar imagem da sidebar:", error);
       alert("Erro ao atualizar imagem da sidebar. Verifique o console para mais detalhes.");
     }
   } else {
-    event.target.value = null; // Limpa o input file se nenhum arquivo foi selecionado
+    event.target.value = null;
   }
 }
 
@@ -2073,7 +2006,6 @@ async function importarBackup(event){
         const importedData = JSON.parse(e.target.result);
         if (importedData.produtos && importedData.historico) {
           if (confirm("Importar backup? Isso substituirá os dados ATUAIS no Firebase. Continuar?")) {
-            // Limpa dados existentes no Firebase
             console.log("Limpando produtos existentes no Firebase...");
             const deleteProdPromises = db.map(p => deletarProdutoFirebase(p.id));
             await Promise.all(deleteProdPromises);
@@ -2081,19 +2013,17 @@ async function importarBackup(event){
             const deleteHistPromises = historico.map(h => deletarHistoricoFirebase(h.id));
             await Promise.all(deleteHistPromises);
 
-            db = []; historico = []; // Limpa arrays locais
+            db = []; historico = [];
 
-            // Importar produtos
             console.log("Importando produtos do backup...");
             for (const prod of importedData.produtos) {
-              const { id,...data } = prod; // Firestore gera IDs, então ignore o ID do backup
-              data.qtdMin = Number(data.qtdMin || 0); // Garante que qtdMin seja um número ou 0
-              // Se a imagem for uma data URL, faça upload para o Cloudinary
+              const { id,...data } = prod;
+              data.qtdMin = Number(data.qtdMin || 0);
               if (data.foto && data.foto.startsWith('data:image')) {
                   const blob = await (await fetch(data.foto)).blob();
                   const fakeFile = new File([blob], `image_${Date.now()}.png`, { type: blob.type });
-                  const fotoURL = await uploadImagemCloudinary(fakeFile); // <<< UPLOAD PARA CLOUDINARY
-                  data.foto = fotoURL; // Atualiza a foto no objeto de dados
+                  const fotoURL = await uploadImagemCloudinary(fakeFile);
+                  data.foto = fotoURL;
               } else if (data.foto && data.foto.startsWith('https://firebasestorage.googleapis.com/')) {
                   console.warn(`Foto do Firebase Storage detectada para ${data.nome}. Tentando re-upload para Cloudinary.`);
                   try {
@@ -2103,35 +2033,32 @@ async function importarBackup(event){
                         const fakeFile = new File([blob], `image_fs_${Date.now()}.png`, { type: blob.type });
                         const fotoURL = await uploadImagemCloudinary(fakeFile);
                         if (fotoURL) data.foto = fotoURL;
-                        else data.foto = 'https://via.placeholder.com/120x120?text=Import+Error'; // Fallback
+                        else data.foto = 'https://via.placeholder.com/120x120?text=Import+Error';
                     } else {
-                        data.foto = 'https://via.placeholder.com/120x120?text=FS+Error'; // Fallback
+                        data.foto = 'https://via.placeholder.com/120x120?text=FS+Error';
                     }
                   } catch (fetchError) {
                       console.error("Erro ao tentar baixar imagem do Firebase Storage:", fetchError);
-                      data.foto = 'https://via.placeholder.com/120x120?text=Fetch+Error'; // Fallback
+                      data.foto = 'https://via.placeholder.com/120x120?text=Fetch+Error';
                   }
               }
               const savedProd = await salvarProdutoFirebase(data);
               db.push(savedProd);
             }
 
-            // Importar histórico
             console.log("Importando histórico do backup...");
             for (const histItem of importedData.historico) {
-              const { id,...data } = histItem; // Firestore gera IDs, ignore o ID do backup
-              // Adiciona um timestamp de servidor para manter a ordem se data fosse apenas string
+              const { id,...data } = histItem;
               data.dataTimestamp = firebase.firestore.FieldValue.serverTimestamp();
               const savedHist = await adicionarHistoricoFirebase(data);
               historico.push(savedHist);
             }
 
-            // Importar imagem da sidebar
             if (importedData.sidebarImage) {
               if (importedData.sidebarImage.startsWith('data:image')) {
                   const blob = await (await fetch(importedData.sidebarImage)).blob();
                   const fakeFile = new File([blob], `sidebar_image_${Date.now()}.png`, { type: blob.type });
-                  const fotoURL = await uploadImagemCloudinary(fakeFile); // <<< UPLOAD PARA CLOUDINARY
+                  const fotoURL = await uploadImagemCloudinary(fakeFile);
                   if (fotoURL) {
                     sidebarImageUrl = fotoURL;
                     document.getElementById('sidebarImage').src = sidebarImageUrl;
@@ -2163,15 +2090,12 @@ async function importarBackup(event){
                       document.getElementById('sidebarImage').src = sidebarImageUrl;
                   }
               } else {
-                  // Se já for URL do Cloudinary ou externa, salva direto no Firestore
                   sidebarImageUrl = importedData.sidebarImage;
                   document.getElementById('sidebarImage').src = sidebarImageUrl;
                   await salvarSidebarImageFirebase(sidebarImageUrl);
               }
             }
-
-            // Recarrega todos os dados do Firebase para garantir a consistência
-            await initFirebase();
+            await initFirebase(); // Recarrega todos os dados do Firebase para garantir a consistência
             alert("Backup importado com sucesso!");
           }
         } else {
@@ -2200,7 +2124,10 @@ function mostrarDashboard(event, dashboardId) {
     });
 
     // Mostra o dashboard selecionado
-    document.getElementById(dashboardId + 'Dashboard').style.display = 'block';
+    const targetDashboard = document.getElementById(dashboardId + 'Dashboard');
+    if (targetDashboard) {
+        targetDashboard.style.display = 'block';
+    }
     
     // Adiciona a classe 'active' ao botão clicado, se o evento existir
     if (event && event.target) {
@@ -2252,30 +2179,29 @@ function render(){
   produtosExibidos.forEach(p=>{
     cProd++; cEst+=parseInt(p.qtd);
     
-    // NOVO: Lógica de alerta e classes (com ícones inline e discretos, agora usando PNGs)
     let estoqueClass = '';
-    let alertaIconInline = ''; // Agora o ícone será inline (imagem)
+    let alertaIconInline = '';
     // Suas URLs dos ícones PNG no Cloudinary
-    const urlIconAlerta = 'https://res.cloudinary.com/dqp57nr5g/image/upload/v1771459662/icone_amarelo_alerta_ykelar.png'; // Ícone amarelo de alerta
-    const urlIconCritico = 'https://res.cloudinary.com/dqp57nr5g/image/upload/v1771459681/icone_vermelho_critico_zsxrwm.png'; // Ícone vermelho de crítico
+    const urlIconAlerta = URL_ICON_ALERTA_PNG;
+    const urlIconCritico = URL_ICON_CRITICO_PNG;
 
-    if (p.qtdMin > 0) { // Só aplica alerta se houver estoque mínimo definido
-        if (p.qtd < p.qtdMin) { // Abaixo do mínimo: crítico (vermelho)
+    if (p.qtdMin > 0) {
+        if (p.qtd < p.qtdMin) {
             estoqueClass = 'estoque-critico';
             alertaIconInline = `<span class="alerta-icon-inline"><img src="${urlIconCritico}" alt="Crítico"></span>`;
-        } else if (p.qtd === p.qtdMin) { // Igual ao mínimo: alerta (laranja/amarelo)
+        } else if (p.qtd === p.qtdMin) {
             estoqueClass = 'estoque-alerta';
             alertaIconInline = `<span class="alerta-icon-inline"><img src="${urlIconAlerta}" alt="Alerta"></span>`;
         }
     }
 
     v.innerHTML+=`
-      <div class="card ${estoqueClass}"> <!-- Aplicar classes de estoque no card -->
+      <div class="card ${estoqueClass}">
       <img src="${p.foto || 'https://via.placeholder.com/120x120?text=Sem+Foto'}">
       <div class="card-info">
         <h3>${p.nome}</h3>
         <span class="badge-cat" style="background:${getCorCat(p.cat)}">${p.cat||'Outros'}</span>
-        <p class="estoque-label">Estoque: <b>${p.qtd}</b>${alertaIconInline}</p> <!-- Ícone agora está aqui, inline com o texto -->
+        <p class="estoque-label">Estoque: <b>${p.qtd}</b>${alertaIconInline}</p>
         ${isAdmin?`<div class="admin-actions">
          <button class="btn-edit-card" onclick="abrirModal('${p.id}')">✏️</button>
           <button class="btn-delete-card" onclick="deletarProduto('${p.id}')">🗑️</button>
@@ -2284,10 +2210,9 @@ function render(){
       </div>`;
   });
 
-  // ATUALIZAR DADOS DA SIDEBAR DIREITA SEMPRE QUE RENDERIZAR
   document.getElementById('rightSidebarTotalProdutos').innerText = db.length;
   document.getElementById('rightSidebarTotalEstoqueHighlight').innerText = db.reduce((sum, p) => sum + p.qtd, 0);
-  gerarRelatorioRapido(); // Chama a função para garantir que as listas menores/maiores sejam atualizadas
+  gerarRelatorioRapido();
 }
 
 function toggleCat(categoria){
@@ -2335,7 +2260,6 @@ function renderHistory(){
   tbody.innerHTML='';
   let totalMovimentacoes = 0;
 
-  // O histórico já vem ordenado pelo Firestore, mas podemos garantir se a ordem for importante
   const historicoExibido = historico.filter(h =>
     (h.produto.toLowerCase().includes(termo)||h.motivo.toLowerCase().includes(termo)) &&
     (filtro==='Todos'||h.cat===filtro)
@@ -2398,104 +2322,130 @@ function imprimirProdutos(){
 }
 
 function imprimirHistorico(){
-  let novaJan=window.open('','_blank'); // Abre em uma nova aba
+  let novaJan = window.open('', '_blank');
   if (!novaJan) {
       alert('Seu navegador bloqueou a abertura da janela de impressão. Por favor, desative o bloqueador de pop-ups para este site.');
       return;
   }
+
   let currentDateTime = new Date().toLocaleString();
 
-  let html=`<html><head><title>Histórico de Movimentações</title><style>
-    body{font-family:'Poppins', sans-serif;padding:0; margin: 0; min-height: 100vh; display: flex; flex-direction: column;}
-.content-wrapper { flex-grow: 1; padding: 15mm; }
-    h1{text-align:center;font-size:24px;font-weight:bold;margin-bottom:20px; color:#1f2a40;}
-    table{width:100%;border-collapse:collapse;font-size:12px; margin-top: 15px;}
-    th,td{padding:8px;border:1px solid #e0e7ee;text-align:left; page-break-inside: avoid;}
-    th{font-weight:600; background-color: #f0f4f8; color:#334155;}
-    tr:nth-child(even){background-color:#f9fbfc!important;}
-    tr:nth-child(odd){background-color:#ffffff!important;}
-    table tbody tr { page-break-inside: avoid; page-break-after: auto;}
-.tag-add{color:#10b8a6;font-weight:bold;}
-.tag-sub{color:#ef4444;font-weight:bold;}
+  let htmlContent = `
+    <html>
+    <head>
+        <title>Histórico de Movimentações</title>
+        <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+        <style>
+            body { font-family: 'Poppins', sans-serif; padding: 0; margin: 0; min-height: 100vh; display: flex; flex-direction: column; }
+          .content-wrapper { flex-grow: 1; padding: 15mm; }
+            h1 { text-align: center; font-size: 24px; font-weight: bold; margin-bottom: 20px; color: #1f2a40; }
+            table { width: 100%; border-collapse: collapse; font-size: 12px; margin-top: 15px; }
+            th, td { padding: 8px; border: 1px solid #e0e7ee; text-align: left; page-break-inside: avoid; }
+            th { font-weight: 600; background-color: #f0f4f8; color: #334155; }
+            tr:nth-child(even) { background-color: #f9fbfc!important; }
+            tr:nth-child(odd) { background-color: #ffffff!important; }
+            table tbody tr { page-break-inside: avoid; page-break-after: auto; }
+          .tag-add { color: #10b8a6; font-weight: bold; }
+          .tag-sub { color: #ef4444; font-weight: bold; }
 
-.report-footer{
-        position: fixed;
-        bottom: 0;
-        left: 0;
-        right: 0;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        font-size: 10px;
-        border-top: 1px solid #000;
-        padding: 5mm 15mm;
-        background: white;
-        box-sizing: border-box;
-        page-break-before: avoid;
-      }
-.report-footer.datetime-info { flex-grow: 1; text-align: center; order: 2; }
-.report-footer.count-info { flex-grow: 1; text-align: right; order: 3; }
-.report-footer.flex-spacer-left { flex-grow: 1; order: 1; }
+          .report-footer {
+                position: fixed;
+                bottom: 0;
+                left: 0;
+                right: 0;
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                font-size: 10px;
+                border-top: 1px solid #000;
+                padding: 5mm 15mm;
+                background: white;
+                box-sizing: border-box;
+                page-break-before: avoid;
+            }
+          .report-footer.datetime-info { flex-grow: 1; text-align: center; order: 2; }
+          .report-footer.count-info { flex-grow: 1; text-align: right; order: 3; }
+          .report-footer.flex-spacer-left { flex-grow: 1; order: 1; }
 
-    @page { margin: 15mm; }
-    table th:nth-child(1), table td:nth-child(1) { width: 18%; }
-    table th:nth-child(2), table td:nth-child(2) { width: 30%; }
-    table th:nth-child(3), table td:nth-child(3) { width: 12%; }
-    table th:nth-child(4) { width: 8%; }
-    table td:nth-child(4) { width: 8%; text-align: center; }
-    table th:nth-child(5), table td:nth-child(5) { width: 32%; }
-  </style></head><body>`;
-
-  html+=`<div class="content-wrapper"><h1>Histórico de Movimentações Haris</h1><table><thead><tr><th>Data</th><th>Produto</th><th>Tipo</th><th>Qtd</th><th>Motivo</th></tr></thead><tbody>`;
+            @page { margin: 15mm; }
+            table th:nth-child(1), table td:nth-child(1) { width: 18%; }
+            table th:nth-child(2), table td:nth-child(2) { width: 30%; }
+            table th:nth-child(3), table td:nth-child(3) { width: 12%; }
+            table th:nth-child(4) { width: 8%; }
+            table td:nth-child(4) { width: 8%; text-align: center; }
+            table th:nth-child(5), table td:nth-child(5) { width: 32%; }
+            /* Esconde a coluna de ação (lixeira) na impressão */
+            table th:last-child, table td:last-child { display: none; }
+        </style>
+    </head>
+    <body>
+        <div class="content-wrapper">
+            <h1>Histórico de Movimentações Haris</h1>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Data</th>
+                        <th>Produto</th>
+                        <th>Tipo</th>
+                        <th>Qtd</th>
+                        <th>Motivo</th>
+                        <th>Ação</th>
+                    </tr>
+                </thead>
+                <tbody>
+  `;
 
   let totalMovimentacoesImpressao = 0;
-  const termo=document.getElementById('inputBuscaHist').value.toLowerCase();
-  const filtro=document.getElementById('filtroCatHist').value;
+  const termo = document.getElementById('inputBuscaHist').value.toLowerCase();
+  const filtro = document.getElementById('filtroCatHist').value;
   const historicoParaImprimir = historico.filter(h =>
-      (h.produto.toLowerCase().includes(termo)||h.motivo.toLowerCase().includes(termo)) &&
-      (filtro==='Todos'||h.cat===filtro)
-  ); // Não precisa reverter, o Firebase já ordenou
+      (h.produto.toLowerCase().includes(termo) || h.motivo.toLowerCase().includes(termo)) &&
+      (filtro === 'Todos' || h.cat === filtro)
+  );
 
-  historicoParaImprimir.forEach(h=>{
+  historicoParaImprimir.forEach(h => {
     totalMovimentacoesImpressao++;
     let tipoDisplay = h.tipo === 'Entrada'? `<span class="tag-add">${h.tipo}</span>` : `<span class="tag-sub">${h.tipo}</span>`;
-    tbody.innerHTML+=`
+    htmlContent += `
       <tr>
         <td>${h.data}</td>
         <td>${h.produto}</td>
         <td>${tipoDisplay}</td>
         <td>${h.qtd}</td>
         <td>${h.motivo}</td>
-        <td><button class="lixeira" onclick="deletarHist('${h.id}')">🗑️</button></td>
+        <td></td>
       </tr>`;
   });
 
   if (totalMovimentacoesImpressao === 0) {
-      tbody.innerHTML += `<tr><td colspan="5" style="text-align:center; color:var(--subtle-text);">Nenhuma movimentação encontrada para o filtro atual.</td></tr>`;
+      htmlContent += `<tr><td colspan="6" style="text-align:center; color:#64748b;">Nenhuma movimentação encontrada para o filtro atual.</td></tr>`;
   }
 
-  html+=`</tbody></table></div>`;
-  html+=`<div class="report-footer">
-    <span class="flex-spacer-left"></span>
-    <span class="datetime-info">Data de Emissão: ${currentDateTime}</span>
-    <span class="count-info">QTD Movimentações: ${totalMovimentacoesImpressao}</span>
-  </div></body></html>`;
+  htmlContent += `
+                </tbody>
+            </table>
+        </div>
+        <div class="report-footer">
+            <span class="flex-spacer-left"></span>
+            <span class="datetime-info">Data de Emissão: ${currentDateTime}</span>
+            <span class="count-info">QTD Movimentações: ${totalMovimentacoesImpressao}</span>
+        </div>
+        <script>
+            document.fonts.ready.then(() => {
+                window.print();
+            });
+        </script>
+    </body>
+    </html>
+  `;
 
-  novaJan.document.write(html);
-  novaJan.document.close(); // Fecha o document para garantir que o conteúdo está pronto
-
-  novaJan.focus(); // Foca na nova janela para exibir o diálogo de impressão
-  setTimeout(() => { // Adiciona um pequeno atraso antes de chamar print()
-    try {
-        novaJan.print();
-    } catch (e) {
-        console.error("Erro ao tentar imprimir o histórico:", e);
-    }
-  }, 1000); // Aumentado para 1 segundo para dar mais tempo para renderizar em dispositivos mais lentos
+  novaJan.document.open();
+  novaJan.document.write(htmlContent);
+  novaJan.document.close();
 }
 
-// ATUALIZADO: Função para gerar o relatório rápido e as listas de estoque na sidebar direita
 function gerarRelatorioRapido() {
+    console.log("Executando gerarRelatorioRapido()");
     const selectedCat = document.getElementById('relatorioRapidoCat').value;
 
     let produtosFiltrados = db;
@@ -2506,75 +2456,63 @@ function gerarRelatorioRapido() {
     const totalItensCat = produtosFiltrados.length;
     const totalQtdCat = produtosFiltrados.reduce((sum, p) => sum + p.qtd, 0);
 
-    // Atualizar os elementos individuais do relatório por categoria
-    document.getElementById('itensCategoria').innerHTML = `<b>${totalItensCat}</b>`; // Quantidade em negrito e verde
-    document.getElementById('estoqueCategoria').innerHTML = `<b>${totalQtdCat}</b>`; // Quantidade em negrito e verde
+    document.getElementById('itensCategoria').innerHTML = `<b>${totalItensCat}</b>`;
+    document.getElementById('estoqueCategoria').innerHTML = `<b>${totalQtdCat}</b>`;
 
-    // Atualizar o "Produtos Cadastrados" e "Total em Estoque Geral" na sidebar direita
-    document.getElementById('rightSidebarTotalProdutos').innerText = db.length;
-    document.getElementById('rightSidebarTotalEstoqueHighlight').innerText = db.reduce((sum, p) => sum + p.qtd, 0);
-
-    // Chamar a função para atualizar as listas de estoque (menor e maior)
     atualizarListasDeEstoque(produtosFiltrados);
 }
 
-// ATUALIZADA: Função para atualizar as listas de itens com menor e maior estoque
 function atualizarListasDeEstoque(produtosParaListar) {
+    console.log("Executando atualizarListasDeEstoque()");
     const listaMenorEstoqueUl = document.getElementById('listaMenorEstoque');
     const listaMaiorEstoqueUl = document.getElementById('listaMaiorEstoque');
 
-    listaMenorEstoqueUl.innerHTML = ''; // Limpa a lista existente
-    listaMaiorEstoqueUl.innerHTML = ''; // Limpa a lista existente
+    listaMenorEstoqueUl.innerHTML = '';
+    listaMaiorEstoqueUl.innerHTML = '';
 
     if (produtosParaListar.length === 0) {
-        listaMenorEstoqueUl.innerHTML = '<li class="placeholder">Nenhum item encontrado nesta categoria.</li>';
-        listaMaiorEstoqueUl.innerHTML = '<li class="placeholder">Nenhum item encontrado nesta categoria.</li>';
+        listaMenorEstoqueUl.innerHTML = '<li class="placeholder">Nenhum item encontrado.</li>';
+        listaMaiorEstoqueUl.innerHTML = '<li class="placeholder">Nenhum item encontrado.</li>';
         return;
     }
 
-    // --- Lógica para Menor Estoque (pegando todos com a menor QTD) ---
     const produtosOrdenadosAsc = [...produtosParaListar].sort((a, b) => a.qtd - b.qtd);
     let menorQuantidade = produtosOrdenadosAsc.length > 0? produtosOrdenadosAsc[0].qtd : -1;
     let produtosComMenorEstoque = produtosOrdenadosAsc.filter(p => p.qtd === menorQuantidade);
 
-    const idsMenorEstoque = new Set(); // Para rastrear os IDs dos produtos com menor estoque
+    const idsMenorEstoque = new Set();
     if (produtosComMenorEstoque.length > 0) {
-        produtosComMenorEstoque.slice(0, 5).forEach(p => { // Exibe no máximo 5 itens
-            idsMenorEstoque.add(p.id); // Adiciona o ID para exclusão posterior
+        produtosComMenorEstoque.slice(0, 5).forEach(p => {
+            idsMenorEstoque.add(p.id);
             const li = document.createElement('li');
             li.innerHTML = `<span class="product-name">${p.nome}</span> <span class="stock-count" style="color: var(--danger);"><b>${p.qtd}</b></span>`;
             listaMenorEstoqueUl.appendChild(li);
         });
     } else {
-        listaMenorEstoqueUl.innerHTML = '<li class="placeholder">Nenhum item encontrado nesta categoria.</li>';
+        listaMenorEstoqueUl.innerHTML = '<li class="placeholder">Nenhum item encontrado.</li>';
     }
 
-    // --- Lógica para Maior Estoque (pelo menos 4 valores distintos, excluindo itens de menor estoque) ---
-    const produtosOrdenadosDesc = [...produtosParaListar].filter(p =>!idsMenorEstoque.has(p.id)) // Exclui itens de menor estoque
+    const produtosOrdenadosDesc = [...produtosParaListar].filter(p =>!idsMenorEstoque.has(p.id))
                  .sort((a, b) => b.qtd - a.qtd);
     const topQuantities = new Set();
     const produtosParaMaiorEstoque = [];
-    const maxItems = 5; // Limite de itens a serem exibidos
+    const maxItems = 5;
 
     for (const p of produtosOrdenadosDesc) {
         if (!topQuantities.has(p.qtd)) {
             topQuantities.add(p.qtd);
-            // Adiciona todos os produtos com essa quantidade
             produtosOrdenadosDesc.filter(item => item.qtd === p.qtd)
-          .forEach(prod => {
+         .forEach(prod => {
                 if (!produtosParaMaiorEstoque.some(existing => existing.id === prod.id)) {
                     produtosParaMaiorEstoque.push(prod);
                 }
             });
         }
-        // Se já temos itens suficientes para preencher a lista E pelo menos 4 valores distintos, podemos parar
-        // ou se já temos 5 itens, paramos também
         if ((produtosParaMaiorEstoque.length >= maxItems && topQuantities.size >= 4) || produtosParaMaiorEstoque.length >= maxItems) {
              break;
         }
     }
 
-    // Ordena o array final para exibição e limita a 'maxItems'
     produtosParaMaiorEstoque.sort((a, b) => b.qtd - a.qtd);
 
     if (produtosParaMaiorEstoque.length > 0) {
@@ -2584,11 +2522,10 @@ function atualizarListasDeEstoque(produtosParaListar) {
             listaMaiorEstoqueUl.appendChild(li);
         });
     } else {
-        listaMaiorEstoqueUl.innerHTML = '<li class="placeholder">Nenhum item encontrado nesta categoria.</li>';
+        listaMaiorEstoqueUl.innerHTML = '<li class="placeholder">Nenhum item encontrado.</li>';
     }
 }
 
-// NOVO: Função para gerar o relatório de movimentação (Top 5)
 function gerarRelatorioMovimentacao() {
     console.log("Executando gerarRelatorioMovimentacao()");
     const hoje = new Date();
@@ -2597,12 +2534,12 @@ function gerarRelatorioMovimentacao() {
 
     const movimentacoesRecentes = historico.filter(item => {
         let itemDate;
-        if (item.dataTimestamp && item.dataTimestamp.toDate) { // Se for Timestamp do Firebase
+        if (item.dataTimestamp && item.dataTimestamp.toDate) {
             itemDate = item.dataTimestamp.toDate();
-        } else if (item.data) { // Se for string (backup JSON antigo)
+        } else if (item.data) {
             itemDate = new Date(item.data);
         } else {
-            return false; // Ignora itens sem data válida
+            return false;
         }
         return itemDate >= trintaDiasAtras;
     });
@@ -2628,9 +2565,8 @@ function gerarRelatorioMovimentacao() {
         saidas: movimentacoesPorProduto[nomeProduto].saidas
     }));
 
-    // Top 5 Maior Movimentação
     const ulMaior = document.getElementById('listaMaiorMovimentacao');
-    ulMaior.innerHTML = ''; // Limpa a lista existente
+    ulMaior.innerHTML = '';
     if (produtosMovimentados.length > 0) {
         const top5Maior = [...produtosMovimentados].sort((a, b) => b.totalQtd - a.totalQtd).slice(0, 5);
         top5Maior.forEach(p => {
@@ -2642,13 +2578,9 @@ function gerarRelatorioMovimentacao() {
         ulMaior.innerHTML = '<li class="placeholder">Nenhuma movimentação.</li>';
     }
 
-    // Top 5 Menor Movimentação (produtos que foram movimentados, mas menos vezes, entre os movimentados)
     const ulMenor = document.getElementById('listaMenorMovimentacao');
-    ulMenor.innerHTML = ''; // Limpa a lista existente
+    ulMenor.innerHTML = '';
     if (produtosMovimentados.length > 0) {
-        // Para "menor movimentação", queremos os produtos que TIVERAM movimentação, mas em menor quantidade.
-        // Se quisermos os que "quase não se movem", poderíamos olhar movimentações mais antigas ou 0 movimentações
-        // Mas por enquanto, vamos pegar os com menor totalQtd entre os que foram movimentados.
         const top5Menor = [...produtosMovimentados].sort((a, b) => a.totalQtd - b.totalQtd).slice(0, 5);
         top5Menor.forEach(p => {
             const li = document.createElement('li');
@@ -2660,7 +2592,6 @@ function gerarRelatorioMovimentacao() {
     }
 }
 
-// NOVA FUNÇÃO: Gera o dashboard de status do estoque (Normal, Alerta, Crítico)
 function gerarStatusEstoqueDashboard() {
     console.log("Executando gerarStatusEstoqueDashboard()");
     let normalCount = 0;
@@ -2677,7 +2608,7 @@ function gerarStatusEstoqueDashboard() {
                 normalCount++;
             }
         } else {
-            normalCount++; // Se não tem min definido, consideramos normal
+            normalCount++;
         }
     });
 
@@ -2685,18 +2616,13 @@ function gerarStatusEstoqueDashboard() {
     document.getElementById('statusAlertaCount').innerText = alertaCount;
     document.getElementById('statusCriticoCount').innerText = criticoCount;
 
-    // TODO: Aqui podemos integrar uma biblioteca de gráficos para desenhar um gráfico de pizza/donut
-    // Por enquanto, apenas o texto com os números
     const chartDiv = document.getElementById('statusEstoqueChart');
     chartDiv.innerHTML = `<p>Normal: ${normalCount}, Alerta: ${alertaCount}, Crítico: ${criticoCount}</p>`;
-    // Futuramente, pode ser algo como:
-    // renderizarGraficoDePizza(normalCount, alertaCount, criticoCount);
 }
 
 // Inicialização
 initFirebase();
 
-// >>>>>>>>>>> CÓDIGO DE REGISTRO DO SERVICE WORKER ADICIONADO AQUI <<<<<<<<<<<
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
     navigator.serviceWorker.register('/service-worker.js')
@@ -2708,7 +2634,6 @@ if ('serviceWorker' in navigator) {
       });
   });
 }
-// >>>>>>>>>>> FIM DO CÓDIGO DO SERVICE WORKER <<<<<<<<<<<
 </script>
 </body>
 </html>
