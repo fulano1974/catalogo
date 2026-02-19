@@ -1217,7 +1217,7 @@ input:focus,select:focus,textarea:focus{
       <div class="stats-bar no-print">
         <div class="backup-group" id="backupGroup">
           <button class="btn-secondary" id="btnAdmin" onclick="toggleAdmin()">🔑 Admin</button>
-          <button class="btn-primary" style="background:#1c74d0;" onclick="Produtos()">📄 Gerar PDF Produtos</button>
+          <button class="btn-primary" style="background:#1c74d0;" onclick="imprimirProdutos()">📄 Gerar PDF Produtos</button>
           <button class="btn-secondary" onclick="toggleHistory()">📋 Histórico</button>
           <button class="btn-primary" style="background:#1c74d0;" onclick="exportarBackup()">📥 Exportar Backup</button>
           <button class="btn-secondary" onclick="document.getElementById('importInput').click()">📤 Importar Backup</button>
@@ -1242,7 +1242,8 @@ input:focus,select:focus,textarea:focus{
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; flex-wrap:wrap; gap:10px;">
           <h2>📋 Histórico de Movimentações</h2>
           <div style="display:flex; gap:10px; flex-wrap:wrap;">
-            <button class="btn-primary" onclick="Historico()">📄 PDF Histórico</button>
+            <!-- AQUI FOI FEITA A CORREÇÃO NO ONCLICK -->
+            <button class="btn-primary" onclick="imprimirHistorico()">📄 PDF Histórico</button>
             <button class="btn-secondary" onclick="limparHistorico()">Limpar Histórico</button>
           </div>
         </div>
@@ -2461,7 +2462,7 @@ function atualizarListasDeEstoque(produtosParaListar) {
 
     // --- Lógica para Maior Estoque (pelo menos 4 valores distintos, excluindo itens de menor estoque) ---
     const produtosOrdenadosDesc = [...produtosParaListar].filter(p =>!idsMenorEstoque.has(p.id)) // Exclui itens de menor estoque
-                   .sort((a, b) => b.qtd - a.qtd);
+                  .sort((a, b) => b.qtd - a.qtd);
     const topQuantities = new Set();
     const produtosParaMaiorEstoque = [];
     const maxItems = 5; // Limite de itens a serem exibidos
@@ -2471,7 +2472,7 @@ function atualizarListasDeEstoque(produtosParaListar) {
             topQuantities.add(p.qtd);
             // Adiciona todos os produtos com essa quantidade
             produtosOrdenadosDesc.filter(item => item.qtd === p.qtd)
-           .forEach(prod => {
+          .forEach(prod => {
                 if (!produtosParaMaiorEstoque.some(existing => existing.id === prod.id)) {
                     produtosParaMaiorEstoque.push(prod);
                 }
@@ -2517,4 +2518,3 @@ if ('serviceWorker' in navigator) {
 </script>
 </body>
 </html>
-
