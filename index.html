@@ -196,7 +196,7 @@ body{
   padding: 0 10px; /* Padding um pouco maior */
   height: 32px; /* Altura ajustada para caber o texto */
   border-radius: 16px; /* Mais arredondado */
-  font-size: 0.8rem; /* Fonte um pouco maior */
+  font-size: 0.8rem; /* Fonte um pouco menor */
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1030,7 +1030,7 @@ input:focus,select:focus,textarea:focus{
     font-size:0.75rem;
   }
   /* Esconde a coluna de ação da lixeira na tabela para economizar espaço */
-.hist-table th:last-child,.hist-table th:nth-last-child(2),.hist-table td:last-child,.hist-table th:nth-last-child(2){
+.hist-table th:last-child,.hist-table th:nth-last-child(2),.hist-table td:last-child,.hist-table td:nth-last-child(2){
     display: none;
   }
 
@@ -1367,6 +1367,20 @@ input:focus,select:focus,textarea:focus{
         </ul>
       </div>
 
+      <!-- NOVA Seção para Top 5 Movimentações -->
+      <div class="sidebar-section sidebar-stock-list">
+        <h3>📊 Top 5 Movimentações (Últimos 30 dias)</h3>
+        <p style="font-size: 0.8rem; color: var(--subtle-text); margin-bottom: 10px;">Produtos com mais e menos entradas/saídas.</p>
+        <h4>Maior Movimentação:</h4>
+        <ul id="listaMaiorMovimentacao">
+          <li class="placeholder">Nenhuma movimentação.</li>
+        </ul>
+        <h4 style="margin-top: 15px;">Menor Movimentação:</h4>
+        <ul id="listaMenorMovimentacao">
+          <li class="placeholder">Nenhuma movimentação.</li>
+        </ul>
+      </div>
+
       <div class="sidebar-action-buttons">
         <button class="btn-secondary" onclick="alert('Funcionalidade em desenvolvimento!')">⚙️ Configurações</button>
         <button class="btn-secondary" onclick="alert('Funcionalidade em desenvolvimento!')">🔔 Notificações</button>
@@ -1474,6 +1488,7 @@ async function initFirebase() {
     renderHistory();
     // Atualiza o relatório rápido
     gerarRelatorioRapido();
+    gerarRelatorioMovimentacao(); // <<< NOVO: Chamar o relatório de movimentação
   } catch (error) {
     console.error("Erro ao carregar dados do Firebase:", error);
     alert("Erro ao carregar dados do Firebase. Verifique sua conexão ou configurações de segurança do Firestore.");
@@ -1859,6 +1874,7 @@ async function fecharModal(){
     render();
     gerarRelatorioRapido(); // ATUALIZAR RELATORIO RÁPIDO
     preencherSelectsDeCategoria(); // Atualiza as categorias nos selects
+    gerarRelatorioMovimentacao(); // <<< NOVO: Chamar o relatório de movimentação
   } catch (error) {
     console.error("Erro ao salvar alterações do produto:", error);
     alert("Erro ao salvar alterações. Verifique o console para mais detalhes.");
@@ -1908,6 +1924,7 @@ async function movimentar(tipo){
     render();
     renderHistory();
     gerarRelatorioRapido(); // ATUALIZAR RELATORIO RÁPIDO
+    gerarRelatorioMovimentacao(); // <<< NOVO: Chamar o relatório de movimentação
 
     document.getElementById('mQtd').innerText=p.qtd;
     document.getElementById('valMov').value=0;
@@ -1929,6 +1946,7 @@ async function deletarProduto(productId){
       render();
       gerarRelatorioRapido(); // ATUALIZAR RELATORIO RÁPIDO
       preencherSelectsDeCategoria(); // Atualiza as categorias nos selects
+      gerarRelatorioMovimentacao(); // <<< NOVO: Chamar o relatório de movimentação
     } catch (error) {
       console.error("Erro ao deletar produto:", error);
       alert("Erro ao deletar produto. Verifique o console para mais detalhes.");
@@ -1945,6 +1963,7 @@ async function limparHistorico(){
       historico = []; // Limpa o array local
       renderHistory();
       alert("Histórico limpo com sucesso!");
+      gerarRelatorioMovimentacao(); // <<< NOVO: Chamar o relatório de movimentação
     } catch (error) {
       console.error("Erro ao limpar histórico:", error);
       alert("Erro ao limpar histórico. Verifique o console para mais detalhes.");
@@ -1961,6 +1980,7 @@ async function deletarHist(historicoId){
         historico.splice(indexToDelete, 1);
       }
       renderHistory();
+      gerarRelatorioMovimentacao(); // <<< NOVO: Chamar o relatório de movimentação
     } catch (error) {
       console.error("Erro ao deletar item do histórico:", error);
       alert("Erro ao deletar item do histórico. Verifique o console para mais detalhes.");
@@ -2456,7 +2476,7 @@ function atualizarListasDeEstoque(produtosParaListar) {
 
     // --- Lógica para Maior Estoque (pelo menos 4 valores distintos, excluindo itens de menor estoque) ---
     const produtosOrdenadosDesc = [...produtosParaListar].filter(p =>!idsMenorEstoque.has(p.id)) // Exclui itens de menor estoque
-                   .sort((a, b) => b.qtd - a.qtd);
+                  .sort((a, b) => b.qtd - a.qtd);
     const topQuantities = new Set();
     const produtosParaMaiorEstoque = [];
     const maxItems = 5; // Limite de itens a serem exibidos
@@ -2466,7 +2486,7 @@ function atualizarListasDeEstoque(produtosParaListar) {
             topQuantities.add(p.qtd);
             // Adiciona todos os produtos com essa quantidade
             produtosOrdenadosDesc.filter(item => item.qtd === p.qtd)
-           .forEach(prod => {
+          .forEach(prod => {
                 if (!produtosParaMaiorEstoque.some(existing => existing.id === prod.id)) {
                     produtosParaMaiorEstoque.push(prod);
                 }
@@ -2490,6 +2510,67 @@ function atualizarListasDeEstoque(produtosParaListar) {
         });
     } else {
         listaMaiorEstoqueUl.innerHTML = '<li class="placeholder">Nenhum item encontrado nesta categoria.</li>';
+    }
+}
+
+// NOVO: Função para gerar o relatório de movimentação (Top 5)
+function gerarRelatorioMovimentacao() {
+    const hoje = new Date();
+    const trintaDiasAtras = new Date(hoje);
+    trintaDiasAtras.setDate(hoje.getDate() - 30);
+
+    const movimentacoesRecentes = historico.filter(item => {
+        const itemDate = new Date(item.data); // Assumindo que item.data é uma string compatível com Date
+        return itemDate >= trintaDiasAtras;
+    });
+
+    const movimentacoesPorProduto = {};
+
+    movimentacoesRecentes.forEach(item => {
+        if (!movimentacoesPorProduto[item.produto]) {
+            movimentacoesPorProduto[item.produto] = { totalQtd: 0, entradas: 0, saidas: 0 };
+        }
+        movimentacoesPorProduto[item.produto].totalQtd += item.qtd;
+        if (item.tipo === 'Entrada') {
+            movimentacoesPorProduto[item.produto].entradas += item.qtd;
+        } else if (item.tipo === 'Saída') {
+            movimentacoesPorProduto[item.produto].saidas += item.qtd;
+        }
+    });
+
+    const produtosMovimentados = Object.keys(movimentacoesPorProduto).map(nomeProduto => ({
+        nome: nomeProduto,
+        totalQtd: movimentacoesPorProduto[nomeProduto].totalQtd,
+        entradas: movimentacoesPorProduto[nomeProduto].entradas,
+        saidas: movimentacoesPorProduto[nomeProduto].saidas
+    }));
+
+    // Top 5 Maior Movimentação
+    const ulMaior = document.getElementById('listaMaiorMovimentacao');
+    ulMaior.innerHTML = ''; // Limpa a lista existente
+    if (produtosMovimentados.length > 0) {
+        const top5Maior = [...produtosMovimentados].sort((a, b) => b.totalQtd - a.totalQtd).slice(0, 5);
+        top5Maior.forEach(p => {
+            const li = document.createElement('li');
+            li.innerHTML = `<span class="product-name">${p.nome}</span> <span class="stock-count"><b>${p.totalQtd}</b></span>`;
+            ulMaior.appendChild(li);
+        });
+    } else {
+        ulMaior.innerHTML = '<li class="placeholder">Nenhuma movimentação.</li>';
+    }
+
+    // Top 5 Menor Movimentação (produtos que foram movimentados, mas menos vezes)
+    const ulMenor = document.getElementById('listaMenorMovimentacao');
+    ulMenor.innerHTML = ''; // Limpa a lista existente
+    if (produtosMovimentados.length > 0) {
+        const top5Menor = [...produtosMovimentados].sort((a, b) => a.totalQtd - b.totalQtd).slice(0, 5);
+        top5Menor.forEach(p => {
+            const li = document.createElement('li');
+            li.innerHTML = `<span class="product-name">${p.nome}</span> <span class="stock-count"><b>${p.totalQtd}</b></span>`;
+            ulMenor.appendChild(li);
+        });
+    } else {
+        ulMenor.innerHTML = '<li class="placeholder">Nenhuma movimentação.</li>';
     }
 }
 
