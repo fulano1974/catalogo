@@ -1217,10 +1217,10 @@ input:focus,select:focus,textarea:focus{
       <div class="stats-bar no-print">
         <div class="backup-group" id="backupGroup">
           <button class="btn-secondary" id="btnAdmin" onclick="toggleAdmin()">🔑 Admin</button>
-          <button class="btn-primary" style="background:#1c74d0;" onclick="imprimirProdutos()">📄 Gerar PDF Produtos</button>
+          <button class="btn-primary" style="background:#1c74d0;" onclick="imprimirProdutos()">📄 PDF</button>
           <button class="btn-secondary" onclick="toggleHistory()">📋 Histórico</button>
-          <button class="btn-primary" style="background:#1c74d0;" onclick="exportarBackup()">📥 Exportar Backup</button>
-          <button class="btn-secondary" onclick="document.getElementById('importInput').click()">📤 Importar Backup</button>
+          <button class="btn-primary" style="background:#1c74d0;" onclick="exportarBackup()">📥 Exportar</button>
+          <button class="btn-secondary" style="background:#1c74d0; color:white;" onclick="document.getElementById('importInput').click()">📤 Importar</button>
           <input type="file" id="importInput" style="display:none" onchange="importarBackup(event)">
         </div>
       </div>
@@ -1988,7 +1988,7 @@ async function handleSidebarFileSelection(event) {
   if (file) {
     try {
       const imgElement = document.getElementById('sidebarImage');
-      const fotoURL = await uploadImagemCloudinary(file); // UPLOAD PARA CLOUDINARY
+      const fotoURL = await uploadImagemCloudinary(file); // <<< UPLOAD PARA CLOUDINARY
       if (!fotoURL) throw new Error("Falha ao obter URL da imagem da sidebar do Cloudinary.");
 
       sidebarImageUrl = fotoURL;
@@ -2462,7 +2462,7 @@ function atualizarListasDeEstoque(produtosParaListar) {
 
     // --- Lógica para Maior Estoque (pelo menos 4 valores distintos, excluindo itens de menor estoque) ---
     const produtosOrdenadosDesc = [...produtosParaListar].filter(p =>!idsMenorEstoque.has(p.id)) // Exclui itens de menor estoque
-                  .sort((a, b) => b.qtd - a.qtd);
+                 .sort((a, b) => b.qtd - a.qtd);
     const topQuantities = new Set();
     const produtosParaMaiorEstoque = [];
     const maxItems = 5; // Limite de itens a serem exibidos
@@ -2472,7 +2472,7 @@ function atualizarListasDeEstoque(produtosParaListar) {
             topQuantities.add(p.qtd);
             // Adiciona todos os produtos com essa quantidade
             produtosOrdenadosDesc.filter(item => item.qtd === p.qtd)
-          .forEach(prod => {
+         .forEach(prod => {
                 if (!produtosParaMaiorEstoque.some(existing => existing.id === prod.id)) {
                     produtosParaMaiorEstoque.push(prod);
                 }
