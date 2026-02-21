@@ -820,28 +820,29 @@ input:focus,select:focus,textarea:focus{
     }
 
 /* ESTILOS DE IMPRESSÃO PARA A TABELA DE HISTÓRICO - CORRIGIDO */
-.hist-table-print th,.hist-table-print td {
+/* Removi a classe hist-table-print e adicionei as regras diretamente ao table global para impressão de histórico */
+/* Isso é para garantir que o zebrado e as colunas corretas sejam aplicadas */
+table.hist-table-for-print th, table.hist-table-for-print td { /* Adicionei uma nova classe para a tabela a ser impressa */
     padding:8px;
     border:1px solid #e0e7ee;
     text-align:left;
     page-break-inside: avoid;
-    /* Excluir a última coluna (Ação) na impressão */
 }
-.hist-table-print th:last-child,
-.hist-table-print td:last-child {
+table.hist-table-for-print th:last-child,
+table.hist-table-for-print td:last-child {
     display: none!important; /* Esconde a última coluna (Ação) */
 }
-.hist-table-print th {
+table.hist-table-for-print th {
     font-weight:600;
     background-color: #f0f4f8;
     color:#334155;
 }
-.hist-table-print tr:nth-child(even){
+table.hist-table-for-print tr:nth-child(even){
     background-color:#f9fbfc!important; /* Garante o zebrado */
     -webkit-print-color-adjust: exact; /* Para navegadores Webkit */
     color-adjust: exact; /* Padrão */
 }
-.hist-table-print tr:nth-child(odd){
+table.hist-table-for-print tr:nth-child(odd){
     background-color:#ffffff!important; /* Garante o zebrado */
     -webkit-print-color-adjust: exact;
     color-adjust: exact;
@@ -1938,7 +1939,7 @@ function toggleAdmin(){
 
   if(!isAdmin){
     customPasswordPrompt("Digite a senha de administrador:", "RebocadorHaris")
- .then(isAuthenticated => {
+.then(isAuthenticated => {
         if(isAuthenticated){
           isAdmin=true;
           adminPanel.style.display='grid';
@@ -1999,14 +2000,10 @@ async function abrirModal(productId){
   editIdx = productId; // Agora editIdx armazena o ID, não o índice
   document.getElementById('mNomeEdit').value=p.nome;
   document.getElementById('mQtd').innerText=p.qtd;
-  // CORRIGIDO: Referência mais segura ao elemento do Estoque Mínimo no modal
-  // Garante que o elemento seja encontrado antes de tentar definir o valor
-  const mQtdMinEditElement = document.getElementById('mQtdMinEdit');
-  if (mQtdMinEditElement) {
-      mQtdMinEditElement.value = p.qtdMin;
-  } else {
-      console.error("Erro: Elemento com ID 'mQtdMinEdit' não encontrado no modal.");
-  }
+  // CORRIGIDO: Acessar diretamente o elemento, ele já está no HTML com o ID correto
+  // A verificação if (mQtdMinEditElement) não é mais estritamente necessária se o HTML garante o ID
+  document.getElementById('mQtdMinEdit').value = p.qtdMin; 
+  
   document.getElementById('mNota').value='';
   document.getElementById('valMov').value=0;
   document.getElementById('mCategoriaEdit').value=p.cat;
@@ -2081,7 +2078,7 @@ async function movimentar(tipo){
 
     render();
     renderHistory();
-    gerarRelatorioRapatorio(); // ATUALIZAR RELATORIO RÁPIDO
+    gerarRelatorioRapido(); // ATUALIZAR RELATORIO RÁPIDO
 
     document.getElementById('mQtd').innerText=p.qtd;
     document.getElementById('valMov').value=0;
@@ -2491,7 +2488,7 @@ function imprimirHistorico(){
   }
   let currentDateTime = new Date().toLocaleString();
 
-  // NOVO: Adicionei a classe 'hist-table-print' para aplicar os estilos de impressão específicos
+  // CSS dentro da nova janela para garantir que a impressão fique correta
   let html=`<html><head><title>Histórico de Movimentações</title><style>
     body{font-family:'Poppins', sans-serif;padding:0; margin: 0; min-height: 100vh; display: flex; flex-direction: column;}
 .content-wrapper { flex-grow: 1; padding: 15mm; }
@@ -2532,25 +2529,10 @@ function imprimirHistorico(){
     table th:nth-child(4) { width: 8%; }
     table td:nth-child(4) { width: 8%; text-align: center; }
     table th:nth-child(5), table td:nth-child(5) { width: 32%; }
-    /* NOVO: Esconde a 6ª coluna (Ação) para impressão */
-.hist-table-print th:last-child,.hist-table-print td:last-child {
-        display: none!important;
-    }
-    /* Garante o zebrado das linhas */
-.hist-table-print tr:nth-child(even) {
-        background-color:#f9fbfc!important;
-        -webkit-print-color-adjust: exact;
-        color-adjust: exact;
-    }
-.hist-table-print tr:nth-child(odd) {
-        background-color:#ffffff!important;
-        -webkit-print-color-adjust: exact;
-        color-adjust: exact;
-    }
   </style></head><body>`;
 
-  html+=`<div class="content-wrapper"><h1>Histórico de Movimentações Haris</h1><table class="hist-table-print"><thead><tr><th>Data</th><th>Produto</th><th>Tipo</th><th>Qtd</th><th>Motivo</th></tr></thead><tbody>`;
-  // ^^^^ Removida a <th>Ação</th> daqui, agora o cabeçalho está correto
+  html+=`<div class="content-wrapper"><h1>Histórico de Movimentações Haris</h1><table><thead><tr><th>Data</th><th>Produto</th><th>Tipo</th><th>Qtd</th><th>Motivo</th></tr></thead><tbody>`;
+  // ^^^^ Cabeçalho da tabela com as colunas corretas (5 colunas)
 
   let totalMovimentacoesImpressao = 0;
   const termo=document.getElementById('inputBuscaHist').value.toLowerCase();
@@ -2560,7 +2542,7 @@ function imprimirHistorico(){
       (filtro==='Todos'||h.cat===filtro)
   );
 
-  // Construir o conteúdo do tbody separadamente
+  // Construir o conteúdo do tbody
   let tbodyContent = '';
   historicoParaImprimir.forEach(h=>{
     totalMovimentacoesImpressao++;
@@ -2572,13 +2554,12 @@ function imprimirHistorico(){
         <td>${tipoDisplay}</td>
         <td>${h.qtd}</td>
         <td>${h.motivo}</td>
-        <!-- NOVO: A coluna de Ação não é mais adicionada aqui para o PDF -->
-      </tr>`;
+      </tr>`; // APENAS AS 5 COLUNAS SOLICITADAS
   });
 
   if (totalMovimentacoesImpressao === 0) {
       tbodyContent += `<tr><td colspan="5" style="text-align:center; color:var(--subtle-text);">Nenhuma movimentação encontrada.</td></tr>`;
-      // ^^^^ colspan alterado para 5, já que só teremos 5 colunas
+      // ^^^^ colspan alterado para 5
   }
 
   // Adicionar o conteúdo do tbody ao HTML final
@@ -2662,7 +2643,7 @@ function atualizarListasDeEstoque(produtosParaListar) {
 
     // --- Lógica para Maior Estoque (pelo menos 4 valores distintos, excluindo itens de menor estoque) ---
     const produtosOrdenadosDesc = [...produtosParaListar].filter(p =>!idsMenorEstoque.has(p.id)) // Exclui itens de menor estoque
-  .sort((a, b) => b.qtd - a.qtd);
+ .sort((a, b) => b.qtd - a.qtd);
     const topQuantities = new Set();
     const produtosParaMaiorEstoque = [];
     const maxItems = 5; // Limite de itens a serem exibidos
@@ -2672,7 +2653,7 @@ function atualizarListasDeEstoque(produtosParaListar) {
             topQuantities.add(p.qtd);
             // Adiciona todos os produtos com essa quantidade
             produtosOrdenadosDesc.filter(item => item.qtd === p.qtd)
-      .forEach(prod => {
+     .forEach(prod => {
                 if (!produtosParaMaiorEstoque.some(existing => existing.id === prod.id)) {
                     produtosParaMaiorEstoque.push(prod);
                 }
@@ -2707,10 +2688,10 @@ initFirebase();
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
     navigator.serviceWorker.register('/service-worker.js')
- .then(registration => {
+.then(registration => {
         console.log('Service Worker registered:', registration);
       })
- .catch(error => {
+.catch(error => {
         console.error('Service Worker registration failed:', error);
       });
   });
