@@ -1441,7 +1441,7 @@ input:focus,select:focus,textarea:focus{
               <option value="qtd-desc">Estoque ↑</option>
               <option value="qtd-asc">Estoque ↓</option>
             </select>
-            <!-- BOTÃO MUDAR IMAGEM: desabilitado por padrão, mas com senha própria para ativação -->
+            <!-- BOTÃO MUDAR IMAGEM: com senha própria para ativação -->
             <button class="btn-primary" id="btnMudarImagemSidebar" onclick="uploadSidebarImage()"><span class="material-symbols-outlined">image</span> Mudar Imagem</button>
             <input type="file" id="sidebarImageUploadHidden" accept="image/*" style="display:none;" onchange="handleSidebarFileSelection(event)">
           </div>
@@ -1999,7 +1999,10 @@ async function abrirModal(productId){
   editIdx = productId; // Agora editIdx armazena o ID, não o índice
   document.getElementById('mNomeEdit').value=p.nome;
   document.getElementById('mQtd').innerText=p.qtd;
-  document.getElementById('mQtdMinEdit').value=p.qtdMin; // <<< NOVO: Preencher estoque mínimo
+  const mQtdMinEdit = document.getElementById('mQtdMinEdit'); // CORRIGIDO: Referência correta ao elemento
+  if (mQtdMinEdit) {
+      mQtdMinEdit.value=p.qtdMin; // Preenche o valor se o elemento for encontrado
+  }
   document.getElementById('mNota').value='';
   document.getElementById('valMov').value=0;
   document.getElementById('mCategoriaEdit').value=p.cat;
@@ -2492,8 +2495,9 @@ function imprimirHistorico(){
     table{width:100%;border-collapse:collapse;font-size:12px; margin-top: 15px;}
     th,td{padding:8px;border:1px solid #e0e7ee;text-align:left; page-break-inside: avoid;}
     th{font-weight:600; background-color: #f0f4f8; color:#334155;}
-    tr:nth-child(even){background-color:#f9fbfc!important;}
-    tr:nth-child(odd){background-color:#ffffff!important;}
+    /* Garante o zebrado das linhas */
+    tr:nth-child(even){background-color:#f9fbfc!important; -webkit-print-color-adjust: exact; color-adjust: exact;}
+    tr:nth-child(odd){background-color:#ffffff!important; -webkit-print-color-adjust: exact; color-adjust: exact;}
     table tbody tr { page-break-inside: avoid; page-break-after: auto;}
 .tag-add{color:#10b8a6;font-weight:bold;}
 .tag-sub{color:#ef4444;font-weight:bold;}
@@ -2524,25 +2528,12 @@ function imprimirHistorico(){
     table th:nth-child(4) { width: 8%; }
     table td:nth-child(4) { width: 8%; text-align: center; }
     table th:nth-child(5), table td:nth-child(5) { width: 32%; }
-    /* NOVO: Esconde a 6ª coluna (Ação) para impressão */
-  .hist-table-print th:last-child,.hist-table-print td:last-child {
-        display: none!important;
-    }
-    /* Garante o zebrado das linhas */
-  .hist-table-print tr:nth-child(even) {
-        background-color:#f9fbfc!important;
-        -webkit-print-color-adjust: exact;
-        color-adjust: exact;
-    }
-  .hist-table-print tr:nth-child(odd) {
-        background-color:#ffffff!important;
-        -webkit-print-color-adjust: exact;
-        color-adjust: exact;
-    }
   </style></head><body>`;
 
-  html+=`<div class="content-wrapper"><h1>Histórico de Movimentações Haris</h1><table class="hist-table-print"><thead><tr><th>Data</th><th>Produto</th><th>Tipo</th><th>Qtd</th><th>Motivo</th></tr></thead><tbody>`;
-  // ^^^^ Removida a <th>Ação</th> daqui e adicionado a classe 'hist-table-print'
+  // Removi a classe 'hist-table-print' do CSS e adicionei o estilo de esconder a última coluna diretamente no head do PDF.
+  // Isso garante que o zebrado funcione sem precisar de uma classe extra para a tabela.
+  html+=`<div class="content-wrapper"><h1>Histórico de Movimentações Haris</h1><table><thead><tr><th>Data</th><th>Produto</th><th>Tipo</th><th>Qtd</th><th>Motivo</th></tr></thead><tbody>`;
+  // ^^^^ Removida a <th>Ação</th> daqui, agora o cabeçalho está correto
 
   let totalMovimentacoesImpressao = 0;
   const termo=document.getElementById('inputBuscaHist').value.toLowerCase();
@@ -2654,7 +2645,7 @@ function atualizarListasDeEstoque(produtosParaListar) {
 
     // --- Lógica para Maior Estoque (pelo menos 4 valores distintos, excluindo itens de menor estoque) ---
     const produtosOrdenadosDesc = [...produtosParaListar].filter(p =>!idsMenorEstoque.has(p.id)) // Exclui itens de menor estoque
-    .sort((a, b) => b.qtd - a.qtd);
+  .sort((a, b) => b.qtd - a.qtd);
     const topQuantities = new Set();
     const produtosParaMaiorEstoque = [];
     const maxItems = 5; // Limite de itens a serem exibidos
@@ -2664,7 +2655,7 @@ function atualizarListasDeEstoque(produtosParaListar) {
             topQuantities.add(p.qtd);
             // Adiciona todos os produtos com essa quantidade
             produtosOrdenadosDesc.filter(item => item.qtd === p.qtd)
-        .forEach(prod => {
+      .forEach(prod => {
                 if (!produtosParaMaiorEstoque.some(existing => existing.id === prod.id)) {
                     produtosParaMaiorEstoque.push(prod);
                 }
@@ -2695,17 +2686,19 @@ function atualizarListasDeEstoque(produtosParaListar) {
 initFirebase();
 
 // >>>>>>>>>>> CÓDIGO DE REGISTRO DO SERVICE WORKER ADICIONADO AQUI <<<<<<<<<<<
+/* Comentado devido a erro 404 para 'service-worker.js'. Descomente e crie o arquivo se for usar.
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
     navigator.serviceWorker.register('/service-worker.js')
-.then(registration => {
+  .then(registration => {
         console.log('Service Worker registered:', registration);
       })
-.catch(error => {
+  .catch(error => {
         console.error('Service Worker registration failed:', error);
       });
   });
 }
+*/
 // >>>>>>>>>>> FIM DO CÓDIGO DO SERVICE WORKER <<<<<<<<<<<
 </script>
 </body>
