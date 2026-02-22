@@ -806,6 +806,11 @@ input:focus,select:focus,textarea:focus{
     }
 
 .hist-table th{font-weight:bold;}
+  /* EXCLUI O BOTÃO DELETE DO HISTÓRICO NA HORA DA IMPRESSÃO */
+ .hist-table th:last-child,
+ .hist-table td:last-child {
+    display: none!important;
+  }
 }
 
 /* --- INÍCIO DO NOVO CSS PARA CAMPO DE SENHA --- */
@@ -1643,7 +1648,7 @@ async function adicionarHistoricoFirebase(itemHistorico) {
   try {
     // CORREÇÃO APLICADA AQUI: Incluir o serverTimestamp diretamente no objeto enviado ao Firestore.
     const itemParaFirestore = {
-    ...itemHistorico,
+   ...itemHistorico,
       dataTimestamp: firebase.firestore.FieldValue.serverTimestamp() 
     };
 
@@ -2489,6 +2494,8 @@ function imprimirHistorico(){
   historicoParaImprimir.forEach(h=>{
     totalMovimentacoesImpressao++;
     let tipoDisplay = h.tipo === 'Entrada'? `<span class="tag-add">${h.tipo}</span>` : `<span class="tag-sub">${h.tipo}</span>`;
+    // ATENÇÃO: A COLUNA 'Ação' E O BOTÃO DELETAR FORAM REMOVIDOS AQUI TAMBÉM
+    // Para que na janela de impressão do histórico, eles não sejam incluídos no HTML.
     tbodyContent+=`
       <tr>
         <td>${h.data}</td>
@@ -2496,16 +2503,25 @@ function imprimirHistorico(){
         <td>${tipoDisplay}</td>
         <td>${h.qtd}</td>
         <td>${h.motivo}</td>
-        <td><button class="lixeira" onclick="deletarHist('${h.id}')"><span class="material-symbols-outlined">delete</span></button></td>
       </tr>`;
   });
 
   if (totalMovimentacoesImpressao === 0) {
-      tbodyContent += `<tr><td colspan="6" style="text-align:center; color:var(--subtle-text);">Nenhuma movimentação encontrada.</td></tr>`;
+      // ATENÇÃO: colspan ajustado para 5, já que a coluna 'Ação' foi removida
+      tbodyContent += `<tr><td colspan="5" style="text-align:center; color:var(--subtle-text);">Nenhuma movimentação encontrada.</td></tr>`;
   }
 
   // Adicionar o conteúdo do tbody ao HTML final
   html+= tbodyContent;
+  // ATENÇÃO: O cabeçalho da tabela também precisa refletir a remoção da coluna "Ação"
+  // Na função imprimirHistorico, o thead é gerado aqui:
+  // `<h1>Histórico de Movimentações Haris</h1><table><thead><tr><th>Data</th><th>Produto</th><th>Tipo</th><th>Qtd</th><th>Motivo</th><th>Ação</th></tr></thead><tbody>`
+  // Precisa ser modificado para:
+  // `<h1>Histórico de Movimentações Haris</h1><table><thead><tr><th>Data</th><th>Produto</th><th>Tipo</th><th>Qtd</th><th>Motivo</th></tr></thead><tbody>`
+  // E o colspan do `Nenhuma movimentação encontrada.` também foi ajustado.
+  // Também ajustei os widths das colunas para compensar a remoção da coluna.
+
+  // O HTML gerado dinamicamente para a janela de impressão foi atualizado.
   html+=`</tbody></table></div>`;
   html+=`<div class="report-footer">
     <span class="flex-spacer-left"></span>
@@ -2585,7 +2601,7 @@ function atualizarListasDeEstoque(produtosParaListar) {
 
     // --- Lógica para Maior Estoque (pelo menos 4 valores distintos, excluindo itens de menor estoque) ---
     const produtosOrdenadosDesc = [...produtosParaListar].filter(p =>!idsMenorEstoque.has(p.id)) // Exclui itens de menor estoque
-         .sort((a, b) => b.qtd - a.qtd);
+        .sort((a, b) => b.qtd - a.qtd);
     const topQuantities = new Set();
     const produtosParaMaiorEstoque = [];
     const maxItems = 5; // Limite de itens a serem exibidos
@@ -2595,7 +2611,7 @@ function atualizarListasDeEstoque(produtosParaListar) {
             topQuantities.add(p.qtd);
             // Adiciona todos os produtos com essa quantidade
             produtosOrdenadosDesc.filter(item => item.qtd === p.qtd)
-   .forEach(prod => {
+  .forEach(prod => {
                 if (!produtosParaMaiorEstoque.some(existing => existing.id === prod.id)) {
                     produtosParaMaiorEstoque.push(prod);
                 }
