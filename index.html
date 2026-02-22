@@ -1278,6 +1278,16 @@ input:focus,select:focus,textarea:focus{
     color: var(--danger); /* Cor vermelha para a quantidade e ícone crítico */
 }
 
+/* Estilo para botões desabilitados para feedback visual */
+button:disabled {
+  background-color: #e0e0e0!important; /* Um cinza mais claro */
+  color: #a0a0a0!important; /* Cor do texto um cinza mais escuro */
+  border-color: #cccccc!important; /* Borda cinza */
+  cursor: not-allowed!important; /* Muda o cursor para indicar que não é clicável */
+  box-shadow: none!important; /* Remove a sombra para não parecer clicável */
+  opacity: 0.7; /* Um pouco de transparência para reforçar o estado */
+}
+
 </style>
 <!-- Firebase SDK -->
 <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
@@ -1293,7 +1303,7 @@ input:focus,select:focus,textarea:focus{
     projectId: "haris-estoque",
     // storageBucket: "haris-estoque.appspot.com", // REMOVIDO: Não precisamos configurar Storage aqui se não vamos usá-lo
     messagingSenderId: "526155106830",
-    appId: "1:526155106830:web:55b4bf4c0d9549ec42ca5f",
+    appId: "1:526155106830:web:55b4bf4c0d9544ec42ca5f",
     measurementId: "G-B77P8EZ6BS" // Para Analytics, pode ser mantido ou removido se não for usar
   };
 
@@ -1649,7 +1659,7 @@ async function adicionarHistoricoFirebase(itemHistorico) {
   try {
     // CORREÇÃO APLICADA AQUI: Incluir o serverTimestamp diretamente no objeto enviado ao Firestore.
     const itemParaFirestore = {
-  ...itemHistorico,
+ ...itemHistorico,
       dataTimestamp: firebase.firestore.FieldValue.serverTimestamp() 
     };
 
@@ -2623,7 +2633,7 @@ function atualizarListasDeEstoque(produtosParaListar) {
 
     // --- Lógica para Maior Estoque (pelo menos 4 valores distintos, excluindo itens de menor estoque) ---
     const produtosOrdenadosDesc = [...produtosParaListar].filter(p =>!idsMenorEstoque.has(p.id)) // Exclui itens de menor estoque
-       .sort((a, b) => b.qtd - a.qtd);
+      .sort((a, b) => b.qtd - a.qtd);
     const topQuantities = new Set();
     const produtosParaMaiorEstoque = [];
     const maxItems = 5; // Limite de itens a serem exibidos
@@ -2633,7 +2643,7 @@ function atualizarListasDeEstoque(produtosParaListar) {
             topQuantities.add(p.qtd);
             // Adiciona todos os produtos com essa quantidade
             produtosOrdenadosDesc.filter(item => item.qtd === p.qtd)
- .forEach(prod => {
+.forEach(prod => {
                 if (!produtosParaMaiorEstoque.some(existing => existing.id === prod.id)) {
                     produtosParaMaiorEstoque.push(prod);
                 }
