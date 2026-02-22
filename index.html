@@ -807,8 +807,8 @@ input:focus,select:focus,textarea:focus{
 
 .hist-table th{font-weight:bold;}
   /* EXCLUI O BOTÃO DELETE DO HISTÓRICO NA HORA DA IMPRESSÃO */
- .hist-table th:last-child,
- .hist-table td:last-child {
+.hist-table th:last-child,
+.hist-table td:last-child {
     display: none!important;
   }
 }
@@ -1331,16 +1331,15 @@ input:focus,select:focus,textarea:focus{
         <div class="backup-group" id="backupGroup">
           <!-- BOTÃO ADMIN: alterado para btn-primary -->
           <button class="btn-primary" id="btnAdmin" onclick="toggleAdmin()"><span class="material-symbols-outlined">key</span> Admin</button>
-          <button class="btn-primary" style="background:#1c74d0;" onclick="imprimirProdutos()"><span class="material-symbols-outlined">description</span> PDF</button>
-          <!-- BOTÃO HISTÓRICO: alterado para btn-primary -->
-          <button class="btn-primary" onclick="toggleHistory()"><span class="material-symbols-outlined">history</span> Histórico</button>
-          <button class="btn-primary" style="background:#1c74d0;" onclick="exportarBackup()"><span class="material-symbols-outlined">download</span> Exportar</button>
-          <!-- BOTÃO IMPORTAR: alterado para btn-primary, removido estilo inline para cor padrao -->
-          <button class="btn-primary" onclick="document.getElementById('importInput').click()"><span class="material-symbols-outlined">upload</span> Importar</button>
+          <!-- BOTÕES AGORA VÊM DESABILITADOS POR PADRÃO -->
+          <button class="btn-primary" id="btnPdfProdutos" style="background:#1c74d0;" onclick="imprimirProdutos()" disabled><span class="material-symbols-outlined">description</span> PDF</button>
+          <button class="btn-primary" id="btnHistorico" onclick="toggleHistory()" disabled><span class="material-symbols-outlined">history</span> Histórico</button>
+          <button class="btn-primary" id="btnExportar" style="background:#1c74d0;" onclick="exportarBackup()" disabled><span class="material-symbols-outlined">download</span> Exportar</button>
+          <button class="btn-primary" id="btnImportar" onclick="document.getElementById('importInput').click()" disabled><span class="material-symbols-outlined">upload</span> Importar</button>
           <input type="file" id="importInput" style="display:none" onchange="importarBackup(event)">
           
           <!-- NOVO BOTÃO PARA ABRIR O CATÁLOGO -->
-          <button class="btn-primary" onclick="window.open('https://fulano1974.github.io/catalogo/catalogo.html', '_blank');">
+          <button class="btn-primary" id="btnCatalogo" onclick="window.open('https://fulano1974.github.io/catalogo/catalogo.html', '_blank');" disabled>
             <span class="material-symbols-outlined">menu_book</span> Catálogo
           </button>
         </div>
@@ -1597,6 +1596,8 @@ async function initFirebase() {
     renderHistory();
     // Atualiza o relatório rápido
     gerarRelatorioRapido();
+    // NOVO: Desabilita os botões ao iniciar
+    toggleRestrictedButtons(false);
   } catch (error) {
     console.error("Erro ao carregar dados do Firebase:", error);
     alert("Erro ao carregar dados do Firebase. Verifique sua conexão ou configurações de segurança do Firestore.");
@@ -1648,7 +1649,7 @@ async function adicionarHistoricoFirebase(itemHistorico) {
   try {
     // CORREÇÃO APLICADA AQUI: Incluir o serverTimestamp diretamente no objeto enviado ao Firestore.
     const itemParaFirestore = {
-   ...itemHistorico,
+  ...itemHistorico,
       dataTimestamp: firebase.firestore.FieldValue.serverTimestamp() 
     };
 
@@ -1751,6 +1752,25 @@ async function carregarSidebarImageFirebase() {
     console.error("Erro ao carregar imagem da sidebar do Firestore:", error);
     document.getElementById('sidebarImage').src = 'https://via.placeholder.com/280x150?text=Imagem+Nao+Encontrada';
   }
+}
+
+// NOVO: Função para habilitar/desabilitar os botões restritos
+function toggleRestrictedButtons(enable) {
+  const buttonsToToggle = [
+    'btnPdfProdutos',
+    'btnHistorico',
+    'btnExportar',
+    'btnImportar',
+    'btnCatalogo'
+  ];
+  buttonsToToggle.forEach(id => {
+    const button = document.getElementById(id);
+    if (button) {
+      button.disabled =!enable;
+      // Opcional: Adicionar/remover uma classe para mudar o estilo (ex: cinza, pointer-events: none)
+      // button.classList.toggle('disabled-style',!enable); 
+    }
+  });
 }
 
 // === FUNÇÕES DE ADMINISTRAÇÃO E LÓGICA DO APP ===
@@ -1900,6 +1920,7 @@ function toggleAdmin(){
           document.getElementById('adminPanel').style.display='grid';
           document.getElementById('backupGroup').style.display='flex';
           render(); // Atualiza a vitrine para mostrar os botões de admin
+          toggleRestrictedButtons(true); // NOVO: Habilita os botões restritos
           alert("Modo Administrador Ativado!");
         } else {
           alert("Senha incorreta ou operação cancelada.");
@@ -1909,9 +1930,10 @@ function toggleAdmin(){
   else{
     isAdmin=false;
     document.getElementById('adminPanel').style.display='none';
-    document.getElementById('backupGroup').style.display='none';
+    document.getElementById('backupGroup').style.display='none'; // Oculta o grupo de backup no modo normal
     document.getElementById('historyPanel').style.display='none';
     render(); // Esconde os botões de admin
+    toggleRestrictedButtons(false); // NOVO: Desabilita os botões restritos
     alert("Modo Administrador Desativado!");
   }
 }
@@ -2601,7 +2623,7 @@ function atualizarListasDeEstoque(produtosParaListar) {
 
     // --- Lógica para Maior Estoque (pelo menos 4 valores distintos, excluindo itens de menor estoque) ---
     const produtosOrdenadosDesc = [...produtosParaListar].filter(p =>!idsMenorEstoque.has(p.id)) // Exclui itens de menor estoque
-        .sort((a, b) => b.qtd - a.qtd);
+       .sort((a, b) => b.qtd - a.qtd);
     const topQuantities = new Set();
     const produtosParaMaiorEstoque = [];
     const maxItems = 5; // Limite de itens a serem exibidos
@@ -2611,7 +2633,7 @@ function atualizarListasDeEstoque(produtosParaListar) {
             topQuantities.add(p.qtd);
             // Adiciona todos os produtos com essa quantidade
             produtosOrdenadosDesc.filter(item => item.qtd === p.qtd)
-  .forEach(prod => {
+ .forEach(prod => {
                 if (!produtosParaMaiorEstoque.some(existing => existing.id === prod.id)) {
                     produtosParaMaiorEstoque.push(prod);
                 }
