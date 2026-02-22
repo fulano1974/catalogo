@@ -11,7 +11,6 @@
 <!-- Material Symbols - Outlined style -->
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
 <style>
-/* --- SEU CSS ORIGINAL --- */
 :root{
   --primary:#1f2a40; /* Azul escuro quase preto */
   --accent:#3b82f6; /* Azul vibrante */
@@ -179,17 +178,6 @@ body{
   background:#f0f2f5;
   border-color:#d0d7e0;
 }
-/* Estilo para botões desabilitados */
-button:disabled {
-    opacity: 0.6;
-    cursor: not-allowed;
-    box-shadow: none;
-}
-button:disabled:hover {
-    background: var(--accent); /* Mantém a cor original do botão primário */
-    border-color: var(--border-color); /* Mantém a cor original do botão secundário */
-    box-shadow: none;
-}
 
 /* Material Symbols Iconography */
 .material-symbols-outlined {
@@ -226,7 +214,6 @@ button:disabled:hover {
     margin-right: 0; /* Remove margem extra */
 }
 .lixeira:hover.material-symbols-outlined {
-    background:#b91c1c; /* Garante que a cor seja usada no hover */
     color: white; /* Cor branca no hover */
 }
 
@@ -418,8 +405,7 @@ input:focus,select:focus,textarea:focus{
   font-size:1rem;
 }
 .backup-group{
-  /* Não precisa de display: none aqui, já que eles vão estar desabilitados */
-  display:flex; /* Deixa visível por padrão */
+  display:none; /* É 'none' por padrão e JS muda para 'flex' */
   gap:10px;
   flex-wrap: wrap; /* Permite quebrar linha em telas menores */
 }
@@ -819,36 +805,8 @@ input:focus,select:focus,textarea:focus{
       order: 1;
     }
 
-/* ESTILOS DE IMPRESSÃO PARA A TABELA DE HISTÓRICO - CORRIGIDO */
-/* Removi a classe hist-table-print e adicionei as regras diretamente ao table global para impressão de histórico */
-/* Isso é para garantir que o zebrado e as colunas corretas sejam aplicadas */
-table.hist-table-for-print th, table.hist-table-for-print td { /* Adicionei uma nova classe para a tabela a ser impressa */
-    padding:8px;
-    border:1px solid #e0e7ee;
-    text-align:left;
-    page-break-inside: avoid;
+.hist-table th{font-weight:bold;}
 }
-table.hist-table-for-print th:last-child,
-table.hist-table-for-print td:last-child {
-    display: none!important; /* Esconde a última coluna (Ação) */
-}
-table.hist-table-for-print th {
-    font-weight:600;
-    background-color: #f0f4f8;
-    color:#334155;
-}
-table.hist-table-for-print tr:nth-child(even){
-    background-color:#f9fbfc!important; /* Garante o zebrado */
-    -webkit-print-color-adjust: exact; /* Para navegadores Webkit */
-    color-adjust: exact; /* Padrão */
-}
-table.hist-table-for-print tr:nth-child(odd){
-    background-color:#ffffff!important; /* Garante o zebrado */
-    -webkit-print-color-adjust: exact;
-    color-adjust: exact;
-}
-
-} /* FIM DO MEDIA PRINT */
 
 /* --- INÍCIO DO NOVO CSS PARA CAMPO DE SENHA --- */
 /* Estilo para o container do input de senha */
@@ -1314,11 +1272,13 @@ table.hist-table-for-print tr:nth-child(odd){
 .card.estoque-critico p.estoque-label.alerta-icon-inline.material-symbols-outlined { /* Seletores mais específicos */
     color: var(--danger); /* Cor vermelha para a quantidade e ícone crítico */
 }
-/* --- FIM DO SEU CSS ORIGINAL --- */
+
 </style>
 <!-- Firebase SDK -->
 <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
 <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
+<!-- Remover referência a firebase-storage.js pois não será usado para upload -->
+<!-- <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-storage.js"></script> -->
 
 <script>
   // SUA CONFIGURAÇÃO firebaseConfig GERADA PELO CONSOLE DO FIREBASE
@@ -1326,6 +1286,7 @@ table.hist-table-for-print tr:nth-child(odd){
     apiKey: "AIzaSyB0dWRSytDSfIAmCtg5pTEIjvwfJPSxb74", // SEU API KEY REAL!
     authDomain: "haris-estoque.firebaseapp.com",
     projectId: "haris-estoque",
+    // storageBucket: "haris-estoque.appspot.com", // REMOVIDO: Não precisamos configurar Storage aqui se não vamos usá-lo
     messagingSenderId: "526155106830",
     appId: "1:526155106830:web:55b4bf4c0d9549ec42ca5f",
     measurementId: "G-B77P8EZ6BS" // Para Analytics, pode ser mantido ou removido se não for usar
@@ -1336,10 +1297,15 @@ table.hist-table-for-print tr:nth-child(odd){
 
   // Obtenha a referência para o Firestore
   const dbFirebase = firebase.firestore();
+  // REMOVIDO: Não precisamos da referência ao storageFirebase se não vamos usá-lo
+  // const storageFirebase = firebase.storage();
 
   // CREDENCIAIS DO CLOUDINARY
   const CLOUDINARY_CLOUD_NAME = 'dqp57nr5g'; // SEU CLOUD NAME!
   const CLOUDINARY_UPLOAD_PRESET = 'haris_estoque_preset'; // SEU UPLOAD PRESET!
+
+  // Você pode ignorar o analytics por enquanto, ele não é essencial para o funcionamento do app.
+  // Se quiser usar, seria: const analytics = firebase.analytics();
 </script>
 </head>
 <body>
@@ -1352,28 +1318,26 @@ table.hist-table-for-print tr:nth-child(odd){
       <!-- Header do App -->
       <div class="header no-print">
         <h1><img src="https://cdn-icons-png.flaticon.com/512/3238/3238058.png" alt="Logo" style="height:30px;"> Haris <span>Estoque</span></h1>
+        <!-- Ícone do cabeçalho original foi removido para evitar duplicação -->
       </div>
 
       <!-- Stats Bar -->
       <div class="stats-bar no-print">
-        <div style="display:flex; gap:10px; flex-wrap: wrap;">
-            <!-- BOTÃO ADMIN -->
-            <button class="btn-primary" id="btnAdmin" onclick="toggleAdmin()"><span class="material-symbols-outlined">key</span> Admin</button>
-
-            <!-- GRUPO DE BOTÕES QUE SÓ ATIVA NO MODO ADMIN -->
-            <div class="backup-group" id="backupGroup">
-              <!-- Todos os botões estão desabilitados por padrão -->
-              <button class="btn-primary" id="btnPdf" style="background:#1c74d0;" onclick="imprimirProdutos()" disabled><span class="material-symbols-outlined">description</span> PDF</button>
-              <button class="btn-primary" id="btnHistorico" onclick="toggleHistory()" disabled><span class="material-symbols-outlined">history</span> Histórico</button>
-              <button class="btn-primary" id="btnExportar" style="background:#1c74d0;" onclick="exportarBackup()" disabled><span class="material-symbols-outlined">download</span> Exportar</button>
-              <button class="btn-primary" id="btnImportar" onclick="document.getElementById('importInput').click()" disabled><span class="material-symbols-outlined">upload</span> Importar</button>
-              <input type="file" id="importInput" style="display:none" onchange="importarBackup(event)">
-              
-              <!-- NOVO BOTÃO PARA ABRIR O CATÁLOGO (Também desabilitado por padrão) -->
-              <button class="btn-primary" id="btnCatalogo" onclick="window.open('https://fulano1974.github.io/catalogo/catalogo.html', '_blank');" disabled>
-                <span class="material-symbols-outlined">menu_book</span> Catálogo
-              </button>
-            </div>
+        <div class="backup-group" id="backupGroup">
+          <!-- BOTÃO ADMIN: alterado para btn-primary -->
+          <button class="btn-primary" id="btnAdmin" onclick="toggleAdmin()"><span class="material-symbols-outlined">key</span> Admin</button>
+          <button class="btn-primary" style="background:#1c74d0;" onclick="imprimirProdutos()"><span class="material-symbols-outlined">description</span> PDF</button>
+          <!-- BOTÃO HISTÓRICO: alterado para btn-primary -->
+          <button class="btn-primary" onclick="toggleHistory()"><span class="material-symbols-outlined">history</span> Histórico</button>
+          <button class="btn-primary" style="background:#1c74d0;" onclick="exportarBackup()"><span class="material-symbols-outlined">download</span> Exportar</button>
+          <!-- BOTÃO IMPORTAR: alterado para btn-primary, removido estilo inline para cor padrao -->
+          <button class="btn-primary" onclick="document.getElementById('importInput').click()"><span class="material-symbols-outlined">upload</span> Importar</button>
+          <input type="file" id="importInput" style="display:none" onchange="importarBackup(event)">
+          
+          <!-- NOVO BOTÃO PARA ABRIR O CATÁLOGO -->
+          <button class="btn-primary" onclick="window.open('https://fulano1974.github.io/catalogo/catalogo.html', '_blank');">
+            <span class="material-symbols-outlined">menu_book</span> Catálogo
+          </button>
         </div>
       </div>
 
@@ -1394,6 +1358,7 @@ table.hist-table-for-print tr:nth-child(odd){
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; flex-wrap:wrap; gap:10px;" class="history-panel-btns">
           <h2><span class="material-symbols-outlined">history</span> Histórico de Movimentações</h2>
           <div style="display:flex; gap:10px; flex-wrap:wrap;">
+            <!-- AQUI FOI FEITA A CORREÇÃO NO ONCLICK -->
             <button class="btn-primary" onclick="imprimirHistorico()"><span class="material-symbols-outlined">description</span> PDF Histórico</button>
             <button class="btn-secondary" onclick="limparHistorico()"><span class="material-symbols-outlined">delete_sweep</span> Limpar Histórico</button>
           </div>
@@ -1442,8 +1407,8 @@ table.hist-table-for-print tr:nth-child(odd){
               <option value="qtd-desc">Estoque ↑</option>
               <option value="qtd-asc">Estoque ↓</option>
             </select>
-            <!-- BOTÃO MUDAR IMAGEM: com senha própria para ativação -->
-            <button class="btn-primary" id="btnMudarImagemSidebar" onclick="uploadSidebarImage()"><span class="material-symbols-outlined">image</span> Mudar Imagem</button>
+            <!-- BOTÃO MUDAR IMAGEM: removido o estilo inline para usar a classe btn-primary -->
+            <button class="btn-primary" onclick="uploadSidebarImage(event)"><span class="material-symbols-outlined">image</span> Mudar Imagem</button>
             <input type="file" id="sidebarImageUploadHidden" accept="image/*" style="display:none;" onchange="handleSidebarFileSelection(event)">
           </div>
         </div>
@@ -1555,6 +1520,11 @@ table.hist-table-for-print tr:nth-child(odd){
       <b id="mQtd">0</b>
     </div>
 
+    <div class="input-group">
+        <label for="valMov">Quantidade de Movimentação</label>
+        <input type="number" id="valMov" value="0">
+    </div>
+    
     <div class="input-group"> <!-- NOVO CAMPO: Estoque Mínimo no modal de edição -->
         <label for="mQtdMinEdit">Estoque Mínimo</label>
         <input type="number" id="mQtdMinEdit" value="0">
@@ -1622,8 +1592,6 @@ async function initFirebase() {
     renderHistory();
     // Atualiza o relatório rápido
     gerarRelatorioRapido();
-    // Inicializa o estado dos botões de administração (desabilitados)
-    toggleAdminButtons(false); 
   } catch (error) {
     console.error("Erro ao carregar dados do Firebase:", error);
     alert("Erro ao carregar dados do Firebase. Verifique sua conexão ou configurações de segurança do Firestore.");
@@ -1675,7 +1643,7 @@ async function adicionarHistoricoFirebase(itemHistorico) {
   try {
     // CORREÇÃO APLICADA AQUI: Incluir o serverTimestamp diretamente no objeto enviado ao Firestore.
     const itemParaFirestore = {
-...itemHistorico,
+     ...itemHistorico,
       dataTimestamp: firebase.firestore.FieldValue.serverTimestamp() 
     };
 
@@ -1917,34 +1885,16 @@ async function customPasswordPrompt(message, correctPassword) {
     });
 }
 
-// NOVO: Função para habilitar/desabilitar os botões do grupo de backup
-function toggleAdminButtons(enable) {
-    const buttonsToToggle = [
-        document.getElementById('btnPdf'),
-        document.getElementById('btnHistorico'),
-        document.getElementById('btnExportar'),
-        document.getElementById('btnImportar'),
-        document.getElementById('btnCatalogo')
-    ];
-
-    buttonsToToggle.forEach(button => {
-        if (button) { // Verifica se o botão existe antes de tentar manipular
-            button.disabled =!enable;
-        }
-    });
-}
-
 function toggleAdmin(){
-  const adminPanel = document.getElementById('adminPanel');
-
   if(!isAdmin){
+    // Utiliza o prompt de senha customizado
     customPasswordPrompt("Digite a senha de administrador:", "RebocadorHaris")
-.then(isAuthenticated => {
+.then(isAuthenticated => { // Usa.then() pois a função customPasswordPrompt retorna uma Promise
         if(isAuthenticated){
           isAdmin=true;
-          adminPanel.style.display='grid';
-          toggleAdminButtons(true); // HABILITA OS BOTÕES
-          render(); // Atualiza a vitrine para mostrar os botões de admin nos cards
+          document.getElementById('adminPanel').style.display='grid';
+          document.getElementById('backupGroup').style.display='flex';
+          render(); // Atualiza a vitrine para mostrar os botões de admin
           alert("Modo Administrador Ativado!");
         } else {
           alert("Senha incorreta ou operação cancelada.");
@@ -1953,10 +1903,10 @@ function toggleAdmin(){
   }
   else{
     isAdmin=false;
-    adminPanel.style.display='none';
-    document.getElementById('historyPanel').style.display='none'; // Esconde o histórico também
-    toggleAdminButtons(false); // DESABILITA OS BOTÕES
-    render(); // Esconde os botões de admin nos cards
+    document.getElementById('adminPanel').style.display='none';
+    document.getElementById('backupGroup').style.display='none';
+    document.getElementById('historyPanel').style.display='none';
+    render(); // Esconde os botões de admin
     alert("Modo Administrador Desativado!");
   }
 }
@@ -2000,10 +1950,7 @@ async function abrirModal(productId){
   editIdx = productId; // Agora editIdx armazena o ID, não o índice
   document.getElementById('mNomeEdit').value=p.nome;
   document.getElementById('mQtd').innerText=p.qtd;
-  // CORRIGIDO: Acessar diretamente o elemento, ele já está no HTML com o ID correto
-  // A verificação if (mQtdMinEditElement) não é mais estritamente necessária se o HTML garante o ID
-  document.getElementById('mQtdMinEdit').value = p.qtdMin; 
-  
+  document.getElementById('mQtdMinEdit').value=p.qtdMin; // <<< NOVO: Preencher estoque mínimo
   document.getElementById('mNota').value='';
   document.getElementById('valMov').value=0;
   document.getElementById('mCategoriaEdit').value=p.cat;
@@ -2139,10 +2086,9 @@ async function deletarHist(historicoId){
   }
 }
 
-// NOVO FLUXO: Primeiro pede a senha, depois abre o seletor de arquivos (função anterior)
-// AGORA CORRIGIDO PARA TER SUA PRÓPRIA SENHA E SER INDEPENDENTE DO isAdmin
-async function uploadSidebarImage() {
-  const isAuthenticated = await customPasswordPrompt("Digite a senha para alterar a imagem da sidebar:", "RebocadorHarisIMG"); // Senha exclusiva para a imagem
+// NOVO FLUXO: Primeiro pede a senha, depois abre o seletor de arquivos
+async function uploadSidebarImage(event) {
+  const isAuthenticated = await customPasswordPrompt("Digite a senha para alterar a imagem da sidebar:", "RebocadorHaris");
   if (!isAuthenticated) {
     alert("Senha incorreta ou operação cancelada. Imagem da sidebar não alterada.");
     return; // Não faz mais nada, pois a senha não foi validada
@@ -2177,8 +2123,6 @@ async function handleSidebarFileSelection(event) {
 }
 
 async function importarBackup(event){
-  // Já que este botão é desabilitado/habilitado por `toggleAdminButtons`,
-  // não precisamos de um prompt de senha extra aqui.
   const file = event.target.files[0];
   if (file) {
     const reader = new FileReader();
@@ -2488,7 +2432,6 @@ function imprimirHistorico(){
   }
   let currentDateTime = new Date().toLocaleString();
 
-  // CSS dentro da nova janela para garantir que a impressão fique correta
   let html=`<html><head><title>Histórico de Movimentações</title><style>
     body{font-family:'Poppins', sans-serif;padding:0; margin: 0; min-height: 100vh; display: flex; flex-direction: column;}
 .content-wrapper { flex-grow: 1; padding: 15mm; }
@@ -2496,9 +2439,8 @@ function imprimirHistorico(){
     table{width:100%;border-collapse:collapse;font-size:12px; margin-top: 15px;}
     th,td{padding:8px;border:1px solid #e0e7ee;text-align:left; page-break-inside: avoid;}
     th{font-weight:600; background-color: #f0f4f8; color:#334155;}
-    /* Garante o zebrado das linhas */
-    tr:nth-child(even){background-color:#f9fbfc!important; -webkit-print-color-adjust: exact; color-adjust: exact;}
-    tr:nth-child(odd){background-color:#ffffff!important; -webkit-print-color-adjust: exact; color-adjust: exact;}
+    tr:nth-child(even){background-color:#f9fbfc!important;}
+    tr:nth-child(odd){background-color:#ffffff!important;}
     table tbody tr { page-break-inside: avoid; page-break-after: auto;}
 .tag-add{color:#10b8a6;font-weight:bold;}
 .tag-sub{color:#ef4444;font-weight:bold;}
@@ -2532,7 +2474,6 @@ function imprimirHistorico(){
   </style></head><body>`;
 
   html+=`<div class="content-wrapper"><h1>Histórico de Movimentações Haris</h1><table><thead><tr><th>Data</th><th>Produto</th><th>Tipo</th><th>Qtd</th><th>Motivo</th></tr></thead><tbody>`;
-  // ^^^^ Cabeçalho da tabela com as colunas corretas (5 colunas)
 
   let totalMovimentacoesImpressao = 0;
   const termo=document.getElementById('inputBuscaHist').value.toLowerCase();
@@ -2542,7 +2483,7 @@ function imprimirHistorico(){
       (filtro==='Todos'||h.cat===filtro)
   );
 
-  // Construir o conteúdo do tbody
+  // Construir o conteúdo do tbody separadamente
   let tbodyContent = '';
   historicoParaImprimir.forEach(h=>{
     totalMovimentacoesImpressao++;
@@ -2554,12 +2495,12 @@ function imprimirHistorico(){
         <td>${tipoDisplay}</td>
         <td>${h.qtd}</td>
         <td>${h.motivo}</td>
-      </tr>`; // APENAS AS 5 COLUNAS SOLICITADAS
+        <td><button class="lixeira" onclick="deletarHist('${h.id}')"><span class="material-symbols-outlined">delete</span></button></td>
+      </tr>`;
   });
 
   if (totalMovimentacoesImpressao === 0) {
-      tbodyContent += `<tr><td colspan="5" style="text-align:center; color:var(--subtle-text);">Nenhuma movimentação encontrada.</td></tr>`;
-      // ^^^^ colspan alterado para 5
+      tbodyContent += `<tr><td colspan="6" style="text-align:center; color:var(--subtle-text);">Nenhuma movimentação encontrada.</td></tr>`;
   }
 
   // Adicionar o conteúdo do tbody ao HTML final
@@ -2643,7 +2584,7 @@ function atualizarListasDeEstoque(produtosParaListar) {
 
     // --- Lógica para Maior Estoque (pelo menos 4 valores distintos, excluindo itens de menor estoque) ---
     const produtosOrdenadosDesc = [...produtosParaListar].filter(p =>!idsMenorEstoque.has(p.id)) // Exclui itens de menor estoque
- .sort((a, b) => b.qtd - a.qtd);
+          .sort((a, b) => b.qtd - a.qtd);
     const topQuantities = new Set();
     const produtosParaMaiorEstoque = [];
     const maxItems = 5; // Limite de itens a serem exibidos
@@ -2653,7 +2594,7 @@ function atualizarListasDeEstoque(produtosParaListar) {
             topQuantities.add(p.qtd);
             // Adiciona todos os produtos com essa quantidade
             produtosOrdenadosDesc.filter(item => item.qtd === p.qtd)
-     .forEach(prod => {
+    .forEach(prod => {
                 if (!produtosParaMaiorEstoque.some(existing => existing.id === prod.id)) {
                     produtosParaMaiorEstoque.push(prod);
                 }
@@ -2684,7 +2625,6 @@ function atualizarListasDeEstoque(produtosParaListar) {
 initFirebase();
 
 // >>>>>>>>>>> CÓDIGO DE REGISTRO DO SERVICE WORKER ADICIONADO AQUI <<<<<<<<<<<
-/* Comentado devido a erro 404 para 'service-worker.js'. Descomente e crie o arquivo se for usar.
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
     navigator.serviceWorker.register('/service-worker.js')
@@ -2696,8 +2636,8 @@ if ('serviceWorker' in navigator) {
       });
   });
 }
-*/
 // >>>>>>>>>>> FIM DO CÓDIGO DO SERVICE WORKER <<<<<<<<<<<
 </script>
 </body>
 </html>
+
