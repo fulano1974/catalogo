@@ -1643,7 +1643,7 @@ async function adicionarHistoricoFirebase(itemHistorico) {
   try {
     // CORREÇÃO APLICADA AQUI: Incluir o serverTimestamp diretamente no objeto enviado ao Firestore.
     const itemParaFirestore = {
-     ...itemHistorico,
+    ...itemHistorico,
       dataTimestamp: firebase.firestore.FieldValue.serverTimestamp() 
     };
 
@@ -2297,7 +2297,8 @@ function render(){
     v.innerHTML+=`
       <div class="card ${estoqueClass}"> <!-- Aplicar classes de estoque no card -->
         <div class="card-image-container">
-          <img src="${p.foto || 'https://via.placeholder.com/120x120?text=Sem+Foto'}" alt="${p.nome || 'Produto sem foto'}" loading="lazy">
+          <!-- REMOVIDO: loading="lazy" para garantir o carregamento para impressão -->
+          <img src="${p.foto || 'https://via.placeholder.com/120x120?text=Sem+Foto'}" alt="${p.nome || 'Produto sem foto'}">
         </div>
         <div class="card-info">
           <h3>${p.nome}</h3>
@@ -2584,7 +2585,7 @@ function atualizarListasDeEstoque(produtosParaListar) {
 
     // --- Lógica para Maior Estoque (pelo menos 4 valores distintos, excluindo itens de menor estoque) ---
     const produtosOrdenadosDesc = [...produtosParaListar].filter(p =>!idsMenorEstoque.has(p.id)) // Exclui itens de menor estoque
-          .sort((a, b) => b.qtd - a.qtd);
+         .sort((a, b) => b.qtd - a.qtd);
     const topQuantities = new Set();
     const produtosParaMaiorEstoque = [];
     const maxItems = 5; // Limite de itens a serem exibidos
@@ -2594,7 +2595,7 @@ function atualizarListasDeEstoque(produtosParaListar) {
             topQuantities.add(p.qtd);
             // Adiciona todos os produtos com essa quantidade
             produtosOrdenadosDesc.filter(item => item.qtd === p.qtd)
-    .forEach(prod => {
+   .forEach(prod => {
                 if (!produtosParaMaiorEstoque.some(existing => existing.id === prod.id)) {
                     produtosParaMaiorEstoque.push(prod);
                 }
@@ -2640,4 +2641,3 @@ if ('serviceWorker' in navigator) {
 </script>
 </body>
 </html>
-
